@@ -13,14 +13,22 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script>
+            (() => {
+                const savedTheme = localStorage.getItem('theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const useDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+                document.documentElement.classList.toggle('dark', useDark);
+            })();
+        </script>
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+    <body class="font-sans antialiased bg-gray-100 text-gray-900 dark:bg-graphite-950 dark:text-graphite-100">
+        <div class="min-h-screen bg-gray-100 dark:bg-graphite-950">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white shadow">
+                <header class="bg-white border-b border-gray-200 dark:bg-graphite-900/90 dark:border-graphite-800">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
