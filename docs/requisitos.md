@@ -245,50 +245,9 @@ erDiagram
 		banks ||--o{ transactions : records
 		users ||--o{ profits : receives
 		users ||--o{ actions : performs
-
-		users {
-			bigint id PK
-			bigint sponsor_id FK
-			decimal commission_balance
-		}
-
-		membership_types {
-			bigint id PK
-			string name
-			int affiliates_required
-			decimal cost
-			decimal profit
-		}
-
-		memberships {
-			bigint id PK
-			bigint user_id FK UNIQUE
-			bigint membership_type_id FK
-			string status
-			datetime started_at
-			datetime expires_at
-			bigint last_payment_id FK
-		}
-
-		payments {
-			bigint id PK
-			bigint user_id FK
-			bigint bank_id FK
-			string number
-			decimal amount
-			string state
-		}
-
-		actions {
-			bigint id PK
-			bigint user_id FK
-			string module
-			string action
-			string method
-			string route
-			string ip_address
-			datetime created_at
-		}
+		payments ||--o{ memberships : last_payment_reference
+		users ||--o{ payments : reviews_as_admin
+		users ||--o{ profits : pays_as_admin
 ```
 
 ## 9) Criterios de cierre de esta fase (análisis)
