@@ -31,7 +31,7 @@ erDiagram
 
     MEMBERSHIP_TYPES {
       BIGINT id PK
-      VARCHAR name UK
+      VARCHAR name
       INT affiliates_required
       DECIMAL cost
       DECIMAL profit
@@ -41,7 +41,7 @@ erDiagram
 
     MEMBERSHIPS {
       BIGINT id PK
-      BIGINT user_id FK UK
+      BIGINT user_id FK
       BIGINT membership_type_id FK
       ENUM status
       DATETIME started_at
@@ -133,6 +133,8 @@ erDiagram
 ## 3. Implementation notes
 - `admin` exists in `users` with role `admin` and does not have row in `memberships`.
 - All `user` role accounts must have exactly one row in `memberships`.
+- `membership_types.name` must be UNIQUE at database level.
+- `memberships.user_id` must be UNIQUE at database level (1:1 with `users`).
 - `memberships.last_payment_id` references latest effective payment (nullable).
 - `actions` is append-only for audit integrity.
 - `profits.state` uses `pending` and `made` in this phase.
