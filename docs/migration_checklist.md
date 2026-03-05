@@ -33,13 +33,17 @@ Suggested command:
 ### 3.3 Financial base
 - [ ] Create `banks` table.
 - [ ] Create `payments` table.
+- [ ] Create `user_banks` table.
 - [ ] Create `transactions` table.
 - [ ] Create `profits` table.
+- [ ] In `payments`, include nullable `transaction_id`.
 - [ ] In `profits`, include `period_month` and `state` as (`pending`,`made`).
+- [ ] In `profits`, include `user_bank_id` and nullable `transaction_id`.
 
 Suggested commands:
 - `php artisan make:migration create_banks_table`
 - `php artisan make:migration create_payments_table`
+- `php artisan make:migration create_user_banks_table`
 - `php artisan make:migration create_transactions_table`
 - `php artisan make:migration create_profits_table`
 
@@ -65,11 +69,14 @@ Suggested command:
 - [ ] `memberships.membership_type_id -> membership_types.id` (restrict delete).
 - [ ] `memberships.last_payment_id -> payments.id` (set null delete).
 - [ ] `payments.user_id -> users.id` (restrict delete).
-- [ ] `payments.bank_id -> banks.id` (restrict delete).
+- [ ] `payments.transaction_id -> transactions.id` (set null delete).
 - [ ] `payments.reviewed_by -> users.id` (set null delete).
 - [ ] `transactions.bank_id -> banks.id` (restrict delete).
 - [ ] `profits.user_id -> users.id` (restrict delete).
+- [ ] `profits.user_bank_id -> user_banks.id` (restrict delete).
+- [ ] `profits.transaction_id -> transactions.id` (set null delete).
 - [ ] `profits.paid_by -> users.id` (set null delete).
+- [ ] `user_banks.user_id -> users.id` (cascade delete).
 - [ ] `actions.user_id -> users.id` (set null delete).
 
 ## 5) Spatie security seed checklist
@@ -92,6 +99,7 @@ Initial modules:
 - [ ] memberships
 - [ ] membership_types
 - [ ] banks
+- [ ] user_banks
 - [ ] transactions
 - [ ] payments
 - [ ] profits

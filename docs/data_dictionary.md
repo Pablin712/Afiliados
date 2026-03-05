@@ -86,7 +86,7 @@ Business constraints:
 ---
 
 ## 3.4 `banks`
-Purpose: Admin-owned payment destinations and balances.
+Purpose: Platform/admin-owned banks that hold balances and generate ledger transactions.
 
 | Column | Type | Null | Default | Index | Notes |
 |---|---|---|---|---|---|
@@ -104,7 +104,7 @@ Purpose: Admin-owned payment destinations and balances.
 ---
 
 ## 3.5 `transactions`
-Purpose: Ledger movements per bank.
+Purpose: Ledger movements per bank (income/expense), linked to business documents.
 
 | Column | Type | Null | Default | Index | Notes |
 |---|---|---|---|---|---|
@@ -118,6 +118,10 @@ Purpose: Ledger movements per bank.
 | is_annulled | TINYINT(1) | NO | 0 | INDEX | 0/1 |
 | created_at | TIMESTAMP | YES | NULL | INDEX | |
 
+Business constraints:
+- `type='income'` is used for approved user payments.
+- `type='expense'` is used for executed profit payouts.
+
 ---
 
 ## 3.6 `payments`
@@ -127,7 +131,7 @@ Purpose: User proofs/payments for registration/renewal.
 |---|---|---|---|---|---|
 | id | BIGINT UNSIGNED | NO | AI | PK | |
 | user_id | BIGINT UNSIGNED | NO | - | INDEX | FK -> `users.id` |
-| bank_id | BIGINT UNSIGNED | NO | - | INDEX | FK -> `banks.id` |
+| transaction_id | BIGINT UNSIGNED | YES | NULL | UNIQUE | FK -> `transactions.id` |
 | number | VARCHAR(120) | NO | - | INDEX | Operation/reference number |
 | photo | VARCHAR(255) | YES | NULL | - | Voucher path |
 | amount | DECIMAL(12,2) | NO | 0.00 | - | |
@@ -140,16 +144,42 @@ Purpose: User proofs/payments for registration/renewal.
 Business constraints:
 - Only admin can transition `state` from `pending` to `approved/rejected`.
 - On `approved`, membership validity is recalculated/extended.
+- Approved payments should be linked to one income transaction.
 
 ---
 
-## 3.7 `profits`
+## 3.7 `user_banks`
+Purpose: Beneficiary bank/payment accounts registered by users to receive profits.
+
+| Column | Type | Null | Default | Index | Notes |
+|---|---|---|---|---|---|
+| id | BIGINT UNSIGNED | NO | AI | PK | |
+| user_id | BIGINT UNSIGNED | NO | - | INDEX | FK -> `users.id` |
+| bank_name | VARCHAR(120) | NO | - | - | |
+| owner | VARCHAR(150) | NO | - | - | |
+| identification | VARCHAR(50) | NO | - | INDEX | |
+| number | VARCHAR(80) | NO | - | INDEX | |
+| type | VARCHAR(30) | NO | - | INDEX | checking/savings/wallet/mobile_payment |
+| is_default | TINYINT(1) | NO | 0 | INDEX | 0/1 |
+| detail | TEXT | YES | NULL | - | |
+| created_at | TIMESTAMP | YES | NULL | - | |
+| updated_at | TIMESTAMP | YES | NULL | - | |
+
+Business constraints:
+- A user can register multiple accounts.
+- Only one default account per user (`is_default=1`).
+
+---
+
+## 3.8 `profits`
 Purpose: Profit/commission payouts to users.
 
 | Column | Type | Null | Default | Index | Notes |
 |---|---|---|---|---|---|
 | id | BIGINT UNSIGNED | NO | AI | PK | |
 | user_id | BIGINT UNSIGNED | NO | - | INDEX | FK -> `users.id` |
+| user_bank_id | BIGINT UNSIGNED | NO | - | INDEX | FK -> `user_banks.id` |
+| transaction_id | BIGINT UNSIGNED | YES | NULL | UNIQUE | FK -> `transactions.id` |
 | period_month | DATE | NO | - | INDEX | First day of payout month (YYYY-MM-01) |
 | amount | DECIMAL(12,2) | NO | 0.00 | - | |
 | state | ENUM('pending','made') | NO | 'pending' | INDEX | |
@@ -163,10 +193,11 @@ Business constraints:
 - `pending`: commission calculated and awaiting payment.
 - `made`: commission already paid.
 - The detailed commission formula is pending definition in a later phase.
+- `made` profits should be linked to one expense transaction.
 
 ---
 
-## 3.8 `actions` (audit)
+## 3.9 `actions` (audit)
 Purpose: Full traceability for views and write actions.
 
 | Column | Type | Null | Default | Index | Notes |
@@ -197,9 +228,12 @@ Retention recommendation:
 - `memberships.last_payment_id` -> `payments.id` (ON UPDATE CASCADE, ON DELETE SET NULL)
 - `transactions.bank_id` -> `banks.id` (ON UPDATE CASCADE, ON DELETE RESTRICT)
 - `payments.user_id` -> `users.id` (ON UPDATE CASCADE, ON DELETE RESTRICT)
-- `payments.bank_id` -> `banks.id` (ON UPDATE CASCADE, ON DELETE RESTRICT)
+- `payments.transaction_id` -> `transactions.id` (ON UPDATE CASCADE, ON DELETE SET NULL)
 - `payments.reviewed_by` -> `users.id` (ON UPDATE CASCADE, ON DELETE SET NULL)
+- `user_banks.user_id` -> `users.id` (ON UPDATE CASCADE, ON DELETE CASCADE)
 - `profits.user_id` -> `users.id` (ON UPDATE CASCADE, ON DELETE RESTRICT)
+- `profits.user_bank_id` -> `user_banks.id` (ON UPDATE CASCADE, ON DELETE RESTRICT)
+- `profits.transaction_id` -> `transactions.id` (ON UPDATE CASCADE, ON DELETE SET NULL)
 - `profits.paid_by` -> `users.id` (ON UPDATE CASCADE, ON DELETE SET NULL)
 - `actions.user_id` -> `users.id` (ON UPDATE CASCADE, ON DELETE SET NULL)
 
@@ -217,6 +251,7 @@ Suggested initial modules:
 - memberships
 - membership_types
 - banks
+- user_banks
 - transactions
 - payments
 - profits
@@ -227,11 +262,12 @@ Suggested initial modules:
 2. membership_types
 3. banks
 4. payments
-5. memberships
-6. transactions
-7. profits
-8. actions
-9. spatie permission migrations and seeders (roles/permissions assignment)
+5. user_banks
+6. profits
+7. transactions
+8. memberships
+9. actions
+10. spatie permission migrations and seeders (roles/permissions assignment)
 
 ## 7. Pending decisions before coding
 1. Whether `payments.number` must be globally unique or unique per `bank_id`.

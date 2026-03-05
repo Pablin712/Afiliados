@@ -83,7 +83,7 @@ Campos clave:
 - `created_at`, `updated_at`
 
 ### 4.4 `banks`
-Métodos/cuentas de pago administradas por el admin.
+Métodos/cuentas de pago de la plataforma (admin).
 
 Campos clave:
 - `id`
@@ -97,7 +97,7 @@ Campos clave:
 - `created_at`, `updated_at`
 
 ### 4.5 `transactions`
-Movimientos de bancos.
+Movimientos de bancos (libro mayor financiero).
 
 Campos clave:
 - `id`
@@ -110,13 +110,16 @@ Campos clave:
 - `is_annulled` (bool)
 - `created_at`
 
+Regla:
+- `transactions` se conecta a `payments` (ingresos) y `profits` (egresos) mediante `transaction_id` en esas tablas.
+
 ### 4.6 `payments`
-Pagos que realizan los usuarios (excepto admin).
+Pagos que realizan los usuarios (excepto admin). Representan ingresos al admin.
 
 Campos clave:
 - `id`
 - `user_id` (FK)
-- `bank_id` (FK)
+- `transaction_id` (nullable, FK a `transactions.id`)
 - `number`
 - `photo`
 - `amount`
@@ -131,6 +134,9 @@ Registra pagos de utilidades/comisiones a usuarios.
 Campos clave:
 - `id`
 - `user_id` (FK)
+- `user_bank_id` (FK a `user_banks.id`)
+- `transaction_id` (nullable, FK a `transactions.id`)
+- `period_month` (date)
 - `amount`
 - `state` (`pending`, `made`)
 - `detail`
@@ -144,7 +150,26 @@ Reglas mínimas del módulo de comisiones (fase actual):
 - `made` representa comisión ya pagada al usuario.
 - La fórmula detallada de comisiones se definirá en una fase posterior y dependerá de membresía/tipo de membresía.
 
-### 4.8 `actions` (módulo de auditoría)
+### 4.8 `user_banks`
+Cuentas bancarias/medios de cobro de cada usuario para recibir utilidades.
+
+Campos clave:
+- `id`
+- `user_id` (FK a `users.id`)
+- `bank_name`
+- `owner`
+- `identification`
+- `number`
+- `type` (ej. `checking`, `savings`, `wallet`, `mobile_payment`)
+- `is_default` (bool)
+- `detail`
+- `created_at`, `updated_at`
+
+Reglas:
+- Un usuario puede registrar varias cuentas.
+- Solo una cuenta por usuario puede estar como `is_default=true`.
+
+### 4.9 `actions` (módulo de auditoría)
 Registro de trazabilidad de vistas y acciones del sistema.
 
 Campos clave:
@@ -184,6 +209,7 @@ Módulos iniciales:
 - `memberships`
 - `membership_types`
 - `banks`
+- `user_banks`
 - `transactions`
 - `payments`
 - `profits`
@@ -233,6 +259,12 @@ Como admin, quiero marcar comisiones como pagadas para llevar control de pendien
 ### HU-09 Consulta de estado de comisión (user)
 Como usuario, quiero ver el estado de mis comisiones para saber cuáles están pendientes y cuáles ya fueron pagadas.
 
+### HU-10 Registro de cuentas de cobro (user)
+Como usuario, quiero registrar mis cuentas bancarias para que admin pueda pagar mis utilidades en la cuenta correcta.
+
+### HU-11 Trazabilidad financiera (admin)
+Como admin, quiero ver qué transacción originó cada pago o utilidad para auditar ingresos y egresos por banco.
+
 ## 8) Diagrama lógico inicial (Mermaid)
 
 ```mermaid
@@ -241,9 +273,12 @@ erDiagram
 		membership_types ||--o{ memberships : defines
 		users ||--o{ users : sponsors
 		users ||--o{ payments : makes
-		banks ||--o{ payments : receives
+		users ||--o{ user_banks : owns
 		banks ||--o{ transactions : records
+		transactions ||--o| payments : income_for
+		transactions ||--o| profits : expense_for
 		users ||--o{ profits : receives
+		user_banks ||--o{ profits : payout_target
 		users ||--o{ actions : performs
 		payments ||--o{ memberships : last_payment_reference
 		users ||--o{ payments : reviews_as_admin
