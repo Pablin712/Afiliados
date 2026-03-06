@@ -53,6 +53,12 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
+                        @can('view actions')
+                            <x-dropdown-link :href="route('actions.index')">
+                                {{ __('Auditoria') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -108,6 +114,12 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
+
+                @can('view actions')
+                    <x-responsive-nav-link :href="route('actions.index')">
+                        {{ __('Auditoria') }}
+                    </x-responsive-nav-link>
+                @endcan
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
