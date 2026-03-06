@@ -276,3 +276,16 @@ Suggested initial modules:
    - Restart from approval date.
 3. Profit settlement periodicity (manual/automatic, monthly cutoff date).
 4. Audit exclusions (if health-check/static assets should be ignored).
+
+## 8. Reusable UI component policy (mandatory)
+- Use `<x-enhanced-table>` for all administrative or operational listings.
+- Use `<x-searchable-select>` for medium/large option lists and relational selectors.
+- Frontend dependencies for these components must be loaded through Vite (`resources/js/app.js`), never through inline CDN script tags.
+- Components should follow project palette/classes (`brand-*`, `graphite-*`) to keep visual consistency.
+
+## 9. Centralized audit implementation (mandatory)
+- `actions` logging is centralized through `AuditLogService`.
+- HTTP requests are logged through a global middleware (`AuditLogMiddleware`) to avoid controller-level duplication.
+- Authentication events (`login`, `logout`, `login_failed`) are logged via Laravel auth events.
+- Eloquent write operations (`create`, `update`, `delete`) are logged globally, including `old_values` and `new_values` when available.
+- Sensitive request keys (passwords/tokens/secrets) must be excluded or sanitized before persistence.

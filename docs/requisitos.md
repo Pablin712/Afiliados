@@ -294,8 +294,43 @@ erDiagram
 - Requisitos de seguridad y auditoría definidos.
 - Historias de usuario y diagrama lógico inicial listos para pasar a diseño de base de datos.
 
-## 10) Documento complementario
+## 10) Estandares de UI reutilizable (obligatorio)
 
-- El diccionario de datos técnico (tipos SQL, índices y FKs) está en `docs/data_dictionary.md`.
-- El DER final del sistema está en `docs/der_final.md`.
-- El checklist operativo de migraciones está en `docs/migration_checklist.md`.
+Para mantener consistencia visual/funcional y reducir codigo repetido:
+
+1. Tablas de listado:
+- Se debe usar el componente `<x-enhanced-table>` en todos los modulos nuevos o refactorizados.
+- Soporta busqueda, orden, paginacion, exportaciones y modo hibrido client/server-side.
+- Debe usar clases del tema del proyecto (`brand-*`, `graphite-*`), evitando variantes externas (`theme-*`).
+
+2. Selects con busqueda:
+- Se debe usar `<x-searchable-select>` para selects de catalogos o listas medianas/grandes.
+- La mejora JS se inicializa de forma global (Vite) y no debe cargarse por CDN en las vistas.
+
+3. Carga de assets frontend:
+- No incluir scripts externos inline en componentes Blade.
+- Todo JS/CSS de componentes se gestiona desde `resources/js/app.js` y Vite.
+
+## 11) Auditoria transversal (obligatorio)
+
+El sistema debe registrar en `actions` toda interaccion relevante sin repetir codigo en cada controlador.
+
+Reglas de implementacion:
+1. Registro HTTP centralizado:
+- Middleware global (`AuditLogMiddleware`) para registrar toda request web/api.
+
+2. Registro de autenticacion:
+- Eventos `login`, `logout` e intentos fallidos (`login_failed`) se registran en `actions`.
+
+3. Registro de escritura de datos:
+- Eventos Eloquent globales (`create`, `update`, `delete`) se registran en `actions` mediante servicio central.
+- `old_values` y `new_values` deben completarse en cambios de datos.
+
+4. Servicio unico de auditoria:
+- La logica vive en `AuditLogService` para evitar reescritura y mantener reglas comunes (sanitizacion, truncado y formato).
+
+## 12) Documento complementario
+
+- El diccionario de datos tecnico (tipos SQL, indices y FKs) esta en `docs/data_dictionary.md`.
+- El DER final del sistema esta en `docs/der_final.md`.
+- El checklist operativo de migraciones esta en `docs/migration_checklist.md`.
