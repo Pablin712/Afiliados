@@ -340,3 +340,4 @@ Reglas de implementacion:
 - El diccionario de datos tecnico (tipos SQL, indices y FKs) esta en `docs/data_dictionary.md`.
 - El DER final del sistema esta en `docs/der_final.md`.
 - El checklist operativo de migraciones esta en `docs/migration_checklist.md`.
+- El estandar base de construccion de modulos y vistas esta en `docs/MODULE_VIEW_STANDARD.md`.

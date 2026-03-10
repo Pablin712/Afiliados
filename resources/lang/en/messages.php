@@ -110,7 +110,7 @@ return [
     'audit.permission_key' => 'report actions',
     'audit.system_user' => 'System',
     'audit.no_records' => 'No audit records available.',
-    
+
     // Profile Page
     'profile.information' => 'Profile Information',
     'profile.update_info' => "Update your account's profile information and email address.",
@@ -126,7 +126,7 @@ return [
     'profile.saved' => 'Saved.',
     'profile.current_password' => 'Current Password',
     'profile.new_password' => 'New Password',
-    
+
     // Common
 
         // Auth Extended
