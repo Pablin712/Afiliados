@@ -13,7 +13,7 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('messages.nav.dashboard') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -23,8 +23,8 @@
                 <!-- Theme Toggle Button -->
                 <button
                     type="button"
-                    aria-label="Cambiar tema"
-                    title="Cambiar tema"
+                    aria-label="{{ __('messages.nav.change_theme') }}"
+                    title="{{ __('messages.nav.change_theme') }}"
                     class="inline-flex items-center px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-200 dark:hover:text-brand-400"
                     onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')"
                 >
@@ -56,12 +56,12 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('messages.profile') }}
                         </x-dropdown-link>
 
                         @can('view actions')
                             <x-dropdown-link :href="route('actions.index')">
-                                {{ __('Auditoria') }}
+                                {{ __('messages.audit.title') }}
                             </x-dropdown-link>
                         @endcan
 
@@ -72,7 +72,7 @@
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('messages.log_out') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -95,7 +95,7 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                {{ __('messages.nav.dashboard') }}
             </x-responsive-nav-link>
         </div>
 
