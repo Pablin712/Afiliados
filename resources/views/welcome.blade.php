@@ -31,18 +31,18 @@
                     </a>
 
                     <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-graphite-300">
-                        <a href="#inicio" class="hover:text-brand-600 dark:hover:text-brand-400">Inicio</a>
-                        <a href="#programas" class="hover:text-brand-600 dark:hover:text-brand-400">Programas</a>
-                        <a href="#mentores" class="hover:text-brand-600 dark:hover:text-brand-400">Mentores</a>
-                        <a href="#testimonios" class="hover:text-brand-600 dark:hover:text-brand-400">Testimonios</a>
-                        <a href="#contacto" class="hover:text-brand-600 dark:hover:text-brand-400">Contacto</a>
+                        <a href="#inicio" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.home') }}</a>
+                        <a href="#programas" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.programs') }}</a>
+                        <a href="#mentores" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.mentors') }}</a>
+                        <a href="#testimonios" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.testimonials') }}</a>
+                        <a href="#contacto" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.contact') }}</a>
                     </nav>
 
                     <div class="flex items-center gap-2">
                         <button
                             type="button"
-                            aria-label="Cambiar tema"
-                            title="Cambiar tema"
+                            aria-label="{{ __('messages.nav.change_theme') }}"
+                            title="{{ __('messages.nav.change_theme') }}"
                             class="inline-flex items-center px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-200 dark:hover:text-brand-400"
                             onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')"
                         >
@@ -57,11 +57,11 @@
                         @if (Route::has('login'))
                             @auth
                                 <a href="{{ url('/dashboard') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
-                                    Dashboard
+                                    {{ __('messages.nav.dashboard') }}
                                 </a>
                             @else
                                 <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
-                                    Entrar
+                                    {{ __('messages.nav.login') }}
                                 </a>
                             @endauth
                         @endif
@@ -73,28 +73,25 @@
                 <section class="rounded-2xl border border-gray-200 bg-white p-8 sm:p-10 lg:p-14 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
                     <div class="max-w-3xl">
                         <p class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold tracking-wide text-brand-700 dark:border-brand-900 dark:bg-brand-950/50 dark:text-brand-300">
-                            Formación en Trading • Nivel inicial a avanzado
+                            {{ __('messages.welcome.section_badge') }}
                         </p>
 
                         <h1 class="mt-5 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-graphite-100">
-                            Aprende trading con estructura, gestión de riesgo y acompañamiento real.
+                            {{ __('messages.welcome.main_title') }}
                         </h1>
 
                         <p class="mt-5 text-base sm:text-lg text-gray-600 dark:text-graphite-300 leading-relaxed">
-                            En AET Trader Academy te guiamos paso a paso para construir una metodología sólida: análisis técnico,
-                            psicología del trader y ejecución disciplinada. Esta es la primera sección del sitio; luego iremos agregando
-                            más bloques para programas, mentores, testimonios y contacto.
+                            {{ __('messages.welcome.main_description') }}
                         </p>
 
                         <div class="mt-8 flex flex-wrap gap-3">
                             <a href="#programas" class="inline-flex items-center px-5 py-3 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
-                                Ver programas
+                                {{ __('messages.welcome.button_programs') }}
                             </a>
                             <a href="#contacto" class="inline-flex items-center px-5 py-3 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
-                                Hablar con un asesor
+                                {{ __('messages.welcome.button_advisor') }}
                             </a>
                         </div>
-                    </div>
                 </section>
 
                 <div id="programas" class="h-16"></div>
