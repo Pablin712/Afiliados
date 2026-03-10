@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-graphite-100 leading-tight">
-            {{ __('Auditoria') }}
+            {{ __('messages.audit.title') }}
         </h2>
     </x-slot>
 
@@ -9,22 +9,22 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
             <div class="bg-white dark:bg-graphite-900 rounded-lg border border-gray-200 dark:border-graphite-800 p-4 sm:p-6">
                 <p class="text-sm text-gray-600 dark:text-graphite-300">
-                    Registro centralizado de acciones HTTP, autenticacion y cambios de modelos.
+                    {{ __('messages.audit.description') }}
                 </p>
             </div>
 
             <x-enhanced-table
                 id="audit-actions-table"
                 :headers="[
-                    ['label' => 'ID', 'type' => 'number', 'sort_by' => 'id'],
-                    ['label' => 'Usuario', 'type' => 'string', 'sort_by' => 'users.name'],
-                    ['label' => 'Modulo', 'type' => 'string', 'sort_by' => 'module'],
-                    ['label' => 'Accion', 'type' => 'string', 'sort_by' => 'action'],
-                    ['label' => 'Metodo', 'type' => 'string', 'sort_by' => 'method'],
-                    ['label' => 'Ruta', 'type' => 'string', 'sort_by' => 'route'],
-                    ['label' => 'URL', 'type' => 'string', 'sort_by' => 'url'],
-                    ['label' => 'IP', 'type' => 'string', 'sort_by' => 'ip_address'],
-                    ['label' => 'Fecha', 'type' => 'string', 'sort_by' => 'created_at'],
+                    ['label' => __('messages.audit.column_id'), 'type' => 'number', 'sort_by' => 'id'],
+                    ['label' => __('messages.audit.column_user'), 'type' => 'string', 'sort_by' => 'users.name'],
+                    ['label' => __('messages.audit.column_module'), 'type' => 'string', 'sort_by' => 'module'],
+                    ['label' => __('messages.audit.column_action'), 'type' => 'string', 'sort_by' => 'action'],
+                    ['label' => __('messages.audit.column_method'), 'type' => 'string', 'sort_by' => 'method'],
+                    ['label' => __('messages.audit.column_route'), 'type' => 'string', 'sort_by' => 'route'],
+                    ['label' => __('messages.audit.column_url'), 'type' => 'string', 'sort_by' => 'url'],
+                    ['label' => __('messages.audit.column_ip'), 'type' => 'string', 'sort_by' => 'ip_address'],
+                    ['label' => __('messages.audit.column_date'), 'type' => 'string', 'sort_by' => 'created_at'],
                 ]"
                 :serverSide="true"
                 :totalRecords="$totalRecords"
@@ -43,7 +43,7 @@
 
             @unless($canReport)
                 <div class="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-md p-3">
-                    Solo usuarios con permiso <code>report actions</code> pueden descargar reportes de auditoria (CSV, Excel, JSON y PDF).
+                    {{ __('messages.audit.report_permission', ['permission' => __('messages.audit.permission_key')]) }}
                 </div>
             @endunless
         </div>

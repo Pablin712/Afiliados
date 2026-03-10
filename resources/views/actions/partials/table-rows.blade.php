@@ -1,7 +1,7 @@
 @forelse ($records as $action)
     <tr class="hover:bg-gray-50 dark:hover:bg-graphite-800/60 transition-colors duration-150">
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">{{ $action->id }}</td>
-        <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">{{ $action->user?->name ?? 'Sistema' }}</td>
+        <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">{{ $action->user?->name ?? __('messages.audit.system_user') }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">{{ $action->module }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">{{ $action->action }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm">
@@ -17,7 +17,7 @@
 @empty
     <tr>
         <td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
-            No hay registros de auditoria disponibles.
+            {{ __('messages.audit.no_records') }}
         </td>
     </tr>
 @endforelse
