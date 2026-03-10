@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Auditoria</title>
+    <title>{{ __('messages.pdf.audit_report') }}</title>
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #111827; }
         h1 { margin: 0 0 8px 0; font-size: 18px; }
@@ -14,31 +14,31 @@
     </style>
 </head>
 <body>
-    <h1>Reporte de Auditoria</h1>
+    <h1>{{ __('messages.pdf.audit_report') }}</h1>
     <div class="meta">
-        Generado: {{ $generatedAt->format('Y-m-d H:i:s') }}<br>
-        Total de registros: {{ $records->count() }}
+        {{ __('messages.pdf.generated') }}: {{ $generatedAt->format('Y-m-d H:i:s') }}<br>
+        {{ __('messages.pdf.total_records') }}: {{ $records->count() }}
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Usuario</th>
-                <th>Modulo</th>
-                <th>Accion</th>
-                <th>Metodo</th>
-                <th>Ruta</th>
-                <th>URL</th>
-                <th>IP</th>
-                <th>Fecha</th>
+                <th>{{ __('messages.audit.column_id') }}</th>
+                <th>{{ __('messages.audit.column_user') }}</th>
+                <th>{{ __('messages.audit.column_module') }}</th>
+                <th>{{ __('messages.audit.column_action') }}</th>
+                <th>{{ __('messages.audit.column_method') }}</th>
+                <th>{{ __('messages.audit.column_route') }}</th>
+                <th>{{ __('messages.audit.column_url') }}</th>
+                <th>{{ __('messages.audit.column_ip') }}</th>
+                <th>{{ __('messages.pdf.date') }}</th>
             </tr>
         </thead>
         <tbody>
         @foreach($records as $action)
             <tr>
                 <td>{{ $action->id }}</td>
-                <td>{{ $action->user?->name ?? 'Sistema' }}</td>
+                <td>{{ $action->user?->name ?? __('messages.audit.system_user') }}</td>
                 <td>{{ $action->module }}</td>
                 <td>{{ $action->action }}</td>
                 <td>{{ $action->method }}</td>
