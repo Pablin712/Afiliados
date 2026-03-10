@@ -8,6 +8,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Language switcher route
+Route::get('/locale/{locale}', function ($locale) {
+    $availableLocales = ['en', 'es'];
+    if (in_array($locale, $availableLocales)) {
+        session(['locale' => $locale]);
+        \Illuminate\Support\Facades\App::setLocale($locale);
+        cookie()->queue('locale', $locale, 60 * 24 * 365); // 1 year
+    }
+    return redirect()->back();
+})->name('locale.change');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

@@ -19,7 +19,8 @@
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 sm:gap-4">
+                <!-- Theme Toggle Button -->
                 <button
                     type="button"
                     aria-label="Cambiar tema"
@@ -34,6 +35,11 @@
                         <path d="M11.5 2.25a.75.75 0 0 1 .74.86 6.75 6.75 0 0 0 8.65 7.55.75.75 0 0 1 .89.89A8.25 8.25 0 1 1 10.66.51a.75.75 0 0 1 .84 1.74Z" />
                     </svg>
                 </button>
+
+                <!-- Language Switcher -->
+                <div class="border-l border-gray-300 dark:border-graphite-700 pl-4">
+                    <x-language-switcher />
+                </div>
 
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
@@ -108,6 +114,13 @@
                 >
                     <span class="text-sm">Cambiar tema</span>
                 </button>
+            </div>
+
+            <!-- Language Switcher Mobile -->
+            <div class="mt-3 px-4">
+                <div class="flex justify-center gap-2">
+                    <x-language-switcher />
+                </div>
             </div>
 
             <div class="mt-3 space-y-1">

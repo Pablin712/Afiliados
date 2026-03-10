@@ -11,6 +11,12 @@
 ### 1.2 Convención de nombres
 - Todas las tablas del sistema se nombrarán en inglés.
 - Se usará `snake_case` para columnas.
+- **Idiomas:** El proyecto soporta **Inglés** y **Español**.
+  - Locale por defecto: `en` (Inglés)
+  - Locale respaldo: `en` (Inglés)
+  - Todos los mensajes, validaciones y etiquetas deben usar los helpers de traducción `__()` o `trans()`
+  - **PROHIBIDO:** Hardcoded strings en vistas, controladores o modelos
+  - Los archivos de traducción se encuentran en `resources/lang/{locale}/`
 
 ## 2) Reglas de negocio (Afiliados)
 
