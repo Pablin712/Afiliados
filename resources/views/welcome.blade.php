@@ -39,6 +39,8 @@
                     </nav>
 
                     <div class="flex items-center gap-2">
+                        <x-language-switcher />
+
                         <button
                             type="button"
                             aria-label="{{ __('messages.nav.change_theme') }}"
@@ -92,6 +94,7 @@
                                 {{ __('messages.welcome.button_advisor') }}
                             </a>
                         </div>
+                    </div>
                 </section>
 
                 <div id="programas" class="h-16"></div>

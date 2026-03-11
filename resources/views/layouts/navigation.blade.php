@@ -71,6 +71,12 @@
                             </x-dropdown-link>
                         @endcan
 
+                        @can('manage payments')
+                            <x-dropdown-link :href="route('admin.pending-registrations.index')">
+                                {{ __('messages.admin.pending_registrations_title') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -118,7 +124,7 @@
                     class="w-full inline-flex items-center justify-center px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-200 dark:hover:text-brand-400"
                     x-on:click="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')"
                 >
-                    <span class="text-sm">Cambiar tema</span>
+                    <span class="text-sm">{{ __('messages.nav.change_theme') }}</span>
                 </button>
             </div>
 
@@ -131,18 +137,24 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('messages.profile') }}
                 </x-responsive-nav-link>
 
                 @can('view actions')
                     <x-responsive-nav-link :href="route('actions.index')">
-                        {{ __('Auditoria') }}
+                        {{ __('messages.audit.title') }}
                     </x-responsive-nav-link>
                 @endcan
 
                 @can('view memberships')
                     <x-responsive-nav-link :href="route('memberships.index')">
                         {{ __('memberships.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('manage payments')
+                    <x-responsive-nav-link :href="route('admin.pending-registrations.index')">
+                        {{ __('messages.admin.pending_registrations_title') }}
                     </x-responsive-nav-link>
                 @endcan
 
@@ -153,7 +165,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('messages.log_out') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

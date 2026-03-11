@@ -12,6 +12,10 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
+    Route::get('register/availability', [RegisteredUserController::class, 'availability'])
+        ->middleware('throttle:20,1')
+        ->name('register.availability');
+
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 

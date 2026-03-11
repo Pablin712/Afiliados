@@ -2,7 +2,7 @@
     <div class="flex gap-1">
         @foreach ($availableLocales as $locale)
             <a
-                href="?locale={{ $locale }}"
+                href="{{ request()->fullUrlWithQuery(['locale' => $locale]) }}"
                 class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors duration-200
                     @if ($currentLocale === $locale)
                         bg-brand-500 text-white shadow-sm

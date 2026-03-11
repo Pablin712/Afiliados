@@ -3,6 +3,7 @@
 use App\Http\Controllers\ActionController;
 use App\Http\Controllers\MembershipsController;
 use App\Http\Controllers\MembershipTypeController;
+use App\Http\Controllers\PendingRegistrationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +42,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/membership-types', [MembershipTypeController::class, 'index'])
         ->middleware(['verified', 'permission:view membership_types'])
         ->name('membership-types.index');
+
+    Route::get('/admin/pending-registrations', [PendingRegistrationController::class, 'index'])
+        ->middleware(['verified', 'permission:manage payments'])
+        ->name('admin.pending-registrations.index');
+
+    Route::post('/admin/pending-registrations/{payment}/approve', [PendingRegistrationController::class, 'approve'])
+        ->middleware(['verified', 'permission:manage payments'])
+        ->name('admin.pending-registrations.approve');
 
     Route::post('/membership-types', [MembershipTypeController::class, 'store'])
         ->middleware(['verified', 'permission:create membership_types'])

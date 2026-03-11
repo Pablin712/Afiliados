@@ -49,6 +49,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if ($user !== null && $user->approved_at === null) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => __('messages.auth.account_pending_approval'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

@@ -36,4 +36,9 @@ class Membership extends Model
     {
         return $this->belongsTo(MembershipType::class);
     }
+
+    public function lastPayment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class, 'last_payment_id');
+    }
 }
