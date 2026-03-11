@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ActionController;
+use App\Http\Controllers\MembershipsController;
+use App\Http\Controllers\MembershipTypeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +33,26 @@ Route::middleware('auth')->group(function () {
     Route::get('/actions', [ActionController::class, 'index'])
         ->middleware(['verified', 'permission:view actions'])
         ->name('actions.index');
+
+    Route::get('/memberships', [MembershipsController::class, 'index'])
+        ->middleware(['verified', 'permission:view memberships'])
+        ->name('memberships.index');
+
+    Route::get('/membership-types', [MembershipTypeController::class, 'index'])
+        ->middleware(['verified', 'permission:view membership_types'])
+        ->name('membership-types.index');
+
+    Route::post('/membership-types', [MembershipTypeController::class, 'store'])
+        ->middleware(['verified', 'permission:create membership_types'])
+        ->name('membership-types.store');
+
+    Route::put('/membership-types/{membershipType}', [MembershipTypeController::class, 'update'])
+        ->middleware(['verified', 'permission:edit membership_types'])
+        ->name('membership-types.update');
+
+    Route::delete('/membership-types/{membershipType}', [MembershipTypeController::class, 'destroy'])
+        ->middleware(['verified', 'permission:delete membership_types'])
+        ->name('membership-types.destroy');
 });
 
 require __DIR__.'/auth.php';
