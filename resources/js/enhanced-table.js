@@ -138,6 +138,7 @@ function initEnhancedTable(table) {
         sortDirection: 'asc',
         searchTerm: '',
         totalRecords: Number.parseInt(table.dataset.totalRecords || '0', 10) || allRows.length,
+        extraParams: parseExtraParams(table.dataset.extraParams),
         allRows,
         filteredRows: allRows.slice(),
         sortStateByColumn: {},
@@ -170,6 +171,19 @@ function initEnhancedTable(table) {
         }
     } else {
         renderClientPage(config);
+    }
+}
+
+function parseExtraParams(rawValue) {
+    if (!rawValue) {
+        return {};
+    }
+
+    try {
+        const parsed = JSON.parse(rawValue);
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+        return {};
     }
 }
 
@@ -274,7 +288,13 @@ async function loadServerData(config) {
             search: config.searchTerm,
             sort_by: config.sortBy || '',
             sort_order: config.sortDirection,
-            ajax: 'true',
+            ajax: '1',
+        });
+
+        Object.entries(config.extraParams || {}).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && String(value).trim() !== '') {
+                params.set(key, String(value));
+            }
         });
 
         const response = await fetch(`${config.searchUrl}?${params.toString()}`, {

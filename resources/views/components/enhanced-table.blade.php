@@ -10,6 +10,7 @@
     'serverSide' => false,      // Nuevo: Forzar server-side
     'searchUrl' => '',          // Nuevo: URL para búsquedas AJAX
     'totalRecords' => 0,        // Nuevo: Total de registros (para server-side)
+    'extraParams' => [],        // Nuevo: Params adicionales para AJAX server-side
 ])
 
 @php
@@ -132,6 +133,7 @@
                data-server-side="{{ $autoServerSide ? 'true' : 'false' }}"
                data-search-url="{{ $searchUrl ?: request()->url() }}"
                data-total-records="{{ $totalRecords }}"
+               data-extra-params='@json($extraParams)'
                class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-100 dark:bg-gray-700 sticky top-0 z-10">
                 <tr>

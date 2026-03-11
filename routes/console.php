@@ -330,5 +330,7 @@ PHP;
     $this->line('1) Add routes in routes/web.php with middleware permission:view '.$module);
     $this->line('2) Add nav/dropdown links in resources/views/layouts/navigation.blade.php using @can');
     $this->line('3) Implement query/export logic in '.$controllerClass.' with model '.$model);
-    $this->line('4) Add permission seeds for '.$module.' if missing.');
+    $this->line('4) Implement create/edit/delete with x-modal partials (no modals inside foreach).');
+    $this->line('5) Use reusable icon action buttons in table rows and open modals by entity id.');
+    $this->line('6) Add permission seeds for '.$module.' if missing.');
 })->purpose('Generate base scaffold for a module view (controller, requests, views, translations)');

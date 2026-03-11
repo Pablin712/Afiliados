@@ -31,10 +31,25 @@ Usar este layout de archivos (ajustando nombres):
 - Definir `headers` con `sort_by` real de base de datos cuando aplique.
 - Pasar `searchUrl` a la ruta del index.
 
-### 3.3 Selects de catalogos/filtros
+### 3.3 Acciones CRUD en modales (obligatorio)
+- Para `create`, `edit` y `delete`, usar `<x-modal>` (no formularios inline dentro de la tabla).
+- Los modales deben vivir en partials separados del index:
+	- `resources/views/{module}/partials/modals/create.blade.php`
+	- `resources/views/{module}/partials/modals/edit.blade.php`
+	- `resources/views/{module}/partials/modals/delete.blade.php`
+- No generar modales con `@foreach`.
+- Debe existir un solo modal de `edit` y un solo modal de `delete`; se rellenan dinamicamente con el `id`/datos de la entidad seleccionada.
+- Los botones de acciones deben abrir modales por `id` (eventos `open-modal` y formularios con `action` dinamico).
+
+### 3.4 Selects de catalogos/filtros
 - Usar `<x-searchable-select>` para selects medianos o grandes.
 
-### 3.4 Exportaciones
+### 3.5 Botones de accion con iconos (obligatorio)
+- No usar textos largos como accion principal en celdas de tabla (`Editar`, `Eliminar`).
+- Usar botones compactos con iconos reutilizables (componente compartido, por ejemplo `<x-action-icon-button>`).
+- Cada boton debe incluir `title` y `aria-label` para accesibilidad.
+
+### 3.6 Exportaciones
 - En tablas server-side, las exportaciones deben resolverse en backend (`?export=csv|excel|json|pdf`).
 - No depender solo de export local JS si el modulo maneja muchos datos.
 
