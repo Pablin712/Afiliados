@@ -51,6 +51,10 @@ Route::middleware('auth')->group(function () {
         ->middleware(['verified', 'permission:manage payments'])
         ->name('admin.pending-registrations.approve');
 
+    Route::post('/admin/pending-registrations/{payment}/reject', [PendingRegistrationController::class, 'reject'])
+        ->middleware(['verified', 'permission:manage payments'])
+        ->name('admin.pending-registrations.reject');
+
     Route::post('/membership-types', [MembershipTypeController::class, 'store'])
         ->middleware(['verified', 'permission:create membership_types'])
         ->name('membership-types.store');
