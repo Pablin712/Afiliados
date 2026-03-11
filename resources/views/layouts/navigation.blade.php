@@ -65,6 +65,12 @@
                             </x-dropdown-link>
                         @endcan
 
+                        @can('view memberships')
+                            <x-dropdown-link :href="route('memberships.index')">
+                                {{ __('memberships.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -131,6 +137,12 @@
                 @can('view actions')
                     <x-responsive-nav-link :href="route('actions.index')">
                         {{ __('Auditoria') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view memberships')
+                    <x-responsive-nav-link :href="route('memberships.index')">
+                        {{ __('memberships.title') }}
                     </x-responsive-nav-link>
                 @endcan
 
