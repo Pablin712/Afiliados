@@ -37,7 +37,7 @@
             </div>
 
             <div @class([
-                'w-full mt-6 px-6 py-4 bg-white border border-gray-200 dark:bg-graphite-900 dark:border-graphite-800 shadow-md overflow-hidden sm:rounded-lg',
+                'w-full mt-6 mb-6 px-6 py-4 bg-white border border-gray-200 dark:bg-graphite-900 dark:border-graphite-800 shadow-md overflow-hidden sm:rounded-lg',
                 'sm:max-w-4xl' => request()->routeIs('register'),
                 'sm:max-w-md' => ! request()->routeIs('register'),
             ])>

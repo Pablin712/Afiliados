@@ -1,34 +1,19 @@
-@php
-    $paymentStepFields = ['bank_id', 'payment_reference', 'payment_amount', 'payment_receipt'];
-    $initialStep = 1;
-
-    foreach ($paymentStepFields as $field) {
-        if ($errors->has($field)) {
-            $initialStep = 2;
-            break;
-        }
-    }
-@endphp
-
 <x-guest-layout>
     <form
         method="POST"
         action="{{ route('register') }}"
-        enctype="multipart/form-data"
         x-data="{
-            step: {{ $initialStep }},
+            step: 1,
             name: @js(old('name', '')),
             email: @js(old('email', '')),
             identification: @js(old('identification', '')),
+            passwordValue: '',
+            passwordConfirmationValue: '',
             showPassword: false,
             showPasswordConfirmation: false,
             emailAvailabilityError: '',
             identificationAvailabilityError: '',
             availabilityUrl: @js(route('register.availability')),
-            paymentReference: @js(old('payment_reference', '')),
-            paymentAmount: @js(old('payment_amount', '147.00')),
-            selectedBankId: @js((string) old('bank_id', '')),
-            banks: @js($banks),
             async checkAvailability() {
                 this.emailAvailabilityError = '';
                 this.identificationAvailabilityError = '';
@@ -79,8 +64,33 @@
                     return true;
                 }
             },
-            async next(stepRef) {
-                const panel = this.$refs[stepRef];
+            validateStepBasic() {
+                const refs = [
+                    this.$refs.nameInput,
+                    this.$refs.identificationInput,
+                    this.$refs.emailInput,
+                    this.$refs.passwordInput,
+                    this.$refs.passwordConfirmationInput,
+                ].filter(Boolean);
+
+                refs.forEach((field) => field.setCustomValidity(''));
+
+                if (this.passwordValue !== this.passwordConfirmationValue) {
+                    this.$refs.passwordConfirmationInput?.setCustomValidity(@js(__('validation.confirmed')));
+                }
+
+                const firstInvalid = refs.find((field) => !field.checkValidity());
+
+                if (firstInvalid) {
+                    firstInvalid.reportValidity();
+                    firstInvalid.focus();
+                    return false;
+                }
+
+                return true;
+            },
+            async goToConfirm() {
+                const panel = this.$refs.stepBasic;
                 const fields = panel ? Array.from(panel.querySelectorAll('input, select, textarea')) : [];
                 const firstInvalid = fields.find((field) => !field.checkValidity());
 
@@ -90,30 +100,24 @@
                     return;
                 }
 
-                if (stepRef === 'stepBasic') {
-                    const available = await this.checkAvailability();
-
-                    if (!available) {
-                        const emailInput = this.$refs.emailInput;
-                        const identificationInput = this.$refs.identificationInput;
-                        const targetInput = this.emailAvailabilityError ? emailInput : identificationInput;
-
-                        if (targetInput) {
-                            targetInput.reportValidity();
-                            targetInput.focus();
-                        }
-
-                        return;
-                    }
+                if (!this.validateStepBasic()) {
+                    return;
                 }
 
-                this.step += 1;
+                const available = await this.checkAvailability();
+                if (!available) {
+                    const targetInput = this.emailAvailabilityError ? this.$refs.emailInput : this.$refs.identificationInput;
+                    if (targetInput) {
+                        targetInput.reportValidity();
+                        targetInput.focus();
+                    }
+                    return;
+                }
+
+                this.step = 2;
             },
-            previous() {
-                this.step -= 1;
-            },
-            selectedBank() {
-                return this.banks.find((bank) => String(bank.id) === String(this.selectedBankId)) ?? null;
+            backToBasic() {
+                this.step = 1;
             }
         }"
         class="space-y-8"
@@ -122,39 +126,24 @@
 
         <input type="hidden" name="sponsor_id" value="{{ old('sponsor_id', $sponsor->id) }}">
 
-        <div class="space-y-4">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-400">{{ __('messages.auth.register_badge') }}</p>
-                <h1 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.auth.register_title') }}</h1>
-                <p class="mt-2 text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.auth.register_description') }}</p>
-            </div>
-
-            <div class="grid gap-3 md:grid-cols-3">
-                <div class="rounded-2xl border px-4 py-3 transition"
-                    :class="step === 1 ? 'border-brand-500 bg-brand-50 text-brand-900 dark:border-brand-400 dark:bg-brand-900/20 dark:text-brand-200' : 'border-gray-200 text-gray-500 dark:border-graphite-800 dark:text-graphite-400'">
-                    <p class="text-xs font-semibold uppercase tracking-[0.25em]">01</p>
-                    <p class="mt-2 text-sm font-semibold">{{ __('messages.auth.step_basic_title') }}</p>
-                    <p class="mt-1 text-xs">{{ __('messages.auth.step_basic_description') }}</p>
-                </div>
-
-                <div class="rounded-2xl border px-4 py-3 transition"
-                    :class="step === 2 ? 'border-brand-500 bg-brand-50 text-brand-900 dark:border-brand-400 dark:bg-brand-900/20 dark:text-brand-200' : 'border-gray-200 text-gray-500 dark:border-graphite-800 dark:text-graphite-400'">
-                    <p class="text-xs font-semibold uppercase tracking-[0.25em]">02</p>
-                    <p class="mt-2 text-sm font-semibold">{{ __('messages.auth.step_payment_title') }}</p>
-                    <p class="mt-1 text-xs">{{ __('messages.auth.step_payment_description') }}</p>
-                </div>
-
-                <div class="rounded-2xl border px-4 py-3 transition"
-                    :class="step === 3 ? 'border-brand-500 bg-brand-50 text-brand-900 dark:border-brand-400 dark:bg-brand-900/20 dark:text-brand-200' : 'border-gray-200 text-gray-500 dark:border-graphite-800 dark:text-graphite-400'">
-                    <p class="text-xs font-semibold uppercase tracking-[0.25em]">03</p>
-                    <p class="mt-2 text-sm font-semibold">{{ __('messages.auth.step_confirm_title') }}</p>
-                    <p class="mt-1 text-xs">{{ __('messages.auth.step_confirm_description') }}</p>
-                </div>
-            </div>
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-400">{{ __('messages.auth.register_badge') }}</p>
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.auth.register_title') }}</h1>
+            <p class="text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.auth.register_description') }}</p>
         </div>
 
-        <section x-show="step === 1" x-ref="stepBasic" class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div class="rounded-3xl border border-gray-200 bg-white p-6 dark:border-graphite-800 dark:bg-graphite-950/40">
+        <section
+            x-show="step === 1"
+            x-ref="stepBasic"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-2"
+            class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
+        >
+            <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/40">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.auth.step_basic_title') }}</h2>
                     <p class="mt-1 text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.auth.step_basic_description') }}</p>
@@ -170,7 +159,7 @@
 
                     <div>
                         <x-input-label for="name" :value="__('messages.name')" />
-                        <x-text-input id="name" class="mt-1 block w-full" type="text" name="name" x-model="name" :value="old('name')" required autofocus autocomplete="name" />
+                        <x-text-input id="name" class="mt-1 block w-full" type="text" name="name" x-model="name" x-ref="nameInput" :value="old('name')" required autofocus autocomplete="name" />
                         <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>
 
@@ -191,7 +180,7 @@
                     <div>
                         <x-input-label for="password" :value="__('messages.password')" />
                         <div class="relative">
-                            <x-text-input id="password" class="mt-1 block w-full pr-10" x-bind:type="showPassword ? 'text' : 'password'" name="password" required autocomplete="new-password" />
+                            <x-text-input id="password" class="mt-1 block w-full pr-10" x-bind:type="showPassword ? 'text' : 'password'" name="password" x-ref="passwordInput" x-model="passwordValue" x-on:input="$refs.passwordInput.setCustomValidity(''); $refs.passwordConfirmationInput?.setCustomValidity('');" required autocomplete="new-password" />
                             <button
                                 type="button"
                                 class="absolute inset-y-0 right-0 mt-1 px-3 text-gray-500 hover:text-gray-700 dark:text-graphite-400 dark:hover:text-graphite-200"
@@ -214,7 +203,7 @@
                     <div>
                         <x-input-label for="password_confirmation" :value="__('messages.confirm_password')" />
                         <div class="relative">
-                            <x-text-input id="password_confirmation" class="mt-1 block w-full pr-10" x-bind:type="showPasswordConfirmation ? 'text' : 'password'" name="password_confirmation" required autocomplete="new-password" />
+                            <x-text-input id="password_confirmation" class="mt-1 block w-full pr-10" x-bind:type="showPasswordConfirmation ? 'text' : 'password'" name="password_confirmation" x-ref="passwordConfirmationInput" x-model="passwordConfirmationValue" x-on:input="$refs.passwordConfirmationInput.setCustomValidity('');" required autocomplete="new-password" />
                             <button
                                 type="button"
                                 class="absolute inset-y-0 right-0 mt-1 px-3 text-gray-500 hover:text-gray-700 dark:text-graphite-400 dark:hover:text-graphite-200"
@@ -245,110 +234,19 @@
                     <li>{{ __('messages.auth.basic_side_item_3') }}</li>
                 </ul>
             </aside>
-
         </section>
 
-        <section x-show="step === 2" x-ref="stepPayment" class="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
-            <div class="rounded-3xl border border-gray-200 bg-white p-6 dark:border-graphite-800 dark:bg-graphite-950/40">
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.auth.step_payment_title') }}</h2>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.auth.step_payment_description') }}</p>
-                </div>
-
-                <div class="mt-6 grid gap-4">
-                    <div>
-                        <x-input-label for="bank_id" :value="__('messages.auth.admin_bank')" />
-                        <select
-                            id="bank_id"
-                            name="bank_id"
-                            x-model="selectedBankId"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100"
-                            required
-                        >
-                            <option value="">{{ __('messages.auth.select_admin_bank') }}</option>
-                            @foreach($banks as $bank)
-                                <option value="{{ $bank->id }}">{{ $bank->name }} - {{ $bank->owner }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error :messages="$errors->get('bank_id')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="payment_reference" :value="__('messages.auth.payment_reference')" />
-                        <x-text-input id="payment_reference" class="mt-1 block w-full" type="text" name="payment_reference" x-model="paymentReference" :value="old('payment_reference')" required autocomplete="off" />
-                        <x-input-error :messages="$errors->get('payment_reference')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="payment_amount" :value="__('messages.auth.payment_amount')" />
-                        <div class="mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 dark:border-graphite-700 dark:bg-graphite-800 dark:text-graphite-100">
-                            $<span>147.00</span>
-                        </div>
-                        <input type="hidden" name="payment_amount" value="147.00">
-                        <p class="mt-2 text-xs text-brand-600 dark:text-brand-400">{{ __('messages.auth.subscription_notice') }}</p>
-                        <x-input-error :messages="$errors->get('payment_amount')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="payment_receipt" :value="__('messages.auth.payment_receipt')" />
-                        <input
-                            id="payment_receipt"
-                            name="payment_receipt"
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100"
-                            required
-                        >
-                        <p class="mt-1 text-xs text-gray-600 dark:text-graphite-400">{{ __('messages.auth.payment_receipt_help') }}</p>
-                        <x-input-error :messages="$errors->get('payment_receipt')" class="mt-2" />
-                    </div>
-                </div>
-            </div>
-
-            <aside class="rounded-3xl border border-gray-200 bg-gray-50 p-6 dark:border-graphite-800 dark:bg-graphite-950/50">
-                <h3 class="text-sm font-semibold uppercase tracking-[0.25em] text-brand-700 dark:text-brand-300">{{ __('messages.auth.payment_method_data_title') }}</h3>
-
-                <template x-if="selectedBank()">
-                    <div class="mt-4 space-y-4 text-sm text-gray-700 dark:text-graphite-300">
-                        <div class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
-                            <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.bank') }}</p>
-                            <p class="mt-2 text-base font-semibold text-gray-900 dark:text-graphite-100" x-text="selectedBank().name"></p>
-                        </div>
-
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
-                                <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.auth.payment_owner') }}</p>
-                                <p class="mt-2 font-medium" x-text="selectedBank().owner"></p>
-                            </div>
-
-                            <div class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
-                                <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.auth.payment_identification') }}</p>
-                                <p class="mt-2 font-medium" x-text="selectedBank().identification"></p>
-                            </div>
-                        </div>
-
-                        <div class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
-                            <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.auth.payment_number') }}</p>
-                            <p class="mt-2 font-medium break-all" x-text="selectedBank().number"></p>
-                        </div>
-
-                        <div class="rounded-2xl border border-dashed border-brand-300 bg-brand-50/70 p-4 text-sm text-brand-900 dark:border-brand-700 dark:bg-brand-900/10 dark:text-brand-200">
-                            <p class="font-medium">{{ __('messages.auth.payment_detail') }}</p>
-                            <p class="mt-2" x-text="selectedBank().detail || '{{ __('messages.auth.no_additional_bank_detail') }}'"></p>
-                        </div>
-                    </div>
-                </template>
-
-                <template x-if="!selectedBank()">
-                    <div class="mt-4 rounded-2xl border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-500 dark:border-graphite-700 dark:text-graphite-400">
-                        {{ __('messages.auth.select_bank_to_continue') }}
-                    </div>
-                </template>
-            </aside>
-        </section>
-
-        <section x-show="step === 3" class="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
-            <div class="rounded-3xl border border-gray-200 bg-white p-6 dark:border-graphite-800 dark:bg-graphite-950/40">
+        <section
+            x-show="step === 2"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-2"
+            class="grid gap-6 lg:grid-cols-[1fr_0.9fr]"
+        >
+            <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/40">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.auth.step_confirm_title') }}</h2>
                     <p class="mt-1 text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.auth.step_confirm_description') }}</p>
@@ -369,21 +267,6 @@
                         <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.email') }}</p>
                         <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100" x-text="email"></p>
                     </div>
-
-                    <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">
-                        <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.auth.admin_bank') }}</p>
-                        <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100" x-text="selectedBank() ? selectedBank().name : '-' "></p>
-                    </div>
-
-                    <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">
-                        <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.auth.payment_reference') }}</p>
-                        <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100" x-text="paymentReference"></p>
-                    </div>
-
-                    <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800 md:col-span-2">
-                        <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.auth.payment_amount') }}</p>
-                        <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100">$<span x-text="paymentAmount"></span></p>
-                    </div>
                 </div>
             </div>
 
@@ -391,9 +274,8 @@
                 <h3 class="text-sm font-semibold uppercase tracking-[0.25em] text-brand-700 dark:text-brand-300">{{ __('messages.auth.confirm_notice_title') }}</h3>
                 <p class="mt-3 text-sm text-brand-900 dark:text-brand-200">{{ __('messages.auth.confirm_notice_body') }}</p>
                 <ul class="mt-4 space-y-3 text-sm text-brand-900 dark:text-brand-200">
-                    <li>{{ __('messages.auth.confirm_notice_item_1') }}</li>
                     <li>{{ __('messages.auth.confirm_notice_item_2') }}</li>
-                    <li>{{ __('messages.auth.confirm_notice_item_3') }}</li>
+                    <li>{{ __('messages.auth.basic_side_item_1') }}</li>
                 </ul>
             </aside>
         </section>
@@ -404,15 +286,15 @@
             </a>
 
             <div class="flex items-center gap-3">
-                <x-secondary-button type="button" x-show="step > 1" x-on:click="previous()">
+                <x-secondary-button type="button" x-show="step === 2" x-on:click="backToBasic()">
                     {{ __('messages.auth.previous_step') }}
                 </x-secondary-button>
 
-                <x-primary-button type="button" x-show="step < 3" x-on:click="next(step === 1 ? 'stepBasic' : 'stepPayment')">
+                <x-primary-button type="button" x-show="step === 1" x-on:click="goToConfirm()">
                     {{ __('messages.auth.next_step') }}
                 </x-primary-button>
 
-                <x-primary-button x-show="step === 3">
+                <x-primary-button x-show="step === 2">
                     {{ __('messages.register') }}
                 </x-primary-button>
             </div>
