@@ -4,6 +4,7 @@ use App\Http\Controllers\ActionController;
 use App\Http\Controllers\MembershipsController;
 use App\Http\Controllers\MembershipTypeController;
 use App\Http\Controllers\PendingRegistrationController;
+use App\Http\Controllers\PlansController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/plans', [PlansController::class, 'index'])
+        ->middleware('verified')
+        ->name('plans.index');
+
+    Route::post('/plans/payment', [PlansController::class, 'store'])
+        ->middleware('verified')
+        ->name('plans.payment.store');
 
     Route::get('/actions', [ActionController::class, 'index'])
         ->middleware(['verified', 'permission:view actions'])
