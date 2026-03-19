@@ -23,7 +23,7 @@ class ProfitsController extends Controller
     {
         $query = $this->buildQuery($request);
 
-        $perPage = max(5, min(100, (int) $request->integer('per_page', 20)));
+        $perPage = max(5, min(100, (int) $request->integer('per_page', 10)));
         $records = (clone $query)->paginate($perPage)->withQueryString();
 
         if ($request->boolean('ajax')) {
