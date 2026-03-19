@@ -130,6 +130,9 @@ return [
     'profile.referral_description' => 'Comparte este enlace para que tus invitados se registren bajo tu patrocinio.',
     'profile.referral_link_label' => 'Tu enlace de invitación',
     'profile.referral_link_help' => 'Todo registro realizado desde este enlace quedará asociado a tu cuenta como sponsor.',
+    'profile.referral_copy' => 'Copiar enlace',
+    'profile.referral_copied' => 'Copiado',
+    'profile.referral_copied_help' => 'Enlace copiado al portapapeles.',
 
     // Common
 
@@ -297,6 +300,7 @@ return [
     'plans.no_bank_detail' => 'Sin detalle adicional.',
     'plans.reference_label' => 'Referencia / N° de transacción',
     'plans.amount_label' => 'Monto pagado',
+    'plans.fixed_amount_note' => 'Monto fijo según el programa seleccionado',
     'plans.receipt_label' => 'Comprobante (foto)',
     'plans.receipt_help' => 'Formatos permitidos: JPG, PNG o WEBP. Máximo 4 MB.',
     'plans.submit_button' => 'Enviar comprobante',

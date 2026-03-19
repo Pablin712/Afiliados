@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PlansController extends Controller
@@ -73,14 +74,24 @@ class PlansController extends Controller
         }
 
         $validated = $request->validate([
-            'program_id' => ['required', 'integer', 'exists:programs,id'],
+            'program_id' => ['required', 'integer', Rule::exists('programs', 'id')->where('is_active', true)],
             'bank_id'    => ['required', 'integer', 'exists:banks,id'],
             'number'     => ['required', 'string', 'max:120'],
-            'amount'     => ['required', 'numeric', 'min:0.01'],
             'photo'      => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
 
-        DB::transaction(function () use ($validated, $userId): void {
+        $program = Program::query()->findOrFail($validated['program_id']);
+
+        $hasApprovedPayment = Payment::query()
+            ->where('user_id', $userId)
+            ->where('state', 'approved')
+            ->exists();
+
+        $calculatedAmount = $hasApprovedPayment
+            ? (float) $program->renewal_cost
+            : (float) $program->first_payment_cost;
+
+        DB::transaction(function () use ($validated, $userId, $calculatedAmount): void {
             $photoPath = $validated['photo']->store('payment-receipts', 'public');
 
             $transaction = Transaction::create([
@@ -100,7 +111,7 @@ class PlansController extends Controller
                 'transaction_id' => $transaction->id,
                 'number'         => $validated['number'],
                 'photo'          => $photoPath,
-                'amount'         => $validated['amount'],
+                'amount'         => $calculatedAmount,
                 'state'          => 'pending',
             ]);
         });

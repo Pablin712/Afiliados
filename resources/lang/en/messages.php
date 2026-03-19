@@ -130,6 +130,9 @@ return [
     'profile.referral_description' => 'Share this link so your invited users register under your sponsorship.',
     'profile.referral_link_label' => 'Your invitation link',
     'profile.referral_link_help' => 'Any registration done through this link will be associated with your account as sponsor.',
+    'profile.referral_copy' => 'Copy link',
+    'profile.referral_copied' => 'Copied',
+    'profile.referral_copied_help' => 'Link copied to clipboard.',
 
     // Common
 
@@ -297,6 +300,7 @@ return [
     'plans.no_bank_detail' => 'No additional detail.',
     'plans.reference_label' => 'Reference / Transaction #',
     'plans.amount_label' => 'Amount paid',
+    'plans.fixed_amount_note' => 'Fixed amount based on the selected program',
     'plans.receipt_label' => 'Receipt (photo)',
     'plans.receipt_help' => 'Accepted formats: JPG, PNG or WEBP. Maximum 4 MB.',
     'plans.submit_button' => 'Submit receipt',

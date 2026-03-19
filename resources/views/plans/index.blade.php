@@ -337,18 +337,13 @@
                                                 </div>
 
                                                 <div>
-                                                    <x-input-label for="amount" :value="__('messages.plans.amount_label')" />
-                                                    <x-text-input
-                                                        id="amount"
-                                                        class="mt-1 block w-full"
-                                                        type="number"
-                                                        name="amount"
-                                                        step="0.01"
-                                                        min="0.01"
-                                                        :value="old('amount', $hasApprovedPayment ? $program->renewal_cost : $program->first_payment_cost)"
-                                                        required
-                                                    />
-                                                    <x-input-error :messages="$errors->get('amount')" class="mt-2" />
+                                                    <x-input-label :value="__('messages.plans.amount_label')" />
+                                                    @php($fixedAmount = $hasApprovedPayment ? (float) $program->renewal_cost : (float) $program->first_payment_cost)
+                                                    <div class="mt-1 flex items-center justify-between rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 dark:border-brand-900/60 dark:bg-brand-900/20">
+                                                        <span class="text-sm text-gray-700 dark:text-graphite-300">{{ __('messages.plans.fixed_amount_note') }}</span>
+                                                        <span class="text-lg font-bold text-brand-700 dark:text-brand-300">${{ number_format($fixedAmount, 2) }}</span>
+                                                    </div>
+                                                    <input type="hidden" name="amount" value="{{ number_format($fixedAmount, 2, '.', '') }}">
                                                 </div>
 
                                                 <div>
