@@ -7,3 +7,28 @@
 		@apply bg-gray-100 text-gray-900 dark:bg-graphite-950 dark:text-graphite-100;
 	}
 }
+
+@layer components {
+	.users-tree-surface {
+		background-color: #fffdf8;
+		background-image:
+			linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+		background-size: 30px 30px;
+	}
+
+	.dark .users-tree-surface {
+		background-color: #0f1720;
+		background-image:
+			linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+	}
+
+	.users-tree-surface canvas {
+		cursor: grab;
+	}
+
+	.users-tree-pan-btn {
+		@apply inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 shadow-sm transition hover:border-amber-400 hover:text-amber-700 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-200 dark:hover:border-amber-500 dark:hover:text-amber-300;
+	}
+}

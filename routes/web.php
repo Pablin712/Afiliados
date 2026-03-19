@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ActionController;
+use App\Http\Controllers\Admin\FinancialDashboardController;
+use App\Http\Controllers\Admin\ProfitsController;
+use App\Http\Controllers\Admin\UsersTreeController;
 use App\Http\Controllers\MembershipsController;
 use App\Http\Controllers\MembershipTypeController;
 use App\Http\Controllers\PendingRegistrationController;
@@ -72,6 +75,34 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/pending-registrations/{payment}/reject', [PendingRegistrationController::class, 'reject'])
         ->middleware(['verified', 'permission:manage payments'])
         ->name('admin.pending-registrations.reject');
+
+    Route::get('/admin/users-tree', [UsersTreeController::class, 'index'])
+        ->middleware(['verified', 'permission:view users'])
+        ->name('admin.users-tree.index');
+
+    Route::get('/admin/users-tree/{user}/insights', [UsersTreeController::class, 'insights'])
+        ->middleware(['verified', 'permission:view users'])
+        ->name('admin.users-tree.insights');
+
+    Route::get('/admin/financial-dashboard', [FinancialDashboardController::class, 'index'])
+        ->middleware(['verified', 'permission:report profits'])
+        ->name('admin.financial-dashboard.index');
+
+    Route::post('/admin/financial-dashboard/register-today', [FinancialDashboardController::class, 'registerToday'])
+        ->middleware(['verified', 'permission:manage profits'])
+        ->name('admin.financial-dashboard.register-today');
+
+    Route::post('/admin/financial-dashboard/register-yesterday', [FinancialDashboardController::class, 'registerYesterday'])
+        ->middleware(['verified', 'permission:manage profits'])
+        ->name('admin.financial-dashboard.register-yesterday');
+
+    Route::get('/admin/profits', [ProfitsController::class, 'index'])
+        ->middleware(['verified', 'permission:view profits'])
+        ->name('admin.profits.index');
+
+    Route::post('/admin/profits/{profit}/mark-as-paid', [ProfitsController::class, 'markAsPaid'])
+        ->middleware(['verified', 'permission:manage profits'])
+        ->name('admin.profits.mark-as-paid');
 
     Route::post('/membership-types', [MembershipTypeController::class, 'store'])
         ->middleware(['verified', 'permission:create membership_types'])

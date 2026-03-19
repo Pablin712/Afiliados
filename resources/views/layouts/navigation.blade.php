@@ -80,6 +80,24 @@
                             </x-dropdown-link>
                         @endcan
 
+                        @can('view users')
+                            <x-dropdown-link :href="route('admin.users-tree.index')">
+                                {{ __('messages.admin.users_tree.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
+                        @can('view profits')
+                            <x-dropdown-link :href="route('admin.profits.index')">
+                                {{ __('messages.admin.profits.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
+                        @can('report profits')
+                            <x-dropdown-link :href="route('admin.financial-dashboard.index')">
+                                {{ __('messages.admin.financial_dashboard.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -161,6 +179,24 @@
                 @can('manage payments')
                     <x-responsive-nav-link :href="route('admin.pending-registrations.index')">
                         {{ __('messages.admin.pending_registrations_title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view users')
+                    <x-responsive-nav-link :href="route('admin.users-tree.index')">
+                        {{ __('messages.admin.users_tree.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view profits')
+                    <x-responsive-nav-link :href="route('admin.profits.index')">
+                        {{ __('messages.admin.profits.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('report profits')
+                    <x-responsive-nav-link :href="route('admin.financial-dashboard.index')">
+                        {{ __('messages.admin.financial_dashboard.title') }}
                     </x-responsive-nav-link>
                 @endcan
 
