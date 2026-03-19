@@ -383,5 +383,6 @@ return [
     'admin.financial_dashboard.register_yesterday' => 'Register yesterday stats',
     'admin.financial_dashboard.stats_today_registered' => 'Today statistics registered.',
     'admin.financial_dashboard.stats_yesterday_registered' => 'Yesterday statistics registered.',
+    'admin.financial_dashboard.missing_stats_table' => 'The daily_financial_stats table is missing. Run php artisan migrate to enable the financial dashboard.',
 ];
 

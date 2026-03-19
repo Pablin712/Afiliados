@@ -53,107 +53,40 @@
                 </form>
             </div>
 
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-graphite-800 dark:bg-graphite-900">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50 dark:bg-graphite-800 text-left text-xs uppercase text-gray-500 dark:text-graphite-400">
-                        <tr>
-                            <th class="px-4 py-3">ID</th>
-                            <th class="px-4 py-3">{{ __('messages.admin.user_label') }}</th>
-                            <th class="px-4 py-3">{{ __('messages.admin.profits.bank') }}</th>
-                            <th class="px-4 py-3">{{ __('messages.admin.profits.amount') }}</th>
-                            <th class="px-4 py-3">{{ __('messages.admin.profits.state') }}</th>
-                            <th class="px-4 py-3">{{ __('messages.admin.profits.created_at') }}</th>
-                            <th class="px-4 py-3">{{ __('messages.actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-graphite-800">
-                        @forelse ($records as $profit)
-                            <tr>
-                                <td class="px-4 py-3">#{{ $profit->id }}</td>
-                                <td class="px-4 py-3">
-                                    <p class="font-medium text-gray-900 dark:text-graphite-100">{{ $profit->user?->name }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-graphite-400">{{ $profit->user?->email }}</p>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <p>{{ $profit->userBank?->bank_name }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-graphite-400">{{ $profit->userBank?->number }}</p>
-                                </td>
-                                <td class="px-4 py-3 font-semibold">${{ number_format((float) $profit->amount, 2) }}</td>
-                                <td class="px-4 py-3">
-                                    @if ($profit->state === 'pending')
-                                        <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">{{ __('messages.status.pending') }}</span>
-                                    @else
-                                        <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">{{ __('messages.admin.profits.status_made') }}</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3">
-                                    <p>{{ optional($profit->created_at)->format('Y-m-d H:i') }}</p>
-                                    @if ($profit->paid_at)
-                                        <p class="text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.profits.paid_at') }}: {{ optional($profit->paid_at)->format('Y-m-d H:i') }}</p>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3">
-                                    @if ($profit->state === 'pending')
-                                        <button
-                                            type="button"
-                                            class="inline-flex items-center rounded-md border border-emerald-500 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                            onclick='openProfitPaidModal(@json([
-                                                "id" => $profit->id,
-                                                "user" => $profit->user?->name,
-                                                "amount" => (float) $profit->amount,
-                                            ]))'
-                                        >
-                                            {{ __('messages.admin.profits.mark_as_paid') }}
-                                        </button>
-                                    @else
-                                        <span class="text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.profits.transaction') }} #{{ $profit->transaction_id }}</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-4 py-6 text-center text-gray-500 dark:text-graphite-400">{{ __('messages.table.no_records') }}</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <div>
-                {{ $records->links() }}
-            </div>
+            <x-enhanced-table
+                id="profits-table"
+                :headers="[
+                    ['label' => 'ID', 'type' => 'number', 'sort_by' => 'id'],
+                    ['label' => __('messages.admin.user_label'), 'type' => 'string', 'sort_by' => 'user_name'],
+                    ['label' => __('messages.admin.profits.bank'), 'type' => 'string', 'sort_by' => 'bank_name'],
+                    ['label' => __('messages.admin.profits.amount'), 'type' => 'number', 'sort_by' => 'amount'],
+                    ['label' => __('messages.admin.profits.state'), 'type' => 'string', 'sort_by' => 'state'],
+                    ['label' => __('messages.admin.profits.created_at'), 'type' => 'string', 'sort_by' => 'created_at'],
+                    ['label' => __('messages.actions'), 'type' => 'actions', 'sort_by' => 'id'],
+                ]"
+                :serverSide="true"
+                :totalRecords="$totalRecords"
+                :searchUrl="route('admin.profits.index')"
+                :extraParams="[
+                    'state' => $filters['state'] ?? '',
+                    'from' => $filters['from'] ?? '',
+                    'to' => $filters['to'] ?? '',
+                ]"
+                :csv="false"
+                :excel="false"
+                :json="false"
+                :pdf="false"
+                :print="false"
+                :table_void="$records->isEmpty()"
+            >
+                <tbody class="divide-y divide-gray-200 dark:divide-graphite-800">
+                    @include('admin.profits.partials.table-rows', ['records' => $records->items()])
+                </tbody>
+            </x-enhanced-table>
         </div>
     </div>
 
-    <x-modal name="profit-mark-paid-modal" :show="false" maxWidth="md">
-        <form id="profit-mark-paid-form" method="POST" class="p-6 space-y-4">
-            @csrf
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.admin.profits.modal_title') }}</h3>
-                <p id="profit-mark-paid-text" class="mt-1 text-sm text-gray-600 dark:text-graphite-300"></p>
-            </div>
-
-            <div>
-                <x-input-label for="profit_bank_id" :value="__('messages.admin.profits.select_bank')" />
-                <select id="profit_bank_id" name="bank_id" required class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
-                    <option value="">{{ __('messages.admin.profits.select_bank_placeholder') }}</option>
-                    @foreach ($banks as $bank)
-                        <option value="{{ $bank->id }}">{{ $bank->name }} ({{ $bank->number }}) - ${{ number_format((float) $bank->amount, 2) }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <x-input-label for="profit_detail" :value="__('messages.admin.profits.detail_optional')" />
-                <textarea id="profit_detail" name="detail" rows="3" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100"></textarea>
-            </div>
-
-            <div class="flex justify-end gap-2">
-                <x-secondary-button x-on:click.prevent="$dispatch('close')">{{ __('messages.cancel') }}</x-secondary-button>
-                <x-primary-button type="submit">{{ __('messages.confirm') }}</x-primary-button>
-            </div>
-        </form>
-    </x-modal>
+    @include('admin.profits.partials.modals.mark-paid')
 
     @push('scripts')
         <script>

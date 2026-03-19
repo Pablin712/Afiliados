@@ -11,12 +11,32 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DailyFinancialStatsService
 {
+    public function hasStatsTable(): bool
+    {
+        return Schema::hasTable('daily_financial_stats');
+    }
+
     public function registerForDate(CarbonInterface $date): DailyFinancialStat
     {
         $day = Carbon::parse($date)->startOfDay();
+
+        if (! $this->hasStatsTable()) {
+            return new DailyFinancialStat([
+                'stat_date' => $day->toDateString(),
+                'incomes_total' => 0,
+                'expenses_total' => 0,
+                'net_profit' => 0,
+                'new_users_count' => 0,
+                'new_customers_count' => 0,
+                'approved_payments_count' => 0,
+                'pending_profits_total' => 0,
+                'profits_paid_total' => 0,
+            ]);
+        }
 
         $incomes = (float) Transaction::query()
             ->where('type', 'income')
@@ -79,6 +99,28 @@ class DailyFinancialStatsService
         $fromDay = Carbon::parse($from)->startOfDay();
         $toDay = Carbon::parse($to)->endOfDay();
 
+        if (! $this->hasStatsTable()) {
+            return [
+                'range' => [
+                    'from' => $fromDay->toDateString(),
+                    'to' => $toDay->toDateString(),
+                ],
+                'totals' => [
+                    'incomes_total' => 0.0,
+                    'expenses_total' => 0.0,
+                    'net_profit_total' => 0.0,
+                    'new_users_count' => 0,
+                    'new_customers_count' => 0,
+                    'approved_payments_count' => 0,
+                    'pending_profits_total_now' => (float) Profit::query()->where('state', 'pending')->sum('amount'),
+                ],
+                'line_series' => [],
+                'candles' => [],
+                'membership_totals' => $this->membershipTotals(),
+                'stats_table_missing' => true,
+            ];
+        }
+
         $rows = DailyFinancialStat::query()
             ->whereBetween('stat_date', [$fromDay->toDateString(), $toDay->toDateString()])
             ->orderBy('stat_date')
@@ -110,6 +152,7 @@ class DailyFinancialStatsService
             ])->values()->all(),
             'candles' => $this->buildProfitCandles($rows),
             'membership_totals' => $this->membershipTotals(),
+            'stats_table_missing' => false,
         ];
     }
 

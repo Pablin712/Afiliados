@@ -35,16 +35,22 @@ class FinancialDashboardController extends Controller
         }
 
         $summary = $this->dailyFinancialStatsService->dashboardSummary($from, $to);
+        $statsTableMissing = ! $this->dailyFinancialStatsService->hasStatsTable();
 
         return view('admin.financial-dashboard.index', [
             'summary' => $summary,
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
+            'statsTableMissing' => $statsTableMissing,
         ]);
     }
 
     public function registerToday(): RedirectResponse
     {
+        if (! $this->dailyFinancialStatsService->hasStatsTable()) {
+            return back()->with('error', __('messages.admin.financial_dashboard.missing_stats_table'));
+        }
+
         $this->dailyFinancialStatsService->registerForDate(now()->startOfDay());
 
         return back()->with('status', __('messages.admin.financial_dashboard.stats_today_registered'));
@@ -52,6 +58,10 @@ class FinancialDashboardController extends Controller
 
     public function registerYesterday(): RedirectResponse
     {
+        if (! $this->dailyFinancialStatsService->hasStatsTable()) {
+            return back()->with('error', __('messages.admin.financial_dashboard.missing_stats_table'));
+        }
+
         $this->dailyFinancialStatsService->registerForDate(now()->subDay()->startOfDay());
 
         return back()->with('status', __('messages.admin.financial_dashboard.stats_yesterday_registered'));

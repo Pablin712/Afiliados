@@ -20,6 +20,18 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-300">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($statsTableMissing)
+                <div class="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                    {{ __('messages.admin.financial_dashboard.missing_stats_table') }}
+                </div>
+            @endif
+
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
                     <p class="text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.financial_dashboard.cards.incomes') }}</p>
