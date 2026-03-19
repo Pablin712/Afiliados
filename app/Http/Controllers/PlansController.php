@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Bank;
 use App\Models\Membership;
-use App\Models\MembershipType;
 use App\Models\Payment;
+use App\Models\Program;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,30 +18,54 @@ class PlansController extends Controller
 {
     public function index(): View
     {
-        $userId = Auth::id();
+        $user = Auth::user();
+        $userId = $user?->id;
+        $isAdmin = $user instanceof User && $user->hasRole('admin');
 
         $membership = Membership::query()
             ->with('membershipType')
             ->where('user_id', $userId)
             ->first();
 
-        $pendingPayment = Payment::query()
-            ->where('user_id', $userId)
-            ->where('state', 'pending')
-            ->first();
+        $pendingPayment = null;
 
-        $paidTypes = MembershipType::query()
-            ->where('name', '!=', 'free')
-            ->orderBy('cost')
+        if (! $isAdmin) {
+            $pendingPayment = Payment::query()
+                ->with('program')
+                ->where('user_id', $userId)
+                ->where('state', 'pending')
+                ->first();
+        }
+
+        $programs = Program::query()
+            ->with('membershipType')
+            ->orderBy('first_payment_cost')
+            ->when(! $isAdmin, fn ($query) => $query->where('is_active', true))
             ->get();
 
         $banks = Bank::query()->orderBy('name')->get();
 
-        return view('plans.index', compact('membership', 'pendingPayment', 'paidTypes', 'banks'));
+        // Determine if the user is renewing (has ever had an approved payment)
+        $hasApprovedPayment = false;
+
+        if (! $isAdmin) {
+            $hasApprovedPayment = Payment::query()
+                ->where('user_id', $userId)
+                ->where('state', 'approved')
+                ->exists();
+        }
+
+        return view('plans.index', compact('membership', 'pendingPayment', 'programs', 'banks', 'hasApprovedPayment', 'isAdmin'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+
+        if ($user instanceof User && $user->hasRole('admin')) {
+            return back()->with('error', __('messages.plans.admin_no_payment'));
+        }
+
         $userId = Auth::id();
 
         if (Payment::query()->where('user_id', $userId)->where('state', 'pending')->exists()) {
@@ -48,10 +73,11 @@ class PlansController extends Controller
         }
 
         $validated = $request->validate([
-            'bank_id' => ['required', 'integer', 'exists:banks,id'],
-            'number'  => ['required', 'string', 'max:120'],
-            'amount'  => ['required', 'numeric', 'min:0.01'],
-            'photo'   => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'program_id' => ['required', 'integer', 'exists:programs,id'],
+            'bank_id'    => ['required', 'integer', 'exists:banks,id'],
+            'number'     => ['required', 'string', 'max:120'],
+            'amount'     => ['required', 'numeric', 'min:0.01'],
+            'photo'      => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
 
         DB::transaction(function () use ($validated, $userId): void {
@@ -70,6 +96,7 @@ class PlansController extends Controller
 
             Payment::create([
                 'user_id'        => $userId,
+                'program_id'     => $validated['program_id'],
                 'transaction_id' => $transaction->id,
                 'number'         => $validated['number'],
                 'photo'          => $photoPath,
@@ -81,3 +108,4 @@ class PlansController extends Controller
         return back()->with('status', __('messages.plans.payment_submitted'));
     }
 }
+

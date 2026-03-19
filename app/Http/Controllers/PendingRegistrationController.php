@@ -60,7 +60,7 @@ class PendingRegistrationController extends Controller
         }
 
         DB::transaction(function () use ($payment): void {
-            $payment->load(['user', 'transaction.bank']);
+            $payment->load(['user', 'transaction.bank', 'program.membershipType']);
 
             $transaction = $payment->transaction;
             if ($transaction instanceof Transaction) {
@@ -92,17 +92,24 @@ class PendingRegistrationController extends Controller
             $user->approved_at = now();
             $user->save();
 
-            $customerType = MembershipType::query()
-                ->where('name', 'customer')
-                ->firstOrFail();
+            $membershipType = $payment->program?->membershipType;
+
+            if ($membershipType === null) {
+                // Backward compatibility for pending payments created before program_id existed.
+                $membershipType = MembershipType::query()
+                    ->where('name', 'customer')
+                    ->firstOrFail();
+            }
+
+            $durationMonths = max(1, (int) ($payment->program?->duration_months ?? 2));
 
             Membership::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'membership_type_id' => $customerType->id,
+                    'membership_type_id' => $membershipType->id,
                     'status'             => 'active',
                     'started_at'         => now(),
-                    'expires_at'         => now()->addMonths(2),
+                    'expires_at'         => now()->addMonths($durationMonths),
                     'last_payment_id'    => $payment->id,
                 ]
             );

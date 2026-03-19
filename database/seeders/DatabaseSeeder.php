@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             MembershipTypeSeeder::class,
             AdminUserSeeder::class,
             BankSeeder::class,
+            ProgramSeeder::class,
         ]);
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\MembershipsController;
 use App\Http\Controllers\MembershipTypeController;
 use App\Http\Controllers\PendingRegistrationController;
 use App\Http\Controllers\PlansController;
+use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/plans/payment', [PlansController::class, 'store'])
         ->middleware('verified')
         ->name('plans.payment.store');
+
+    Route::post('/plans/programs', [ProgramController::class, 'store'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('plans.programs.store');
+
+    Route::put('/plans/programs/{program}', [ProgramController::class, 'update'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('plans.programs.update');
 
     Route::get('/actions', [ActionController::class, 'index'])
         ->middleware(['verified', 'permission:view actions'])
