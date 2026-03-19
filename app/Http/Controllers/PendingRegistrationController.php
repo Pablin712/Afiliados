@@ -6,6 +6,7 @@ use App\Models\Membership;
 use App\Models\MembershipType;
 use App\Models\Payment;
 use App\Models\Transaction;
+use App\Services\ProfitDistributionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,10 @@ use Illuminate\View\View;
 
 class PendingRegistrationController extends Controller
 {
+    public function __construct(private readonly ProfitDistributionService $profitDistributionService)
+    {
+    }
+
     public function index(Request $request): View|JsonResponse
     {
         $perPage   = max(5, min(100, (int) $request->integer('per_page', 15)));
@@ -113,6 +118,8 @@ class PendingRegistrationController extends Controller
                     'last_payment_id'    => $payment->id,
                 ]
             );
+
+            $this->profitDistributionService->distributeForApprovedPayment($payment, $membershipType);
         });
 
         return back()->with('status', __('messages.admin.pending_registration_approved'));
