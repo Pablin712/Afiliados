@@ -33,7 +33,7 @@
                     <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-graphite-300">
                         <a href="#inicio" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.home') }}</a>
                         <a href="#programas" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.programs') }}</a>
-                        <a href="#mentores" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.mentors') }}</a>
+                        <a href="#quien-detras" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.about_behind') }}</a>
                         <a href="#testimonios" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.testimonials') }}</a>
                         <a href="#contacto" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.contact') }}</a>
                     </nav>
@@ -91,7 +91,7 @@
                     <nav class="px-4 py-3 space-y-2 text-sm font-medium text-gray-700 dark:text-graphite-200">
                         <a href="#inicio" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.home') }}</a>
                         <a href="#programas" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.programs') }}</a>
-                        <a href="#mentores" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.mentors') }}</a>
+                        <a href="#quien-detras" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.about_behind') }}</a>
                         <a href="#testimonios" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.testimonials') }}</a>
                         <a href="#contacto" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.contact') }}</a>
                     </nav>
@@ -176,13 +176,39 @@
                     </div>
                 </section>
 
-                <section id="mentores" class="mt-10 sm:mt-14 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
-                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
-                        {{ __('messages.welcome.mentors_title') }}
-                    </h2>
-                    <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-graphite-300 max-w-3xl">
-                        {{ __('messages.welcome.mentors_description') }}
-                    </p>
+                <section id="quien-detras" class="mt-10 sm:mt-14 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                        <div class="lg:col-span-2">
+                            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
+                                {{ __('messages.welcome.behind_title') }}
+                            </h2>
+                            <p class="mt-3 text-sm sm:text-base text-gray-600 dark:text-graphite-300 leading-relaxed">
+                                {{ __('messages.welcome.behind_description') }}
+                            </p>
+
+                            <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="rounded-xl border border-gray-200 dark:border-graphite-800 px-4 py-3">
+                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-graphite-400">{{ __('messages.welcome.behind_focus_1_label') }}</p>
+                                    <p class="mt-1 text-sm font-medium text-gray-800 dark:text-graphite-100">{{ __('messages.welcome.behind_focus_1_value') }}</p>
+                                </div>
+                                <div class="rounded-xl border border-gray-200 dark:border-graphite-800 px-4 py-3">
+                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-graphite-400">{{ __('messages.welcome.behind_focus_2_label') }}</p>
+                                    <p class="mt-1 text-sm font-medium text-gray-800 dark:text-graphite-100">{{ __('messages.welcome.behind_focus_2_value') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <aside class="rounded-2xl border border-gray-200 dark:border-graphite-800 bg-gray-50 dark:bg-graphite-800/60 p-5">
+                            <div class="flex items-center gap-3">
+                                <img src="{{ asset('storage/siglas2.png') }}" alt="AET Trader Academy" class="h-12 w-12 rounded-full object-cover">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">AET Trader Academy</p>
+                                    <p class="text-xs text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.behind_badge') }}</p>
+                                </div>
+                            </div>
+                            <p class="mt-4 text-sm text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.behind_quote') }}</p>
+                        </aside>
+                    </div>
                 </section>
 
                 <section id="testimonios" class="mt-10 sm:mt-14">
@@ -236,23 +262,71 @@
                     </div>
                 </section>
 
-                <section id="contacto" class="mt-10 sm:mt-14 mb-6 rounded-2xl border border-brand-200 bg-brand-50 p-6 sm:p-8 dark:border-brand-900 dark:bg-brand-950/30">
-                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
-                        {{ __('messages.welcome.contact_title') }}
-                    </h2>
-                    <p class="mt-2 text-sm sm:text-base text-gray-700 dark:text-graphite-200">
-                        {{ __('messages.welcome.contact_description') }}
-                    </p>
-                    <div class="mt-4">
-                        @auth
-                            <a href="{{ route('plans.index') }}" class="inline-flex items-center px-5 py-3 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
-                                {{ __('messages.nav.plans') }}
+                <section id="contacto" class="mt-10 sm:mt-14 mb-6 rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-emerald-50 p-6 sm:p-8 dark:border-brand-900 dark:from-brand-950/30 dark:via-graphite-900 dark:to-emerald-950/20">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center">
+                        <div>
+                            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
+                                {{ __('messages.welcome.contact_title') }}
+                            </h2>
+                            <p class="mt-2 text-sm sm:text-base text-gray-700 dark:text-graphite-200">
+                                {{ __('messages.welcome.contact_description') }}
+                            </p>
+
+                            <div class="mt-6 space-y-3">
+                                <a href="https://t.me/AETSAS" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-brand-400 hover:bg-brand-50 dark:border-graphite-700 dark:bg-graphite-900 dark:hover:border-brand-700 dark:hover:bg-brand-950/20">
+                                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm4.64 7.06-1.65 7.79c-.12.56-.45.69-.92.43l-2.54-1.87-1.22 1.17c-.13.13-.24.24-.5.24l.18-2.6 4.73-4.27c.21-.18-.04-.29-.32-.11l-5.85 3.68-2.52-.79c-.55-.17-.56-.55.11-.81l9.84-3.79c.46-.17.86.11.66 1.03Z"/></svg>
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">Telegram</p>
+                                        <p class="text-xs text-gray-600 dark:text-graphite-300">@AETSAS</p>
+                                    </div>
+                                </a>
+
+                                <a href="https://www.instagram.com/aet.trader.academy?igsh=cWsxN21qM2o5bmg0&utm_source=qr" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-brand-400 hover:bg-brand-50 dark:border-graphite-700 dark:bg-graphite-900 dark:hover:border-brand-700 dark:hover:bg-brand-950/20">
+                                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm8.5 1.5h-8.5A4.25 4.25 0 0 0 3.5 7.75v8.5a4.25 4.25 0 0 0 4.25 4.25h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5a4.25 4.25 0 0 0-4.25-4.25ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm5.25-.88a1.13 1.13 0 1 1 0 2.26 1.13 1.13 0 0 1 0-2.26Z"/></svg>
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">Instagram</p>
+                                        <p class="text-xs text-gray-600 dark:text-graphite-300">@aet.trader.academy</p>
+                                    </div>
+                                </a>
+
+                                <a href="mailto:Aetsas01@gmail.com" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-brand-400 hover:bg-brand-50 dark:border-graphite-700 dark:bg-graphite-900 dark:hover:border-brand-700 dark:hover:bg-brand-950/20">
+                                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true"><path d="M3 5.75A2.75 2.75 0 0 1 5.75 3h12.5A2.75 2.75 0 0 1 21 5.75v12.5A2.75 2.75 0 0 1 18.25 21H5.75A2.75 2.75 0 0 1 3 18.25V5.75Zm2.1-.89 6.38 5.1a.83.83 0 0 0 1.04 0l6.38-5.1a1.25 1.25 0 0 0-.65-.18H5.75c-.23 0-.45.06-.65.18Zm14.4 2.03-5.96 4.77a2.33 2.33 0 0 1-2.9 0L4.7 6.89v11.36c0 .69.56 1.25 1.25 1.25h12.1c.69 0 1.25-.56 1.25-1.25V6.89Z"/></svg>
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">Correo</p>
+                                        <p class="text-xs text-gray-600 dark:text-graphite-300">Aetsas01@gmail.com</p>
+                                    </div>
+                                </a>
+
+                                <a href="https://wa.me/593978855098" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-brand-400 hover:bg-brand-50 dark:border-graphite-700 dark:bg-graphite-900 dark:hover:border-brand-700 dark:hover:bg-brand-950/20">
+                                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true"><path d="M12.04 2.5c-5.23 0-9.47 4.18-9.47 9.35 0 1.66.44 3.28 1.27 4.7L2.5 21.5l5.08-1.31a9.55 9.55 0 0 0 4.46 1.12h.01c5.23 0 9.47-4.18 9.47-9.35 0-2.49-.99-4.83-2.77-6.59A9.52 9.52 0 0 0 12.04 2.5Zm0 17.2h-.01a7.92 7.92 0 0 1-4.03-1.1l-.29-.17-3.02.78.81-2.93-.19-.3a7.8 7.8 0 0 1-1.23-4.12c0-4.31 3.55-7.82 7.95-7.82 2.12 0 4.11.82 5.61 2.31a7.72 7.72 0 0 1 2.34 5.52c0 4.31-3.56 7.82-7.94 7.82Zm4.35-5.89c-.24-.12-1.4-.69-1.62-.77-.22-.08-.38-.12-.54.12-.16.23-.62.77-.76.92-.14.16-.28.18-.52.06-.24-.12-1-.37-1.9-1.19-.7-.62-1.17-1.39-1.31-1.62-.14-.23-.01-.35.1-.47.1-.1.24-.27.36-.4.12-.14.16-.23.24-.39.08-.16.04-.29-.02-.41-.06-.12-.54-1.29-.74-1.76-.2-.47-.4-.39-.54-.39h-.47c-.16 0-.41.06-.62.29-.22.23-.84.81-.84 1.99s.86 2.3.98 2.46c.12.16 1.68 2.66 4.14 3.63.58.23 1.04.37 1.39.47.58.16 1.1.14 1.52.08.46-.07 1.4-.57 1.6-1.12.2-.55.2-1.02.14-1.12-.06-.1-.22-.16-.46-.27Z"/></svg>
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">WhatsApp</p>
+                                        <p class="text-xs text-gray-600 dark:text-graphite-300">+593 97 885 5098</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm dark:border-graphite-700 dark:bg-graphite-900">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.welcome.contact_qr_title') }}</p>
+                            <p class="mt-1 text-xs text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.contact_qr_description') }}</p>
+
+                            <div class="mt-4 rounded-xl overflow-hidden border border-gray-200 dark:border-graphite-700 bg-gray-50 dark:bg-graphite-800">
+                                <img src="{{ asset('storage/contact/telegram.jpeg') }}" alt="{{ __('messages.welcome.contact_qr_alt') }}" class="w-full h-auto object-contain">
+                            </div>
+
+                            <a href="https://t.me/AETSAS" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center justify-center w-full px-4 py-2 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
+                                {{ __('messages.welcome.contact_qr_button') }}
                             </a>
-                        @else
-                            <a href="{{ route('login') }}" class="inline-flex items-center px-5 py-3 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
-                                {{ __('messages.nav.login') }}
-                            </a>
-                        @endauth
+                        </div>
                     </div>
                 </section>
             </main>
