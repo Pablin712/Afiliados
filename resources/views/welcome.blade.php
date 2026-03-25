@@ -26,8 +26,8 @@
             <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur dark:bg-graphite-900/95 dark:border-graphite-800">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                     <a href="#inicio" class="flex items-center gap-3 shrink-0">
-                        <x-application-logo class="h-10 w-auto" src="{{ asset('storage/siglas2.png') }}" />
-                        <span class="hidden sm:inline text-sm font-semibold text-gray-800 dark:text-graphite-100">AET Trader Academy</span>
+                        <img src="{{ asset('storage/letras_horizontal.jpeg') }}" alt="AET Trader Academy" class="hidden h-10 w-auto rounded-md sm:block">
+                        <img src="{{ asset('storage/letras_cuadrado.jpeg') }}" alt="AET Trader Academy" class="h-10 w-10 rounded-md object-cover sm:hidden">
                     </a>
 
                     <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-graphite-300">
@@ -116,27 +116,42 @@
             </header>
 
             <main id="inicio" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-                <section class="rounded-2xl border border-gray-200 bg-white p-8 sm:p-10 lg:p-14 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
-                    <div class="max-w-3xl">
-                        <p class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold tracking-wide text-brand-700 dark:border-brand-900 dark:bg-brand-950/50 dark:text-brand-300">
-                            {{ __('messages.welcome.section_badge') }}
-                        </p>
+                <section class="rounded-3xl border border-gray-200 bg-white p-8 sm:p-10 lg:p-14 shadow-sm dark:border-graphite-800 dark:bg-graphite-900 overflow-hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_420px] gap-10 items-center">
+                        <div class="max-w-3xl">
+                            <p class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold tracking-wide text-brand-700 dark:border-brand-900 dark:bg-brand-950/50 dark:text-brand-300">
+                                {{ __('messages.welcome.section_badge') }}
+                            </p>
 
-                        <h1 class="mt-5 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-graphite-100">
-                            {{ __('messages.welcome.main_title') }}
-                        </h1>
+                            <h1 class="mt-5 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-graphite-100">
+                                {{ __('messages.welcome.main_title') }}
+                            </h1>
 
-                        <p class="mt-5 text-base sm:text-lg text-gray-600 dark:text-graphite-300 leading-relaxed">
-                            {{ __('messages.welcome.main_description') }}
-                        </p>
+                            <p class="mt-5 text-base sm:text-lg text-gray-600 dark:text-graphite-300 leading-relaxed">
+                                {{ __('messages.welcome.main_description') }}
+                            </p>
 
-                        <div class="mt-8 flex flex-wrap gap-3">
-                            <a href="#programas" class="inline-flex items-center px-5 py-3 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
-                                {{ __('messages.welcome.button_programs') }}
-                            </a>
-                            <a href="#contacto" class="inline-flex items-center px-5 py-3 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
-                                {{ __('messages.welcome.button_advisor') }}
-                            </a>
+                            <div class="mt-8 flex flex-wrap gap-3">
+                                <a href="#programas" class="inline-flex items-center px-5 py-3 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
+                                    {{ __('messages.welcome.button_programs') }}
+                                </a>
+                                <a href="#contacto" class="inline-flex items-center px-5 py-3 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
+                                    {{ __('messages.welcome.button_advisor') }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="relative">
+                            <div class="absolute -top-10 -right-8 h-40 w-40 rounded-full bg-brand-100/80 blur-3xl dark:bg-brand-800/30"></div>
+                            <div class="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-sky-100/80 blur-3xl dark:bg-sky-800/20"></div>
+                            <div class="relative flex flex-col items-center justify-center px-4 py-6 sm:px-6 sm:py-8">
+                                <img src="{{ asset('storage/letras_cuadrado.jpeg') }}" alt="AET Trader Academy logo" class="mx-auto block w-full max-w-[280px] dark:hidden">
+                                <img src="{{ asset('storage/logo.jpg') }}" alt="AET Trader Academy logo dark" class="mx-auto hidden w-full max-w-[280px] dark:block">
+                                <div class="mt-5 text-center max-w-sm">
+                                    <p class="text-sm font-semibold tracking-wide text-gray-900 dark:text-graphite-100">AET Trader Academy</p>
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.hero_logo_caption') }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

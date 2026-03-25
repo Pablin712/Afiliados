@@ -79,6 +79,7 @@ return [
     'welcome.main_description' => 'At AET Trader Academy we guide you step by step to build a solid methodology: technical analysis, trader psychology and disciplined execution. This is the first section of the site; we will be adding more blocks for programs, mentors, testimonials and contact.',
     'welcome.button_programs' => 'View programs',
     'welcome.button_advisor' => 'Talk to an advisor',
+    'welcome.hero_logo_caption' => 'Trading education with a clear, modern identity focused on results.',
     'welcome.programs_title' => 'Featured programs',
     'welcome.programs_description' => 'Discover programs and benefits designed to help you progress through your trading journey with structure.',
     'welcome.program_card_1_title' => 'Training program',
