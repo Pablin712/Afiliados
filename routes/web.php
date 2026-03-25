@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActionController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\FinancialDashboardController;
 use App\Http\Controllers\Admin\ProfitsController;
 use App\Http\Controllers\Admin\UsersTreeController;
@@ -10,6 +11,8 @@ use App\Http\Controllers\PendingRegistrationController;
 use App\Http\Controllers\PlansController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\AffiliateNetworkController;
+use App\Http\Controllers\User\MyProfitsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,9 +30,7 @@ Route::get('/locale/{locale}', function ($locale) {
     return redirect()->back();
 })->name('locale.change');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -39,6 +40,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/plans', [PlansController::class, 'index'])
         ->middleware('verified')
         ->name('plans.index');
+
+    Route::get('/mi-red', [AffiliateNetworkController::class, 'index'])
+        ->middleware('verified')
+        ->name('user.network.index');
+
+    Route::get('/mi-red/{user}/insights', [AffiliateNetworkController::class, 'insights'])
+        ->middleware('verified')
+        ->name('user.network.insights');
+
+    Route::get('/mis-ganancias', [MyProfitsController::class, 'index'])
+        ->middleware('verified')
+        ->name('user.profits.index');
 
     Route::post('/plans/payment', [PlansController::class, 'store'])
         ->middleware('verified')

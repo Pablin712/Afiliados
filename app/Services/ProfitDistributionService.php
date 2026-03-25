@@ -58,6 +58,9 @@ class ProfitDistributionService
                 'user_id' => $sponsor->id,
                 'user_bank_id' => $defaultBank->id,
                 'period_month' => now()->startOfMonth()->toDateString(),
+                'source_payment_id' => $payment->id,
+                'source_user_id' => $buyer->id,
+                'source_level' => $level,
                 'amount' => $amount,
                 'state' => 'pending',
                 'detail' => sprintf(

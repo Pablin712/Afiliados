@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Profit;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -127,6 +128,129 @@ class AffiliateTreeService
         ];
     }
 
+    /**
+     * @return array{nodes: list<array<string, mixed>>, edges: list<array<string, int>>, viewer_id:int, sponsor_id:?int}
+     */
+    public function buildUserScopeGraph(User $viewer, int $maxDepth = 3): array
+    {
+        $viewer->loadMissing(['membership.membershipType', 'sponsor.membership.membershipType']);
+
+        $descendants = collect($this->affiliatesByLevel($viewer, max(1, $maxDepth)))
+            ->flatten(1)
+            ->values();
+
+        $users = collect([$viewer])
+            ->merge($descendants)
+            ->when(
+                $viewer->sponsor && (int) $viewer->sponsor->id !== (int) $viewer->id,
+                fn ($rows) => $rows->prepend($viewer->sponsor)
+            )
+            ->unique('id')
+            ->values();
+
+        $userIds = $users->pluck('id')->all();
+
+        return [
+            'viewer_id' => (int) $viewer->id,
+            'sponsor_id' => $viewer->sponsor && (int) $viewer->sponsor->id !== (int) $viewer->id
+                ? (int) $viewer->sponsor->id
+                : null,
+            'nodes' => $users->map(fn (User $user): array => [
+                'id' => $user->id,
+                'label' => $user->name,
+                'email' => $user->email,
+                'membership' => $user->membership?->membershipType?->name,
+                'commission_balance' => (float) $user->commission_balance,
+                'joined_at' => optional($user->created_at)->toDateTimeString(),
+            ])->all(),
+            'edges' => $users
+                ->filter(fn (User $user): bool => in_array((int) $user->sponsor_id, $userIds, true) && (int) $user->id !== (int) $user->sponsor_id)
+                ->map(fn (User $user): array => [
+                    'from' => (int) $user->sponsor_id,
+                    'to' => (int) $user->id,
+                ])
+                ->values()
+                ->all(),
+        ];
+    }
+
+    public function canAccessInUserScope(User $viewer, User $subject): bool
+    {
+        if ((int) $viewer->id === (int) $subject->id) {
+            return true;
+        }
+
+        if ((int) ($viewer->sponsor_id ?? 0) === (int) $subject->id && (int) $subject->id !== (int) $viewer->id) {
+            return true;
+        }
+
+        return $this->isDescendantOfViewer($viewer, $subject);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function userScopeInsights(User $viewer, User $subject): array
+    {
+        $subject->loadMissing([
+            'membership.membershipType',
+            'payments' => fn ($q) => $q->where('state', 'approved')->latest('reviewed_at'),
+        ]);
+
+        $isSponsor = (int) ($viewer->sponsor_id ?? 0) === (int) $subject->id && (int) $subject->id !== (int) $viewer->id;
+        $isViewer = (int) $viewer->id === (int) $subject->id;
+        $isAffiliate = ! $isSponsor && ! $isViewer;
+
+        $sponsors = $isSponsor
+            ? collect()
+            : collect($this->sponsorsByLevel($subject, (int) config('affiliates.max_sponsor_levels', 3)))
+                ->filter(fn (array $row): bool => $this->canAccessInUserScope($viewer, $row['user']))
+                ->values();
+
+        $affiliates = $isSponsor
+            ? []
+            : collect($this->affiliatesByLevel($subject, 3))->mapWithKeys(function (Collection $rows, int $level) use ($viewer): array {
+                $visibleRows = $rows
+                    ->filter(fn (User $affiliate): bool => $this->isDescendantOfViewer($viewer, $affiliate))
+                    ->values();
+
+                return [
+                    "level_{$level}" => $visibleRows->map(fn (User $affiliate) => [
+                        'id' => $affiliate->id,
+                        'name' => $affiliate->name,
+                        'email' => $affiliate->email,
+                        'sponsor_id' => $affiliate->sponsor_id,
+                    ])->all(),
+                ];
+            })->all();
+
+        return [
+            'scope' => [
+                'relation' => $isSponsor ? 'sponsor' : ($isViewer ? 'self' : 'affiliate'),
+                'viewer_id' => $viewer->id,
+            ],
+            'user' => [
+                'id' => $subject->id,
+                'name' => $subject->name,
+                'email' => $subject->email,
+                'sponsor_id' => $subject->sponsor_id,
+                'commission_balance' => (float) $subject->commission_balance,
+                'joined_at' => optional($subject->created_at)->toDateTimeString(),
+                'membership' => $subject->membership?->membershipType?->name,
+                'last_approved_payment_at' => optional($subject->payments->first()?->reviewed_at)->toDateTimeString(),
+                'pending_profits_total' => (float) Profit::query()->where('user_id', $subject->id)->where('state', 'pending')->sum('amount'),
+                'paid_profits_total' => (float) Profit::query()->where('user_id', $subject->id)->where('state', 'made')->sum('amount'),
+            ],
+            'sponsors' => $sponsors->map(fn (array $row) => [
+                'level' => $row['level'],
+                'id' => $row['user']->id,
+                'name' => $row['user']->name,
+                'email' => $row['user']->email,
+            ])->all(),
+            'affiliates' => $affiliates,
+        ];
+    }
+
     public function resolveRootUser(): User
     {
         $admin = User::query()
@@ -144,6 +268,34 @@ class AffiliateTreeService
     protected function isRootUser(User $user): bool
     {
         return (int) $user->id === (int) $user->sponsor_id;
+    }
+
+    protected function isDescendantOfViewer(User $viewer, User $subject): bool
+    {
+        if ((int) $viewer->id === (int) $subject->id) {
+            return false;
+        }
+
+        $current = $subject;
+
+        for ($guard = 0; $guard < 30; $guard++) {
+            $sponsorId = (int) ($current->sponsor_id ?? 0);
+
+            if ($sponsorId <= 0 || $sponsorId === (int) $current->id) {
+                return false;
+            }
+
+            if ($sponsorId === (int) $viewer->id) {
+                return true;
+            }
+
+            $current = User::query()->select(['id', 'sponsor_id'])->find($sponsorId);
+            if (! $current instanceof User) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     /**

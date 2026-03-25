@@ -17,6 +17,9 @@ class Profit extends Model
         'user_id',
         'user_bank_id',
         'transaction_id',
+        'source_payment_id',
+        'source_user_id',
+        'source_level',
         'period_month',
         'amount',
         'state',
@@ -33,6 +36,7 @@ class Profit extends Model
         return [
             'period_month' => 'date',
             'amount' => 'decimal:2',
+            'source_level' => 'integer',
             'paid_at' => 'datetime',
         ];
     }
@@ -55,5 +59,15 @@ class Profit extends Model
     public function payer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'paid_by');
+    }
+
+    public function sourcePayment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class, 'source_payment_id');
+    }
+
+    public function sourceUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'source_user_id');
     }
 }
