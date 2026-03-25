@@ -42,15 +42,15 @@ Route::middleware('auth')->group(function () {
         ->name('plans.index');
 
     Route::get('/mi-red', [AffiliateNetworkController::class, 'index'])
-        ->middleware('verified')
+        ->middleware(['verified', 'role:user'])
         ->name('user.network.index');
 
     Route::get('/mi-red/{user}/insights', [AffiliateNetworkController::class, 'insights'])
-        ->middleware('verified')
+        ->middleware(['verified', 'role:user'])
         ->name('user.network.insights');
 
     Route::get('/mis-ganancias', [MyProfitsController::class, 'index'])
-        ->middleware('verified')
+        ->middleware(['verified', 'role:user'])
         ->name('user.profits.index');
 
     Route::post('/plans/payment', [PlansController::class, 'store'])

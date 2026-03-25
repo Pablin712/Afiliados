@@ -425,7 +425,9 @@ return [
 
     'user.dashboard.badge' => 'Personal summary',
     'user.dashboard.subtitle' => 'Dashboard tailored for affiliates: network, membership, and profits without exposing admin data.',
+    'user.dashboard.admin_subtitle' => 'Administrator overview. Personal network and profit views apply only to users with role user.',
     'user.dashboard.open_network' => 'Open my network',
+    'user.dashboard.admin_membership' => 'ADMIN',
     'user.dashboard.welcome' => 'Hello, :name',
     'user.dashboard.description' => 'This panel gives you a quick read of your affiliates, your profits, and your current account status. Even if your membership is still free, it helps measure growth and activity.',
     'user.dashboard.kpis.network_affiliates' => 'Network affiliates',
@@ -451,6 +453,8 @@ return [
     'user.dashboard.no_recent_affiliates' => 'You do not have direct affiliates yet.',
     'user.dashboard.view_all' => 'View all',
     'user.dashboard.view_network' => 'View network',
+    'user.dashboard.admin_panel_title' => 'Administrator context',
+    'user.dashboard.admin_panel_description' => 'Your admin account does not use membership or personal profits. Manage finances, global tree, and payouts from the admin menu in your profile.',
 
     'user.network.title' => 'My network',
     'user.network.description' => 'Personal affiliate tree with your direct sponsor and your own descendant branch.',

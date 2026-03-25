@@ -6,6 +6,7 @@ use App\Models\Profit;
 use App\Models\User;
 use App\Models\UserBank;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class UserAffiliateViewsTest extends TestCase
@@ -14,10 +15,13 @@ class UserAffiliateViewsTest extends TestCase
 
     public function test_user_dashboard_and_user_views_are_available(): void
     {
+        $this->ensureUserRole();
+
         $sponsor = User::factory()->create();
         $user = User::factory()->create([
             'sponsor_id' => $sponsor->id,
         ]);
+        $user->assignRole('user');
 
         $response = $this->actingAs($user)->get(route('dashboard'));
 
@@ -29,10 +33,13 @@ class UserAffiliateViewsTest extends TestCase
 
     public function test_user_network_insights_hide_sponsor_affiliates(): void
     {
+        $this->ensureUserRole();
+
         $sponsor = User::factory()->create();
         $user = User::factory()->create([
             'sponsor_id' => $sponsor->id,
         ]);
+        $user->assignRole('user');
         $sponsorAffiliate = User::factory()->create([
             'sponsor_id' => $sponsor->id,
         ]);
@@ -47,10 +54,13 @@ class UserAffiliateViewsTest extends TestCase
 
     public function test_user_only_sees_own_profits(): void
     {
+        $this->ensureUserRole();
+
         $sponsor = User::factory()->create();
         $user = User::factory()->create([
             'sponsor_id' => $sponsor->id,
         ]);
+        $user->assignRole('user');
         $other = User::factory()->create();
 
         $userBank = UserBank::query()->create([
@@ -96,5 +106,13 @@ class UserAffiliateViewsTest extends TestCase
         $response->assertOk();
         $response->assertSee('Own profit');
         $response->assertDontSee('Other profit');
+    }
+
+    protected function ensureUserRole(): void
+    {
+        Role::query()->firstOrCreate([
+            'name' => 'user',
+            'guard_name' => 'web',
+        ]);
     }
 }

@@ -8,6 +8,11 @@ Estas vistas exponen la actividad del afiliado autenticado sin mostrar segmentos
 - `Mi red` (`/mi-red`): arbol visual estilo pizarron con sponsor directo + usuario actual + descendencia propia.
 - `Mis ganancias` (`/mis-ganancias`): listado personal de profits, con estado, origen y pago asociado.
 
+## Roles
+- `Mi red` y `Mis ganancias` son solo para cuentas con rol `user`.
+- El usuario `admin` conserva sus vistas administrativas en el dropdown de perfil.
+- En `Panel`, si entra `admin`, la etiqueta de suscripcion se muestra como `ADMIN` (no `Free`) y no se muestran ganancias personales.
+
 ## Regla de visibilidad
 - El usuario ve:
   - Su sponsor directo.

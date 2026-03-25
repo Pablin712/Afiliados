@@ -425,7 +425,9 @@ return [
 
     'user.dashboard.badge' => 'Resumen personal',
     'user.dashboard.subtitle' => 'Panel pensado para el afiliado: red, membresia y ganancias sin mezclar datos administrativos.',
+    'user.dashboard.admin_subtitle' => 'Vista general del administrador. Las vistas de red y ganancias personales aplican solo para usuarios con rol user.',
     'user.dashboard.open_network' => 'Abrir mi red',
+    'user.dashboard.admin_membership' => 'ADMIN',
     'user.dashboard.welcome' => 'Hola, :name',
     'user.dashboard.description' => 'Aqui tienes una lectura rapida de tus afiliados, tus ganancias y el estado actual de tu cuenta. Si tu membresia todavia es free, este panel sigue sirviendo para medir crecimiento y actividad.',
     'user.dashboard.kpis.network_affiliates' => 'Afiliados en red',
@@ -451,6 +453,8 @@ return [
     'user.dashboard.no_recent_affiliates' => 'Todavia no tienes afiliados directos registrados.',
     'user.dashboard.view_all' => 'Ver todas',
     'user.dashboard.view_network' => 'Ver red',
+    'user.dashboard.admin_panel_title' => 'Contexto de administrador',
+    'user.dashboard.admin_panel_description' => 'Tu cuenta admin no usa membresia ni ganancias personales. Gestiona finanzas, arbol global y pagos desde el menu administrativo en tu perfil.',
 
     'user.network.title' => 'Mi red',
     'user.network.description' => 'Arbol personal de afiliados con sponsor directo y tu rama descendente.',

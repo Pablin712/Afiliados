@@ -15,12 +15,14 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('messages.nav.dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('user.network.index')" :active="request()->routeIs('user.network.*')">
-                        {{ __('messages.nav.my_network') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('user.profits.index')" :active="request()->routeIs('user.profits.*')">
-                        {{ __('messages.nav.my_profits') }}
-                    </x-nav-link>
+                    @role('user')
+                        <x-nav-link :href="route('user.network.index')" :active="request()->routeIs('user.network.*')">
+                            {{ __('messages.nav.my_network') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('user.profits.index')" :active="request()->routeIs('user.profits.*')">
+                            {{ __('messages.nav.my_profits') }}
+                        </x-nav-link>
+                    @endrole
                     <x-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                         {{ __('messages.nav.plans') }}
                     </x-nav-link>
@@ -139,12 +141,14 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('messages.nav.dashboard') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('user.network.index')" :active="request()->routeIs('user.network.*')">
-                {{ __('messages.nav.my_network') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('user.profits.index')" :active="request()->routeIs('user.profits.*')">
-                {{ __('messages.nav.my_profits') }}
-            </x-responsive-nav-link>
+            @role('user')
+                <x-responsive-nav-link :href="route('user.network.index')" :active="request()->routeIs('user.network.*')">
+                    {{ __('messages.nav.my_network') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('user.profits.index')" :active="request()->routeIs('user.profits.*')">
+                    {{ __('messages.nav.my_profits') }}
+                </x-responsive-nav-link>
+            @endrole
             <x-responsive-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                 {{ __('messages.nav.plans') }}
             </x-responsive-nav-link>

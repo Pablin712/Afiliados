@@ -28,8 +28,7 @@
             </div>
 
             <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
-                <form method="GET" action="{{ route('user.profits.index') }}" class="grid gap-2 md:grid-cols-5">
-                    <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="{{ __('messages.table.search_placeholder') }}" class="rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
+                <form method="GET" action="{{ route('user.profits.index') }}" class="grid gap-2 md:grid-cols-4">
                     <select name="state" class="rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
                         <option value="">{{ __('messages.user.profits.all_states') }}</option>
                         <option value="pending" @selected($filters['state'] === 'pending')>{{ __('messages.status.pending') }}</option>
