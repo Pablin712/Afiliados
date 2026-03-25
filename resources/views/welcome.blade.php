@@ -21,7 +21,7 @@
             })();
         </script>
     </head>
-    <body class="font-sans bg-gray-100 text-gray-900 dark:bg-graphite-950 dark:text-graphite-100 antialiased">
+    <body x-data="{ mobileMenuOpen: false }" class="font-sans bg-gray-100 text-gray-900 dark:bg-graphite-950 dark:text-graphite-100 antialiased">
         <div class="min-h-screen">
             <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur dark:bg-graphite-900/95 dark:border-graphite-800">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -56,8 +56,25 @@
                             </svg>
                         </button>
 
+                        <button
+                            type="button"
+                            class="md:hidden inline-flex items-center justify-center p-2 rounded-md border border-gray-300 text-gray-600 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400"
+                            x-on:click="mobileMenuOpen = !mobileMenuOpen"
+                            :aria-expanded="mobileMenuOpen.toString()"
+                            aria-controls="mobile-main-nav"
+                        >
+                            <span class="sr-only">{{ __('messages.nav.toggle_menu') }}</span>
+                            <svg class="h-5 w-5" stroke="currentColor" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                <path :class="{ 'hidden': mobileMenuOpen, 'inline-flex': !mobileMenuOpen }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                <path :class="{ 'hidden': !mobileMenuOpen, 'inline-flex': mobileMenuOpen }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
                         @if (Route::has('login'))
                             @auth
+                                <a href="{{ route('plans.index') }}" class="hidden md:inline-flex items-center px-4 py-2 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
+                                    {{ __('messages.nav.plans') }}
+                                </a>
                                 <a href="{{ url('/dashboard') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
                                     {{ __('messages.nav.dashboard') }}
                                 </a>
@@ -68,6 +85,33 @@
                             @endauth
                         @endif
                     </div>
+                </div>
+
+                <div id="mobile-main-nav" x-cloak x-show="mobileMenuOpen" class="md:hidden border-t border-gray-200 bg-white dark:border-graphite-800 dark:bg-graphite-900">
+                    <nav class="px-4 py-3 space-y-2 text-sm font-medium text-gray-700 dark:text-graphite-200">
+                        <a href="#inicio" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.home') }}</a>
+                        <a href="#programas" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.programs') }}</a>
+                        <a href="#mentores" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.mentors') }}</a>
+                        <a href="#testimonios" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.testimonials') }}</a>
+                        <a href="#contacto" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.contact') }}</a>
+                    </nav>
+
+                    @if (Route::has('login'))
+                        <div class="px-4 pb-4 pt-2 border-t border-gray-200 dark:border-graphite-800 space-y-2">
+                            @auth
+                                <a href="{{ route('plans.index') }}" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
+                                    {{ __('messages.nav.plans') }}
+                                </a>
+                                <a href="{{ route('dashboard') }}" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
+                                    {{ __('messages.nav.dashboard') }}
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
+                                    {{ __('messages.nav.login') }}
+                                </a>
+                            @endauth
+                        </div>
+                    @endif
                 </div>
             </header>
 
@@ -97,10 +141,120 @@
                     </div>
                 </section>
 
-                <div id="programas" class="h-16"></div>
-                <div id="mentores" class="h-16"></div>
-                <div id="testimonios" class="h-16"></div>
-                <div id="contacto" class="h-16"></div>
+                <section id="programas" class="mt-10 sm:mt-14">
+                    <div class="flex items-end justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
+                                {{ __('messages.welcome.programs_title') }}
+                            </h2>
+                            <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-graphite-300">
+                                {{ __('messages.welcome.programs_description') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <article class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
+                            <div class="aspect-[2/3] bg-gray-100 dark:bg-graphite-800">
+                                <img src="{{ asset('storage/programs/program1.jpeg') }}" alt="{{ __('messages.welcome.program_card_1_title') }}" class="h-full w-full object-cover object-center">
+                            </div>
+                            <div class="p-5">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.welcome.program_card_1_title') }}</h3>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.program_card_1_desc') }}</p>
+                            </div>
+                        </article>
+
+                        <article class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
+                            <div class="aspect-[2/3] bg-gray-100 dark:bg-graphite-800">
+                                <img src="{{ asset('storage/programs/beneficios1.jpeg') }}" alt="{{ __('messages.welcome.program_card_2_title') }}" class="h-full w-full object-cover object-center">
+                            </div>
+                            <div class="p-5">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.welcome.program_card_2_title') }}</h3>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.program_card_2_desc') }}</p>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="mentores" class="mt-10 sm:mt-14 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
+                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
+                        {{ __('messages.welcome.mentors_title') }}
+                    </h2>
+                    <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-graphite-300 max-w-3xl">
+                        {{ __('messages.welcome.mentors_description') }}
+                    </p>
+                </section>
+
+                <section id="testimonios" class="mt-10 sm:mt-14">
+                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
+                        {{ __('messages.welcome.testimonials_title') }}
+                    </h2>
+                    <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-graphite-300">
+                        {{ __('messages.welcome.testimonials_description') }}
+                    </p>
+
+                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5">
+                        <article class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
+                            <div class="aspect-[9/16] bg-gray-100 dark:bg-graphite-800">
+                                <img src="{{ asset('storage/testimonios/testimonio1.jpeg') }}" alt="{{ __('messages.welcome.testimonial_1_name') }}" class="h-full w-full object-contain object-center">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.welcome.testimonial_1_name') }}</h3>
+                                <p class="mt-1 text-xs text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.testimonial_1_text') }}</p>
+                            </div>
+                        </article>
+
+                        <article class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
+                            <div class="aspect-[9/16] bg-gray-100 dark:bg-graphite-800">
+                                <img src="{{ asset('storage/testimonios/testimonio2.jpeg') }}" alt="{{ __('messages.welcome.testimonial_2_name') }}" class="h-full w-full object-contain object-center">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.welcome.testimonial_2_name') }}</h3>
+                                <p class="mt-1 text-xs text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.testimonial_2_text') }}</p>
+                            </div>
+                        </article>
+
+                        <article class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
+                            <div class="aspect-[9/16] bg-gray-100 dark:bg-graphite-800">
+                                <img src="{{ asset('storage/testimonios/testimonio3.jpeg') }}" alt="{{ __('messages.welcome.testimonial_3_name') }}" class="h-full w-full object-contain object-center">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.welcome.testimonial_3_name') }}</h3>
+                                <p class="mt-1 text-xs text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.testimonial_3_text') }}</p>
+                            </div>
+                        </article>
+
+                        <article class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
+                            <div class="aspect-[9/16] bg-gray-100 dark:bg-graphite-800">
+                                <img src="{{ asset('storage/testimonios/testimonio4.jpeg') }}" alt="{{ __('messages.welcome.testimonial_4_name') }}" class="h-full w-full object-contain object-center">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.welcome.testimonial_4_name') }}</h3>
+                                <p class="mt-1 text-xs text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.testimonial_4_text') }}</p>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="contacto" class="mt-10 sm:mt-14 mb-6 rounded-2xl border border-brand-200 bg-brand-50 p-6 sm:p-8 dark:border-brand-900 dark:bg-brand-950/30">
+                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
+                        {{ __('messages.welcome.contact_title') }}
+                    </h2>
+                    <p class="mt-2 text-sm sm:text-base text-gray-700 dark:text-graphite-200">
+                        {{ __('messages.welcome.contact_description') }}
+                    </p>
+                    <div class="mt-4">
+                        @auth
+                            <a href="{{ route('plans.index') }}" class="inline-flex items-center px-5 py-3 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
+                                {{ __('messages.nav.plans') }}
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="inline-flex items-center px-5 py-3 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
+                                {{ __('messages.nav.login') }}
+                            </a>
+                        @endauth
+                    </div>
+                </section>
             </main>
         </div>
     </body>

@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                         {{ __('messages.nav.plans') }}
                     </x-nav-link>
+                    <x-nav-link :href="url('/')" :active="request()->is('/')">
+                        {{ __('messages.nav.main_site') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -132,6 +135,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                 {{ __('messages.nav.plans') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="url('/')" :active="request()->is('/')">
+                {{ __('messages.nav.main_site') }}
             </x-responsive-nav-link>
         </div>
 
