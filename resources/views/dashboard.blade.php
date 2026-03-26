@@ -37,26 +37,47 @@
                         </div>
 
                         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                            <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
-                                <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.network_affiliates') }}</p>
-                                <p class="mt-2 text-3xl font-semibold text-gray-900 dark:text-graphite-100">{{ $networkAffiliatesCount }}</p>
-                                <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.direct_affiliates', ['count' => $directAffiliatesCount]) }}</p>
-                            </div>
-                            <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
-                                <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.monthly_profits') }}</p>
-                                <p class="mt-2 text-3xl font-semibold text-emerald-600">${{ number_format($monthlyProfitsAmount, 2) }}</p>
-                                <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.monthly_payments', ['count' => $monthlyApprovedPaymentsCount]) }}</p>
-                            </div>
-                            <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
-                                <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.pending_profits') }}</p>
-                                <p class="mt-2 text-3xl font-semibold text-amber-600">${{ number_format($pendingProfitsAmount, 2) }}</p>
-                                <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.paid_profits', ['amount' => number_format($paidProfitsAmount, 2)]) }}</p>
-                            </div>
-                            <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
-                                <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.current_membership') }}</p>
-                                <p class="mt-2 text-3xl font-semibold text-gray-900 dark:text-graphite-100">{{ $currentMembership }}</p>
-                                <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.levels', ['level2' => $levelTwoAffiliatesCount, 'level3' => $levelThreeAffiliatesCount]) }}</p>
-                            </div>
+                            @if ($isAdmin)
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.admin_kpis.users_total') }}</p>
+                                    <p class="mt-2 text-3xl font-semibold text-gray-900 dark:text-graphite-100">{{ $adminKpis['users_total'] ?? 0 }}</p>
+                                </div>
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.admin_kpis.customers_total') }}</p>
+                                    <p class="mt-2 text-3xl font-semibold text-sky-600">{{ $adminKpis['customers_total'] ?? 0 }}</p>
+                                </div>
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.admin_kpis.approved_payments_month') }}</p>
+                                    <p class="mt-2 text-3xl font-semibold text-emerald-600">{{ $adminKpis['approved_payments_month'] ?? 0 }}</p>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.admin_kpis.net_month', ['amount' => number_format((float) ($adminKpis['net_month'] ?? 0), 2)]) }}</p>
+                                </div>
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.admin_kpis.pending_profits_total') }}</p>
+                                    <p class="mt-2 text-3xl font-semibold text-amber-600">${{ number_format((float) ($adminKpis['pending_profits_total'] ?? 0), 2) }}</p>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.current_membership') }}: {{ $currentMembership }}</p>
+                                </div>
+                            @else
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.network_affiliates') }}</p>
+                                    <p class="mt-2 text-3xl font-semibold text-gray-900 dark:text-graphite-100">{{ $networkAffiliatesCount }}</p>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.direct_affiliates', ['count' => $directAffiliatesCount]) }}</p>
+                                </div>
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.monthly_profits') }}</p>
+                                    <p class="mt-2 text-3xl font-semibold text-emerald-600">${{ number_format($monthlyProfitsAmount, 2) }}</p>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.monthly_payments', ['count' => $monthlyApprovedPaymentsCount]) }}</p>
+                                </div>
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.pending_profits') }}</p>
+                                    <p class="mt-2 text-3xl font-semibold text-amber-600">${{ number_format($pendingProfitsAmount, 2) }}</p>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.paid_profits', ['amount' => number_format($paidProfitsAmount, 2)]) }}</p>
+                                </div>
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/70">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.current_membership') }}</p>
+                                    <p class="mt-2 text-3xl font-semibold text-gray-900 dark:text-graphite-100">{{ $currentMembership }}</p>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.kpis.levels', ['level2' => $levelTwoAffiliatesCount, 'level3' => $levelThreeAffiliatesCount]) }}</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
 

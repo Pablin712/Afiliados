@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Profit;
+use App\Models\Payment;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Services\AffiliateTreeService;
 use Illuminate\Support\Collection;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
@@ -47,6 +50,28 @@ class DashboardController extends Controller
 
         $hasSourcePaymentColumn = Schema::hasColumn('profits', 'source_payment_id');
 
+        $adminKpis = $isAdmin ? [
+            'users_total' => (int) User::query()
+                ->whereColumn('id', '!=', 'sponsor_id')
+                ->count(),
+            'customers_total' => (int) DB::table('memberships')
+                ->join('membership_types', 'membership_types.id', '=', 'memberships.membership_type_id')
+                ->whereRaw('LOWER(membership_types.name) = ?', ['customer'])
+                ->count(),
+            'approved_payments_month' => (int) Payment::query()
+                ->where('state', 'approved')
+                ->whereBetween('reviewed_at', [now()->startOfMonth(), now()->endOfMonth()])
+                ->count(),
+            'pending_profits_total' => (float) Profit::query()
+                ->where('state', 'pending')
+                ->sum('amount'),
+            'net_month' => (float) Transaction::query()
+                ->where('is_annulled', false)
+                ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+                ->selectRaw("COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END), 0) as net")
+                ->value('net'),
+        ] : null;
+
         return view('dashboard', [
             'user' => $user,
             'isAdmin' => $isAdmin,
@@ -79,6 +104,7 @@ class DashboardController extends Controller
                 ->latest('created_at')
                 ->limit(6)
                 ->get(),
+            'adminKpis' => $adminKpis,
         ]);
     }
 }

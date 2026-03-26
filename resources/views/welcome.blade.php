@@ -26,8 +26,8 @@
             <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur dark:bg-graphite-900/95 dark:border-graphite-800">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                     <a href="#inicio" class="flex items-center gap-3 shrink-0">
-                        <img src="{{ asset('storage/letras_horizontal.jpeg') }}" alt="AET Trader Academy" class="hidden h-10 w-auto rounded-md sm:block">
-                        <img src="{{ asset('storage/letras_cuadrado.jpeg') }}" alt="AET Trader Academy" class="h-10 w-10 rounded-md object-cover sm:hidden">
+                        <x-application-logo class="h-10 w-auto" src="{{ asset('storage/siglas2.png') }}" />
+                        <span class="hidden sm:inline text-sm font-semibold text-gray-800 dark:text-graphite-100">AET Trader Academy</span>
                     </a>
 
                     <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-graphite-300">

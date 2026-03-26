@@ -100,31 +100,17 @@ class DailyFinancialStatsService
         $toDay = Carbon::parse($to)->endOfDay();
 
         if (! $this->hasStatsTable()) {
-            return [
-                'range' => [
-                    'from' => $fromDay->toDateString(),
-                    'to' => $toDay->toDateString(),
-                ],
-                'totals' => [
-                    'incomes_total' => 0.0,
-                    'expenses_total' => 0.0,
-                    'net_profit_total' => 0.0,
-                    'new_users_count' => 0,
-                    'new_customers_count' => 0,
-                    'approved_payments_count' => 0,
-                    'pending_profits_total_now' => (float) Profit::query()->where('state', 'pending')->sum('amount'),
-                ],
-                'line_series' => [],
-                'candles' => [],
-                'membership_totals' => $this->membershipTotals(),
-                'stats_table_missing' => true,
-            ];
+            return $this->liveSummary($fromDay, $toDay, true);
         }
 
         $rows = DailyFinancialStat::query()
             ->whereBetween('stat_date', [$fromDay->toDateString(), $toDay->toDateString()])
             ->orderBy('stat_date')
             ->get();
+
+        if ($rows->isEmpty()) {
+            return $this->liveSummary($fromDay, $toDay, false);
+        }
 
         $pendingToPayNow = (float) Profit::query()
             ->where('state', 'pending')
@@ -153,7 +139,129 @@ class DailyFinancialStatsService
             'candles' => $this->buildProfitCandles($rows),
             'membership_totals' => $this->membershipTotals(),
             'stats_table_missing' => false,
+            'is_live_fallback' => false,
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function liveSummary(CarbonInterface $fromDay, CarbonInterface $toDay, bool $statsTableMissing): array
+    {
+        $dateCursor = Carbon::parse($fromDay)->startOfDay();
+        $dateEnd = Carbon::parse($toDay)->startOfDay();
+
+        /** @var array<string, array{date:string,incomes:float,expenses:float,net_profit:float}> $seriesByDate */
+        $seriesByDate = [];
+
+        while ($dateCursor->lte($dateEnd)) {
+            $dateKey = $dateCursor->toDateString();
+            $seriesByDate[$dateKey] = [
+                'date' => $dateKey,
+                'incomes' => 0.0,
+                'expenses' => 0.0,
+                'net_profit' => 0.0,
+            ];
+            $dateCursor->addDay();
+        }
+
+        $incomeRows = Transaction::query()
+            ->selectRaw('DATE(created_at) as stat_date, SUM(amount) as total')
+            ->where('type', 'income')
+            ->where('is_annulled', false)
+            ->whereBetween('created_at', [$fromDay, $toDay])
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->pluck('total', 'stat_date');
+
+        $expenseRows = Transaction::query()
+            ->selectRaw('DATE(created_at) as stat_date, SUM(amount) as total')
+            ->where('type', 'expense')
+            ->where('is_annulled', false)
+            ->whereBetween('created_at', [$fromDay, $toDay])
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->pluck('total', 'stat_date');
+
+        foreach ($incomeRows as $date => $total) {
+            $key = (string) $date;
+            if (isset($seriesByDate[$key])) {
+                $seriesByDate[$key]['incomes'] = (float) $total;
+            }
+        }
+
+        foreach ($expenseRows as $date => $total) {
+            $key = (string) $date;
+            if (isset($seriesByDate[$key])) {
+                $seriesByDate[$key]['expenses'] = (float) $total;
+            }
+        }
+
+        foreach ($seriesByDate as $date => $row) {
+            $seriesByDate[$date]['net_profit'] = $row['incomes'] - $row['expenses'];
+        }
+
+        $lineSeries = array_values($seriesByDate);
+
+        $newUsersCount = (int) User::query()
+            ->whereBetween('created_at', [$fromDay, $toDay])
+            ->whereColumn('id', '!=', 'sponsor_id')
+            ->count();
+
+        $newCustomersCount = (int) DB::table('memberships')
+            ->join('membership_types', 'membership_types.id', '=', 'memberships.membership_type_id')
+            ->whereRaw('LOWER(membership_types.name) = ?', ['customer'])
+            ->whereBetween('memberships.started_at', [$fromDay, $toDay])
+            ->count();
+
+        $approvedPaymentsCount = (int) Payment::query()
+            ->where('state', 'approved')
+            ->whereBetween('reviewed_at', [$fromDay, $toDay])
+            ->count();
+
+        return [
+            'range' => [
+                'from' => Carbon::parse($fromDay)->toDateString(),
+                'to' => Carbon::parse($toDay)->toDateString(),
+            ],
+            'totals' => [
+                'incomes_total' => (float) collect($lineSeries)->sum('incomes'),
+                'expenses_total' => (float) collect($lineSeries)->sum('expenses'),
+                'net_profit_total' => (float) collect($lineSeries)->sum('net_profit'),
+                'new_users_count' => $newUsersCount,
+                'new_customers_count' => $newCustomersCount,
+                'approved_payments_count' => $approvedPaymentsCount,
+                'pending_profits_total_now' => (float) Profit::query()->where('state', 'pending')->sum('amount'),
+            ],
+            'line_series' => $lineSeries,
+            'candles' => $this->buildCandlesFromLineSeries($lineSeries),
+            'membership_totals' => $this->membershipTotals(),
+            'stats_table_missing' => $statsTableMissing,
+            'is_live_fallback' => true,
+        ];
+    }
+
+    /**
+     * @param list<array{date:string,incomes:float,expenses:float,net_profit:float}> $lineSeries
+     * @return list<array<string, float|string>>
+     */
+    protected function buildCandlesFromLineSeries(array $lineSeries): array
+    {
+        $previousClose = 0.0;
+
+        return collect($lineSeries)->map(function (array $row) use (&$previousClose): array {
+            $open = $previousClose;
+            $close = (float) $row['net_profit'];
+            $high = max($open, $close);
+            $low = min($open, $close);
+            $previousClose = $close;
+
+            return [
+                'date' => (string) $row['date'],
+                'open' => $open,
+                'high' => $high,
+                'low' => $low,
+                'close' => $close,
+            ];
+        })->values()->all();
     }
 
     /**

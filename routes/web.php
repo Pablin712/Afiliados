@@ -57,6 +57,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('verified')
         ->name('plans.payment.store');
 
+    Route::post('/plans/renew-free', [PlansController::class, 'renewForFree'])
+        ->middleware('verified')
+        ->name('plans.renew-free');
+
     Route::post('/plans/programs', [ProgramController::class, 'store'])
         ->middleware(['verified', 'role:admin'])
         ->name('plans.programs.store');

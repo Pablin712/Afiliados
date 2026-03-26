@@ -133,8 +133,8 @@
             @else
             {{-- Current membership status --}}
             @php
-                $membershipTypeName = $membership?->membershipType?->name ?? 'free';
-                $membershipStatus   = $membership?->status ?? 'free';
+                $membershipTypeName = strtolower((string) ($membershipTypeName ?? $membership?->membershipType?->name ?? 'free'));
+                $membershipStatus   = (string) ($membershipStatus ?? $membership?->status ?? 'free');
             @endphp
             <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/40">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-400">
@@ -146,7 +146,7 @@
                         @elseif($membershipStatus === 'expired') bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300
                         @else bg-gray-100 text-gray-700 dark:bg-graphite-800 dark:text-graphite-300
                         @endif">
-                        {{ ucfirst($membershipTypeName) }}
+                        {{ ucfirst((string) $membershipTypeName) }}
                     </span>
                     <span class="text-sm text-gray-600 dark:text-graphite-400">
                         @if($membershipStatus === 'active' && $membership?->expires_at)
@@ -161,7 +161,29 @@
             </div>
 
             {{-- Programs list --}}
-            @if ($programs->isEmpty())
+            @if (! $canSubmitPaidRenewal)
+                <div class="rounded-3xl border border-indigo-200 bg-indigo-50/70 p-6 shadow-sm dark:border-indigo-800/50 dark:bg-indigo-900/15">
+                    <h4 class="text-base font-semibold text-indigo-900 dark:text-indigo-200">
+                        {{ __('messages.plans.tier_benefit_title') }}
+                    </h4>
+                    <p class="mt-1 text-sm text-indigo-800 dark:text-indigo-300">
+                        {{ __('messages.plans.tier_benefit_description', ['count' => (int) ($activeDirectAffiliates ?? 0)]) }}
+                    </p>
+
+                    @if ($canFreeRenewToday)
+                        <form method="POST" action="{{ route('plans.renew-free') }}" class="mt-4">
+                            @csrf
+                            <x-primary-button type="submit">
+                                {{ __('messages.plans.renew_free_button') }}
+                            </x-primary-button>
+                        </form>
+                    @else
+                        <p class="mt-3 text-sm text-indigo-800 dark:text-indigo-300">
+                            {{ __('messages.plans.renew_free_waiting') }}
+                        </p>
+                    @endif
+                </div>
+            @elseif ($programs->isEmpty())
                 <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/40">
                     <p class="text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.plans.no_programs') }}</p>
                 </div>
@@ -173,6 +195,9 @@
                         <div class="p-6 border-b border-gray-100 dark:border-graphite-800">
                             <div class="flex flex-wrap items-start justify-between gap-4">
                                 <div>
+                                    @php($programContextDescription = $hasApprovedPayment
+                                        ? __('messages.plans.program_context_customer_renewal')
+                                        : __('messages.plans.program_context_first_payment'))
                                     <p class="text-xs font-semibold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-400">
                                         {{ __('messages.plans.program_badge') }}
                                     </p>
@@ -184,8 +209,12 @@
                                             {{ $program->description }}
                                         </p>
                                     @endif
+                                    <p class="mt-2 text-sm font-medium text-brand-700 dark:text-brand-300 max-w-xl">
+                                        {{ $programContextDescription }}
+                                    </p>
                                 </div>
                                 <div class="text-right shrink-0">
+                                    @php($displayDurationMonths = $hasApprovedPayment ? 1 : (int) $program->duration_months)
                                     <p class="text-xs text-gray-500 dark:text-graphite-400">
                                         {{ $hasApprovedPayment ? __('messages.plans.price_renewal') : __('messages.plans.price_first') }}
                                     </p>
@@ -193,7 +222,7 @@
                                         ${{ $hasApprovedPayment ? number_format((float) $program->renewal_cost, 2) : number_format((float) $program->first_payment_cost, 2) }}
                                     </p>
                                     <p class="text-xs text-gray-500 dark:text-graphite-400">
-                                        {{ __('messages.plans.duration_months', ['count' => $program->duration_months]) }}
+                                        {{ __('messages.plans.duration_months', ['count' => $displayDurationMonths]) }}
                                     </p>
                                     @if (!$hasApprovedPayment)
                                         <p class="mt-1 text-xs text-gray-400 dark:text-graphite-500">

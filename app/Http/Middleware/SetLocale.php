@@ -30,8 +30,8 @@ class SetLocale
         if ($request->has('locale')) {
             $locale = $request->get('locale');
         }
-        // Check session
-        elseif ($request->session()->has('locale')) {
+        // Check session when available (web requests)
+        elseif ($request->hasSession() && $request->session()->has('locale')) {
             $locale = $request->session()->get('locale');
         }
         // Check cookie
@@ -43,7 +43,10 @@ class SetLocale
         $availableLocales = ['en', 'es'];
         if ($locale && in_array($locale, $availableLocales)) {
             App::setLocale($locale);
-            $request->session()->put('locale', $locale);
+
+            if ($request->hasSession()) {
+                $request->session()->put('locale', $locale);
+            }
         } else {
             $locale = config('app.locale', 'en');
             App::setLocale($locale);

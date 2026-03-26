@@ -39,6 +39,10 @@ class ProfitDistributionService
             /** @var User $sponsor */
             $sponsor = $row['user'];
 
+            if (! $this->canReceiveCommissions($sponsor)) {
+                continue;
+            }
+
             $percent = (float) ($distribution[$level] ?? 0);
             if ($percent <= 0) {
                 continue;
@@ -50,13 +54,10 @@ class ProfitDistributionService
             }
 
             $defaultBank = $sponsor->defaultUserBank()->first();
-            if ($defaultBank === null) {
-                continue;
-            }
 
             Profit::query()->create([
                 'user_id' => $sponsor->id,
-                'user_bank_id' => $defaultBank->id,
+                'user_bank_id' => $defaultBank?->id,
                 'period_month' => now()->startOfMonth()->toDateString(),
                 'source_payment_id' => $payment->id,
                 'source_user_id' => $buyer->id,
@@ -74,5 +75,19 @@ class ProfitDistributionService
 
             $sponsor->increment('commission_balance', $amount);
         }
+    }
+
+    private function canReceiveCommissions(User $sponsor): bool
+    {
+        $sponsor->loadMissing('membership.membershipType');
+
+        $membership = $sponsor->membership;
+        if ($membership === null || (string) $membership->status !== 'active') {
+            return false;
+        }
+
+        $typeName = strtolower((string) ($membership->membershipType?->name ?? ''));
+
+        return $typeName !== '' && $typeName !== 'free';
     }
 }

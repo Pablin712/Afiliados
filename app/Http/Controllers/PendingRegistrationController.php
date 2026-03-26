@@ -106,7 +106,15 @@ class PendingRegistrationController extends Controller
                     ->firstOrFail();
             }
 
-            $durationMonths = max(1, (int) ($payment->program?->duration_months ?? 2));
+            $currentMembership = Membership::query()
+                ->with('membershipType')
+                ->where('user_id', $user->id)
+                ->first();
+
+            $isFreeMembership = (string) ($currentMembership?->status ?? 'free') === 'free'
+                || strtolower((string) ($currentMembership?->membershipType?->name ?? 'free')) === 'free';
+
+            $durationMonths = $isFreeMembership ? 2 : 1;
 
             Membership::updateOrCreate(
                 ['user_id' => $user->id],

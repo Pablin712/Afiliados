@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Program;
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,9 +25,21 @@ class PlansController extends Controller
         $isAdmin = $user instanceof User && $user->hasRole('admin');
 
         $membership = Membership::query()
-            ->with('membershipType')
+            ->with(['membershipType', 'lastPayment.program'])
             ->where('user_id', $userId)
             ->first();
+
+        $membershipTypeName = strtolower((string) ($membership?->membershipType?->name ?? 'free'));
+        $membershipStatus = (string) ($membership?->status ?? 'free');
+        $canSubmitPaidRenewal = ! $isAdmin && $this->canSubmitPaidRenewal($membershipTypeName, $membershipStatus);
+
+        $activeDirectAffiliates = 0;
+        $canFreeRenewToday = false;
+
+        if (! $isAdmin && $membership instanceof Membership) {
+            $activeDirectAffiliates = $this->countActiveDirectAffiliates((int) $membership->user_id);
+            $canFreeRenewToday = $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus, $activeDirectAffiliates);
+        }
 
         $pendingPayment = null;
 
@@ -46,17 +59,22 @@ class PlansController extends Controller
 
         $banks = Bank::query()->orderBy('name')->get();
 
-        // Determine if the user is renewing (has ever had an approved payment)
-        $hasApprovedPayment = false;
+        // Customer renewals/reactivations are monthly.
+        $hasApprovedPayment = ! $isAdmin && $membershipTypeName === 'customer' && in_array($membershipStatus, ['active', 'expired'], true);
 
-        if (! $isAdmin) {
-            $hasApprovedPayment = Payment::query()
-                ->where('user_id', $userId)
-                ->where('state', 'approved')
-                ->exists();
-        }
-
-        return view('plans.index', compact('membership', 'pendingPayment', 'programs', 'banks', 'hasApprovedPayment', 'isAdmin'));
+        return view('plans.index', compact(
+            'membership',
+            'pendingPayment',
+            'programs',
+            'banks',
+            'hasApprovedPayment',
+            'isAdmin',
+            'membershipTypeName',
+            'membershipStatus',
+            'canSubmitPaidRenewal',
+            'canFreeRenewToday',
+            'activeDirectAffiliates'
+        ));
     }
 
     public function store(Request $request): RedirectResponse
@@ -68,6 +86,18 @@ class PlansController extends Controller
         }
 
         $userId = Auth::id();
+
+        $membership = Membership::query()
+            ->with('membershipType')
+            ->where('user_id', $userId)
+            ->first();
+
+        $membershipTypeName = strtolower((string) ($membership?->membershipType?->name ?? 'free'));
+        $membershipStatus = (string) ($membership?->status ?? 'free');
+
+        if (! $this->canSubmitPaidRenewal($membershipTypeName, $membershipStatus)) {
+            return back()->with('error', __('messages.plans.only_customer_or_free_can_pay'));
+        }
 
         if (Payment::query()->where('user_id', $userId)->where('state', 'pending')->exists()) {
             return back()->with('error', __('messages.plans.already_pending'));
@@ -82,12 +112,9 @@ class PlansController extends Controller
 
         $program = Program::query()->findOrFail($validated['program_id']);
 
-        $hasApprovedPayment = Payment::query()
-            ->where('user_id', $userId)
-            ->where('state', 'approved')
-            ->exists();
+        $isCustomerRenewal = $membershipTypeName === 'customer' && in_array($membershipStatus, ['active', 'expired'], true);
 
-        $calculatedAmount = $hasApprovedPayment
+        $calculatedAmount = $isCustomerRenewal
             ? (float) $program->renewal_cost
             : (float) $program->first_payment_cost;
 
@@ -117,6 +144,88 @@ class PlansController extends Controller
         });
 
         return back()->with('status', __('messages.plans.payment_submitted'));
+    }
+
+    public function renewForFree(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user instanceof User && $user->hasRole('admin')) {
+            return back()->with('error', __('messages.plans.admin_no_payment'));
+        }
+
+        $membership = Membership::query()
+            ->with('membershipType')
+            ->where('user_id', (int) $user?->id)
+            ->first();
+
+        if (! $membership instanceof Membership) {
+            return back()->with('error', __('messages.plans.free_renew_not_eligible'));
+        }
+
+        $membershipTypeName = strtolower((string) ($membership->membershipType?->name ?? ''));
+        $membershipStatus = (string) $membership->status;
+
+        if (Payment::query()->where('user_id', (int) $membership->user_id)->where('state', 'pending')->exists()) {
+            return back()->with('error', __('messages.plans.already_pending'));
+        }
+
+        $activeDirectAffiliates = $this->countActiveDirectAffiliates((int) $membership->user_id);
+
+        if (! $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus, $activeDirectAffiliates)) {
+            return back()->with('error', __('messages.plans.free_renew_not_eligible'));
+        }
+
+        $baseDate = $membership->expires_at instanceof Carbon
+            ? $membership->expires_at->copy()
+            : now();
+
+        $membership->expires_at = $baseDate->addMonth();
+        $membership->status = 'active';
+        $membership->save();
+
+        return back()->with('status', __('messages.plans.free_renew_success', [
+            'date' => $membership->expires_at?->format('d/m/Y'),
+        ]));
+    }
+
+    private function canSubmitPaidRenewal(string $membershipTypeName, string $membershipStatus): bool
+    {
+        if ($membershipTypeName === 'customer') {
+            return in_array($membershipStatus, ['active', 'expired'], true);
+        }
+
+        return $membershipTypeName === 'free' || $membershipStatus === 'free';
+    }
+
+    private function canFreeRenewToday(Membership $membership, string $membershipTypeName, string $membershipStatus, int $activeDirectAffiliates): bool
+    {
+        if (in_array($membershipTypeName, ['free', 'customer', ''], true)) {
+            return false;
+        }
+
+        if ($membershipStatus !== 'active') {
+            return false;
+        }
+
+        if (! $membership->expires_at instanceof Carbon || ! $membership->expires_at->isSameDay(now())) {
+            return false;
+        }
+
+        $required = (int) ($membership->membershipType?->affiliates_required ?? 0);
+
+        return $activeDirectAffiliates >= $required;
+    }
+
+    private function countActiveDirectAffiliates(int $sponsorId): int
+    {
+        return (int) DB::table('users as child')
+            ->join('memberships as m', 'm.user_id', '=', 'child.id')
+            ->join('membership_types as mt', 'mt.id', '=', 'm.membership_type_id')
+            ->where('child.sponsor_id', $sponsorId)
+            ->where('m.status', 'active')
+            ->whereRaw('LOWER(mt.name) <> ?', ['free'])
+            ->count();
     }
 }
 

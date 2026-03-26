@@ -32,6 +32,12 @@
                 </div>
             @endif
 
+            @if (($summary['is_live_fallback'] ?? false) && ! $statsTableMissing)
+                <div class="rounded-md border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800 dark:border-sky-700 dark:bg-sky-900/20 dark:text-sky-300">
+                    {{ __('messages.admin.financial_dashboard.live_fallback_notice') }}
+                </div>
+            @endif
+
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
                     <p class="text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.financial_dashboard.cards.incomes') }}</p>
