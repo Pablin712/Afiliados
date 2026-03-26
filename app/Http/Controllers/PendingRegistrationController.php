@@ -6,6 +6,7 @@ use App\Models\Membership;
 use App\Models\MembershipType;
 use App\Models\Payment;
 use App\Models\Transaction;
+use App\Services\MembershipTierService;
 use App\Services\ProfitDistributionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -17,7 +18,10 @@ use Illuminate\View\View;
 
 class PendingRegistrationController extends Controller
 {
-    public function __construct(private readonly ProfitDistributionService $profitDistributionService)
+    public function __construct(
+        private readonly ProfitDistributionService $profitDistributionService,
+        private readonly MembershipTierService $membershipTierService,
+    )
     {
     }
 
@@ -128,6 +132,10 @@ class PendingRegistrationController extends Controller
             );
 
             $this->profitDistributionService->distributeForApprovedPayment($payment, $membershipType);
+
+            if ((int) ($user->sponsor_id ?? 0) > 0) {
+                $this->membershipTierService->recalculate((int) $user->sponsor_id);
+            }
         });
 
         return back()->with('status', __('messages.admin.pending_registration_approved'));
