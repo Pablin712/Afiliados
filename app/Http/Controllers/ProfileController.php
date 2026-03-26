@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserBank;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class ProfileController extends Controller
     {
         return view('profile.edit', [
             'user' => $request->user(),
+            'userBank' => $request->user()->userBanks()->first(),
         ]);
     }
 
@@ -26,13 +28,44 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validated();
+
+        $request->user()->fill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
 
         $request->user()->save();
+
+        $binanceAccountId = trim((string) ($validated['binance_account_id'] ?? ''));
+        $binanceUsername = trim((string) ($validated['binance_username'] ?? ''));
+
+        if ($binanceAccountId !== '' && $binanceUsername !== '') {
+            $userBank = $request->user()->userBanks()->first();
+
+            $bankPayload = [
+                'bank_name' => 'Binance',
+                'owner' => $binanceUsername,
+                'identification' => $binanceAccountId,
+                'number' => $binanceAccountId,
+                'type' => 'binance',
+                'is_default' => true,
+                'detail' => __('messages.profile.binance_detail_value', [
+                    'account' => $binanceAccountId,
+                    'username' => $binanceUsername,
+                ]),
+            ];
+
+            if ($userBank instanceof UserBank) {
+                $userBank->update($bankPayload);
+            } else {
+                $request->user()->userBanks()->create($bankPayload);
+            }
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

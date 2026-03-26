@@ -171,6 +171,13 @@ return [
     'profile.referral_copy' => 'Copy link',
     'profile.referral_copied' => 'Copied',
     'profile.referral_copied_help' => 'Link copied to clipboard.',
+    'profile.binance_title' => 'Binance Account',
+    'profile.binance_description' => 'Add or edit your Binance payout details.',
+    'profile.binance_account_id_label' => 'Your Binance account (Account ID)',
+    'profile.binance_username_label' => 'Your Binance username',
+    'profile.binance_hint' => 'For now, you can only keep one bank account linked to your profile.',
+    'profile.binance_save_button' => 'Save Binance account',
+    'profile.binance_detail_value' => 'Your Binance account: :account, your Binance username: :username',
 
     // Common
 

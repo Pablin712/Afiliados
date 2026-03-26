@@ -171,6 +171,13 @@ return [
     'profile.referral_copy' => 'Copiar enlace',
     'profile.referral_copied' => 'Copiado',
     'profile.referral_copied_help' => 'Enlace copiado al portapapeles.',
+    'profile.binance_title' => 'Cuenta Binance',
+    'profile.binance_description' => 'Agrega o edita tus datos de Binance para recibir pagos.',
+    'profile.binance_account_id_label' => 'Tu cuenta de Binance (ID de cuenta)',
+    'profile.binance_username_label' => 'Tu usuario de Binance',
+    'profile.binance_hint' => 'Por ahora solo puedes tener una cuenta bancaria asociada a tu perfil.',
+    'profile.binance_save_button' => 'Guardar cuenta Binance',
+    'profile.binance_detail_value' => 'Tu cuenta de Binance: :account, tu usuario de Binance: :username',
 
     // Common
 
