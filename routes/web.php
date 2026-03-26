@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActionController;
+use App\Http\Controllers\Admin\BanksController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\FinancialDashboardController;
 use App\Http\Controllers\Admin\ProfitsController;
@@ -104,6 +105,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/financial-dashboard', [FinancialDashboardController::class, 'index'])
         ->middleware(['verified', 'permission:report profits'])
         ->name('admin.financial-dashboard.index');
+
+    Route::get('/admin/banks', [BanksController::class, 'index'])
+        ->middleware(['verified', 'permission:view banks'])
+        ->name('admin.banks.index');
+
+    Route::post('/admin/banks', [BanksController::class, 'store'])
+        ->middleware(['verified', 'permission:create banks'])
+        ->name('admin.banks.store');
+
+    Route::put('/admin/banks/{bank}', [BanksController::class, 'update'])
+        ->middleware(['verified', 'permission:edit banks'])
+        ->name('admin.banks.update');
+
+    Route::delete('/admin/banks/{bank}', [BanksController::class, 'destroy'])
+        ->middleware(['verified', 'permission:delete banks'])
+        ->name('admin.banks.destroy');
 
     Route::post('/admin/financial-dashboard/register-today', [FinancialDashboardController::class, 'registerToday'])
         ->middleware(['verified', 'permission:manage profits'])

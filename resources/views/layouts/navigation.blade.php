@@ -103,6 +103,12 @@
                             </x-dropdown-link>
                         @endcan
 
+                        @can('view banks')
+                            <x-dropdown-link :href="route('admin.banks.index')">
+                                {{ __('messages.admin.banks.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         @can('report profits')
                             <x-dropdown-link :href="route('admin.financial-dashboard.index')">
                                 {{ __('messages.admin.financial_dashboard.title') }}
@@ -213,6 +219,12 @@
                 @can('view profits')
                     <x-responsive-nav-link :href="route('admin.profits.index')">
                         {{ __('messages.admin.profits.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view banks')
+                    <x-responsive-nav-link :href="route('admin.banks.index')">
+                        {{ __('messages.admin.banks.title') }}
                     </x-responsive-nav-link>
                 @endcan
 
