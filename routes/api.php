@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\AffiliateTreeController;
 use App\Http\Controllers\Api\Admin\FinancialStatsController;
 use App\Http\Controllers\Api\Admin\MembershipTierController;
+use App\Http\Controllers\Api\Admin\PaymentVerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')
@@ -21,4 +22,15 @@ Route::prefix('admin')
 
         Route::post('/memberships/recalculate-tiers', [MembershipTierController::class, 'recalculate']);
         Route::get('/memberships/recalculate-tiers/{user}', [MembershipTierController::class, 'show']);
+
+        Route::get('/payments/pending', [PaymentVerificationController::class, 'pending'])
+            ->name('api.admin.payments.pending.list');
+        Route::get('/payments/pending/{payment}', [PaymentVerificationController::class, 'show'])
+            ->name('api.admin.payments.pending.show');
+        Route::get('/payments/pending/{payment}/receipt', [PaymentVerificationController::class, 'receipt'])
+            ->name('api.admin.payments.pending.receipt');
+        Route::post('/payments/pending/{payment}/approve', [PaymentVerificationController::class, 'approve'])
+            ->name('api.admin.payments.pending.approve');
+        Route::post('/payments/pending/{payment}/reject', [PaymentVerificationController::class, 'reject'])
+            ->name('api.admin.payments.pending.reject');
     });

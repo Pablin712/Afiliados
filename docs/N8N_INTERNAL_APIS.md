@@ -100,6 +100,65 @@ Notas:
 - URL: `/admin/memberships/recalculate-tiers/3`
 - Devuelve: tipo/status actual, cantidad de afiliados directos activos y tipo/status objetivo.
 
+## Endpoints de verificacion de pagos (admin)
+Prefijo: `/admin`
+
+### 9) Listar pagos pendientes para verificador
+- Método: `GET`
+- URL: `/admin/payments/pending?limit=50`
+- Meta:
+  - `count`
+  - `limit`
+- Data por item incluye:
+  - `payment_id`
+  - `payment_number`
+  - `amount`
+  - `bank` (name/owner/identification/number/detail)
+  - `receipt_url`
+  - `approve_url`
+  - `reject_url`
+
+### 10) Consultar un pago pendiente
+- Método: `GET`
+- URL: `/admin/payments/pending/{payment}`
+- Respuesta `422` si el pago ya no está pendiente.
+
+### 11) Obtener imagen de comprobante
+- Método: `GET`
+- URL: `/admin/payments/pending/{payment}/receipt`
+- Respuesta:
+  - Binario de imagen si existe
+  - `404` si no hay archivo
+
+### 12) Aprobar pago pendiente por automatización
+- Método: `POST`
+- URL: `/admin/payments/pending/{payment}/approve`
+- Body JSON opcional:
+```json
+{
+  "reviewed_by": 1,
+  "trace_id": "n8n-trace-001",
+  "ai_score": 95,
+  "ai_errors": "",
+  "gateway_reference": "GW-ABC-001"
+}
+```
+- Notas:
+  - Reusa la misma lógica de aprobación manual del admin.
+  - Si el pago ya fue procesado, responde `422`.
+
+### 13) Rechazar pago pendiente por automatización
+- Método: `POST`
+- URL: `/admin/payments/pending/{payment}/reject`
+- Body JSON opcional:
+```json
+{
+  "reviewed_by": 1,
+  "reason": "amount_mismatch,owner_mismatch"
+}
+```
+- Si el pago ya fue procesado, responde `422`.
+
 ## Mapeo contable aplicado
 - Todo pago aprobado de usuarios: ingreso del admin.
 - Todo profit pagado a usuarios: egreso del admin.
@@ -126,6 +185,15 @@ Notas:
 1. Cron semanal (ejemplo: lunes 01:00)
 2. HTTP Request `POST /admin/memberships/recalculate-tiers`
 3. Guardar `meta.processed` y `meta.changed` para auditoria
+
+### Flujo E (verificador automatico de pagos pendientes)
+1. Cron cada 5 minutos (o Webhook push desde tu app)
+2. HTTP Request `GET /admin/payments/pending`
+3. Por cada item:
+  - Analizar `receipt_url` con IA
+  - Si pasa reglas: `POST /admin/payments/pending/{id}/approve`
+  - Si falla reglas: `POST /admin/payments/pending/{id}/reject`
+4. Guardar `trace_id`, score y errores para auditoría
 
 ## Plantilla de nodo HTTP (n8n)
 - Method: `POST`

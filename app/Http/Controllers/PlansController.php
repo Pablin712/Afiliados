@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Program;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\PaymentPendingWebhookService;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,10 @@ use Illuminate\View\View;
 
 class PlansController extends Controller
 {
+    public function __construct(private readonly PaymentPendingWebhookService $paymentPendingWebhookService)
+    {
+    }
+
     public function index(): View
     {
         $user = Auth::user();
@@ -118,7 +123,7 @@ class PlansController extends Controller
             ? (float) $program->renewal_cost
             : (float) $program->first_payment_cost;
 
-        DB::transaction(function () use ($validated, $userId, $calculatedAmount): void {
+        $payment = DB::transaction(function () use ($validated, $userId, $calculatedAmount): Payment {
             $photoPath = $validated['photo']->store('payment-receipts', 'public');
 
             $transaction = Transaction::create([
@@ -132,7 +137,7 @@ class PlansController extends Controller
                 'created_at'      => now(),
             ]);
 
-            Payment::create([
+            return Payment::create([
                 'user_id'        => $userId,
                 'program_id'     => $validated['program_id'],
                 'transaction_id' => $transaction->id,
@@ -142,6 +147,8 @@ class PlansController extends Controller
                 'state'          => 'pending',
             ]);
         });
+
+        $this->paymentPendingWebhookService->send($payment);
 
         return back()->with('status', __('messages.plans.payment_submitted'));
     }

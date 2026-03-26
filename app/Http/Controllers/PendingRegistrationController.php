@@ -2,25 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Membership;
-use App\Models\MembershipType;
 use App\Models\Payment;
-use App\Models\Transaction;
-use App\Services\MembershipTierService;
-use App\Services\ProfitDistributionService;
+use App\Services\PendingPaymentReviewService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use RuntimeException;
 
 class PendingRegistrationController extends Controller
 {
     public function __construct(
-        private readonly ProfitDistributionService $profitDistributionService,
-        private readonly MembershipTierService $membershipTierService,
+        private readonly PendingPaymentReviewService $pendingPaymentReviewService,
     )
     {
     }
@@ -68,75 +63,11 @@ class PendingRegistrationController extends Controller
             return back()->with('status', __('messages.admin.pending_registration_already_processed'));
         }
 
-        DB::transaction(function () use ($payment): void {
-            $payment->load(['user', 'transaction.bank', 'program.membershipType']);
-
-            $transaction = $payment->transaction;
-            if ($transaction instanceof Transaction) {
-                $bank = $transaction->bank()->lockForUpdate()->firstOrFail();
-
-                $amountPrevious = (float) $bank->amount;
-                $amount         = (float) $payment->amount;
-                $amountNow      = $amountPrevious + $amount;
-
-                $transaction->amount_previous = $amountPrevious;
-                $transaction->amount          = $amount;
-                $transaction->amount_now      = $amountNow;
-                $transaction->is_annulled     = false;
-                $transaction->detail          = __('messages.admin.approved_registration_transaction_detail', [
-                    'user' => $payment->user->name,
-                ]);
-                $transaction->save();
-
-                $bank->amount = $amountNow;
-                $bank->save();
-            }
-
-            $payment->state       = 'approved';
-            $payment->reviewed_by = Auth::id();
-            $payment->reviewed_at = now();
-            $payment->save();
-
-            $user             = $payment->user;
-            $user->approved_at = now();
-            $user->save();
-
-            $membershipType = $payment->program?->membershipType;
-
-            if ($membershipType === null) {
-                // Backward compatibility for pending payments created before program_id existed.
-                $membershipType = MembershipType::query()
-                    ->where('name', 'customer')
-                    ->firstOrFail();
-            }
-
-            $currentMembership = Membership::query()
-                ->with('membershipType')
-                ->where('user_id', $user->id)
-                ->first();
-
-            $isFreeMembership = (string) ($currentMembership?->status ?? 'free') === 'free'
-                || strtolower((string) ($currentMembership?->membershipType?->name ?? 'free')) === 'free';
-
-            $durationMonths = $isFreeMembership ? 2 : 1;
-
-            Membership::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'membership_type_id' => $membershipType->id,
-                    'status'             => 'active',
-                    'started_at'         => now(),
-                    'expires_at'         => now()->addMonths($durationMonths),
-                    'last_payment_id'    => $payment->id,
-                ]
-            );
-
-            $this->profitDistributionService->distributeForApprovedPayment($payment, $membershipType);
-
-            if ((int) ($user->sponsor_id ?? 0) > 0) {
-                $this->membershipTierService->recalculate((int) $user->sponsor_id);
-            }
-        });
+        try {
+            $this->pendingPaymentReviewService->approve($payment, Auth::id());
+        } catch (RuntimeException) {
+            return back()->with('status', __('messages.admin.pending_registration_already_processed'));
+        }
 
         return back()->with('status', __('messages.admin.pending_registration_approved'));
     }
@@ -147,10 +78,11 @@ class PendingRegistrationController extends Controller
             return back()->with('status', __('messages.admin.pending_registration_already_processed'));
         }
 
-        $payment->state       = 'rejected';
-        $payment->reviewed_by = Auth::id();
-        $payment->reviewed_at = now();
-        $payment->save();
+        try {
+            $this->pendingPaymentReviewService->reject($payment, Auth::id());
+        } catch (RuntimeException) {
+            return back()->with('status', __('messages.admin.pending_registration_already_processed'));
+        }
 
         return back()->with('status', __('messages.admin.pending_registration_rejected'));
     }
