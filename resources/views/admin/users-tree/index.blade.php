@@ -154,7 +154,7 @@
                             color: '#1f2937',
                             strokeWidth: 0,
                             strokeColor: '#fffdf8',
-                            vadjust: 48,
+                            vadjust: 0,
                             background: 'rgba(255,253,248,0.88)',
                         },
                         shadow: {
