@@ -24,6 +24,8 @@ class DashboardController extends Controller
         /** @var User $user */
         $user = $request->user();
         $isAdmin = $user->hasRole('admin');
+        $membershipTypeName = strtolower((string) ($user->membership?->membershipType?->name ?? 'free'));
+        $canDownloadScanners = ! $isAdmin && $membershipTypeName !== 'free';
 
         $user->loadMissing([
             'membership.membershipType',
@@ -75,6 +77,7 @@ class DashboardController extends Controller
         return view('dashboard', [
             'user' => $user,
             'isAdmin' => $isAdmin,
+            'canDownloadScanners' => $canDownloadScanners,
             'currentMembership' => $isAdmin
                 ? __('messages.user.dashboard.admin_membership')
                 : ($user->membership?->membershipType?->name ?? 'Free'),

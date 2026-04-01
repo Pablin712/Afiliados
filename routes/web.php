@@ -12,6 +12,7 @@ use App\Http\Controllers\PendingRegistrationController;
 use App\Http\Controllers\PlansController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\ScannerDownloadController;
 use App\Http\Controllers\User\AffiliateNetworkController;
 use App\Http\Controllers\User\MyProfitsController;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +54,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/mis-ganancias', [MyProfitsController::class, 'index'])
         ->middleware(['verified', 'role:user'])
         ->name('user.profits.index');
+
+    Route::prefix('/scanners')
+        ->middleware(['verified', 'role:user'])
+        ->name('scanners.')
+        ->group(function (): void {
+            Route::post('/prepare', [ScannerDownloadController::class, 'prepare'])
+                ->name('prepare');
+
+            Route::get('/download/{broker}/{pattern}', [ScannerDownloadController::class, 'download'])
+                ->middleware('signed')
+                ->name('download');
+        });
 
     Route::post('/plans/payment', [PlansController::class, 'store'])
         ->middleware('verified')

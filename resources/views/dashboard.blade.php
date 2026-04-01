@@ -11,9 +11,33 @@
             </div>
 
             @unless($isAdmin)
-                <a href="{{ route('user.network.index') }}" class="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:border-amber-400 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
-                    {{ __('messages.user.dashboard.open_network') }}
-                </a>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('user.network.index') }}" class="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:border-amber-400 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
+                        {{ __('messages.user.dashboard.open_network') }}
+                    </a>
+
+                    @if($canDownloadScanners)
+                        <x-dropdown align="right" width="48">
+                            <x-slot name="trigger">
+                                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:border-sky-400 hover:bg-sky-100 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-300">
+                                    {{ __('messages.user.dashboard.scanner.button') }}
+                                </button>
+                            </x-slot>
+
+                            <x-slot name="content">
+                                <button type="button" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-graphite-200 dark:hover:bg-graphite-800" onclick="openScannerDownloadModal('deriv')">
+                                    {{ __('messages.user.dashboard.scanner.broker_deriv') }}
+                                </button>
+                                <button type="button" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-graphite-200 dark:hover:bg-graphite-800" onclick="openScannerDownloadModal('weltrade')">
+                                    {{ __('messages.user.dashboard.scanner.broker_weltrade') }}
+                                </button>
+                                <button type="button" class="block w-full cursor-not-allowed px-4 py-2 text-left text-sm text-gray-400 dark:text-graphite-500" disabled>
+                                    {{ __('messages.user.dashboard.scanner.broker_vantage') }}
+                                </button>
+                            </x-slot>
+                        </x-dropdown>
+                    @endif
+                </div>
             @endunless
         </div>
     </x-slot>
@@ -168,13 +192,15 @@
                 @endunless
 
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
-                    <div class="flex items-center justify-between gap-3">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.user.dashboard.recent_affiliates_title') }}</h3>
-                            <p class="text-sm text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.recent_affiliates_description') }}</p>
+                    @unless($isAdmin)
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.user.dashboard.recent_affiliates_title') }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.recent_affiliates_description') }}</p>
+                            </div>
+                            <a href="{{ route('user.network.index') }}" class="text-sm font-semibold text-amber-600 hover:text-amber-500 dark:text-amber-400">{{ __('messages.user.dashboard.view_network') }}</a>
                         </div>
-                        <a href="{{ route('user.network.index') }}" class="text-sm font-semibold text-amber-600 hover:text-amber-500 dark:text-amber-400">{{ __('messages.user.dashboard.view_network') }}</a>
-                    </div>
+                    @endunless
 
                     <div class="mt-4 space-y-3">
                         @forelse ($recentAffiliates as $affiliate)
@@ -200,4 +226,171 @@
             </div>
         </div>
     </div>
+
+    @if(! $isAdmin && $canDownloadScanners)
+        <x-modal name="scanner-download-modal" focusable maxWidth="md">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">
+                    {{ __('messages.user.dashboard.scanner.modal_title') }}
+                </h3>
+                <p class="mt-2 text-sm text-gray-600 dark:text-graphite-300">
+                    {{ __('messages.user.dashboard.scanner.modal_description') }}
+                    <span id="scanner-selected-broker" class="font-semibold"></span>
+                </p>
+
+                <form id="scanner-download-form" class="mt-5 space-y-4">
+                    <input type="hidden" id="scanner-broker" name="broker" value="">
+
+                    <div>
+                        <x-input-label for="scanner-account-id" :value="__('messages.user.dashboard.scanner.account_id_label')" />
+                        <x-text-input
+                            id="scanner-account-id"
+                            name="account_id"
+                            type="text"
+                            class="mt-1 block w-full"
+                            maxlength="8"
+                            inputmode="numeric"
+                            pattern="[0-9]{8}"
+                            required
+                        />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.scanner.account_id_hint') }}</p>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <x-secondary-button type="button" onclick="window.dispatchEvent(new CustomEvent('close-modal', { detail: 'scanner-download-modal' }))">
+                            {{ __('messages.cancel') }}
+                        </x-secondary-button>
+                        <x-primary-button id="scanner-download-submit" type="submit">
+                            {{ __('messages.user.dashboard.scanner.download_now') }}
+                        </x-primary-button>
+                    </div>
+                </form>
+            </div>
+        </x-modal>
+
+        @once
+            @push('scripts')
+                <script>
+                    (function () {
+                        const brokerLabels = {
+                            deriv: @json(__('messages.user.dashboard.scanner.broker_deriv')),
+                            weltrade: @json(__('messages.user.dashboard.scanner.broker_weltrade')),
+                        };
+
+                        const prepareUrl = @json(route('scanners.prepare'));
+                        const form = document.getElementById('scanner-download-form');
+                        const brokerInput = document.getElementById('scanner-broker');
+                        const accountInput = document.getElementById('scanner-account-id');
+                        const selectedBrokerLabel = document.getElementById('scanner-selected-broker');
+                        const submitButton = document.getElementById('scanner-download-submit');
+
+                        if (!form || !brokerInput || !accountInput || !selectedBrokerLabel || !submitButton) {
+                            return;
+                        }
+
+                        window.openScannerDownloadModal = function (broker) {
+                            brokerInput.value = broker;
+                            accountInput.value = '';
+                            selectedBrokerLabel.textContent = brokerLabels[broker] ?? broker;
+                            window.dispatchEvent(new CustomEvent('open-modal', { detail: 'scanner-download-modal' }));
+                            setTimeout(() => accountInput.focus(), 120);
+                        };
+
+                        form.addEventListener('submit', async function (event) {
+                            event.preventDefault();
+
+                            const broker = brokerInput.value;
+                            const accountId = accountInput.value.trim();
+
+                            if (!/^\d{8}$/.test(accountId)) {
+                                window.alert(@json(__('messages.user.dashboard.scanner.account_id_invalid')));
+                                return;
+                            }
+
+                            submitButton.setAttribute('disabled', 'disabled');
+
+                            try {
+                                const response = await fetch(prepareUrl, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': @json(csrf_token()),
+                                    },
+                                    body: JSON.stringify({
+                                        broker: broker,
+                                        account_id: accountId,
+                                    }),
+                                });
+
+                                const payload = await response.json();
+
+                                if (!response.ok) {
+                                    const message = payload?.message
+                                        ?? payload?.errors?.scanner?.[0]
+                                        ?? payload?.errors?.account_id?.[0]
+                                        ?? @json(__('messages.error'));
+                                    throw new Error(message);
+                                }
+
+                                for (const download of (payload.downloads ?? [])) {
+                                    const fileResponse = await fetch(download.url, {
+                                        method: 'GET',
+                                        redirect: 'follow',
+                                        headers: {
+                                            'Accept': 'application/octet-stream,application/json',
+                                        },
+                                    });
+
+                                    const contentType = (fileResponse.headers.get('Content-Type') ?? '').toLowerCase();
+
+                                    if (fileResponse.redirected || contentType.includes('text/html')) {
+                                        throw new Error(@json(__('messages.user.dashboard.scanner.unexpected_html_response')));
+                                    }
+
+                                    if (!fileResponse.ok) {
+                                        let detail = @json(__('messages.error'));
+                                        try {
+                                            const errorPayload = await fileResponse.json();
+                                            detail = errorPayload?.message
+                                                ?? errorPayload?.errors?.scanner?.[0]
+                                                ?? detail;
+                                        } catch (e) {
+                                            // Ignore parse errors and use generic message.
+                                        }
+                                        throw new Error(detail);
+                                    }
+
+                                    if (contentType.includes('application/json')) {
+                                        const errorPayload = await fileResponse.json();
+                                        throw new Error(errorPayload?.message ?? @json(__('messages.error')));
+                                    }
+
+                                    const blob = await fileResponse.blob();
+                                    const disposition = fileResponse.headers.get('Content-Disposition') ?? '';
+                                    const match = disposition.match(/filename="?([^";]+)"?/i);
+                                    const fileName = match?.[1] ?? 'scanner.ex5';
+
+                                    const objectUrl = URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = objectUrl;
+                                    link.download = fileName;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.remove();
+                                    URL.revokeObjectURL(objectUrl);
+                                }
+
+                                window.dispatchEvent(new CustomEvent('close-modal', { detail: 'scanner-download-modal' }));
+                            } catch (error) {
+                                window.alert(error.message || @json(__('messages.error')));
+                            } finally {
+                                submitButton.removeAttribute('disabled');
+                            }
+                        });
+                    })();
+                </script>
+            @endpush
+        @endonce
+    @endif
 </x-app-layout>
