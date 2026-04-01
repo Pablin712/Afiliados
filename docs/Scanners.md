@@ -5,6 +5,7 @@ Haré un apartado en el dashboard (panel del usuario) el cual será un botón de
 1. deriv
 2. weltrade
 3. vantage
+
 Al dar clic en una de estas opciones abre un modal el cual le preguntará por input cual es su id de deriv, el cual es un número de 8 dígitos, de ahí el usuario le da a descargar, y empieza la lógica de descarga:
 ![alt text](image-1.png)
 
