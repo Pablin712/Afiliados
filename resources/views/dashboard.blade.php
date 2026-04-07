@@ -16,6 +16,14 @@
                         {{ __('messages.user.dashboard.open_network') }}
                     </a>
 
+                    <a href="https://deriv.com/signup?sidc=7044F2C1-1A0C-496A-986E-570DCAD80FF8&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU17859" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-brand-500 dark:hover:bg-brand-400">
+                        {{ __('messages.user.dashboard.create_deriv_account') }}
+                    </a>
+
+                    <a href="https://es.gowt.net/ib61404" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-xl border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:border-sky-400 hover:bg-sky-100 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-300 dark:hover:border-sky-400 dark:hover:bg-sky-500/20">
+                        {{ __('messages.user.dashboard.create_weltrade_account') }}
+                    </a>
+
                     @if($canDownloadScanners)
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
@@ -121,6 +129,14 @@
                             <p class="text-xs uppercase tracking-[0.18em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.quick_actions') }}</p>
                             <div class="mt-3 grid gap-2">
                                 @unless($isAdmin)
+                                    <a href="https://deriv.com/signup?sidc=7044F2C1-1A0C-496A-986E-570DCAD80FF8&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU17859" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-brand-400 hover:text-brand-700 dark:border-graphite-800 dark:text-graphite-200 dark:hover:border-brand-500 dark:hover:text-brand-300">
+                                        <span>{{ __('messages.user.dashboard.create_deriv_account') }}</span>
+                                        <span>{{ __('messages.user.dashboard.external_link_badge') }}</span>
+                                    </a>
+                                    <a href="https://es.gowt.net/ib61404" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-sky-400 hover:text-sky-700 dark:border-graphite-800 dark:text-graphite-200 dark:hover:border-sky-500 dark:hover:text-sky-300">
+                                        <span>{{ __('messages.user.dashboard.create_weltrade_account') }}</span>
+                                        <span>{{ __('messages.user.dashboard.external_link_badge') }}</span>
+                                    </a>
                                     <a href="{{ route('user.network.index') }}" class="inline-flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-amber-400 hover:text-amber-700 dark:border-graphite-800 dark:text-graphite-200 dark:hover:border-amber-500 dark:hover:text-amber-300">
                                         <span>{{ __('messages.nav.my_network') }}</span>
                                         <span>{{ $networkAffiliatesCount }}</span>
