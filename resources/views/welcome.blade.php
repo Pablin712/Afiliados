@@ -157,37 +157,130 @@
                 </section>
 
                 <section id="programas" class="mt-10 sm:mt-14">
-                    <div class="flex items-end justify-between gap-4">
-                        <div>
-                            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
-                                {{ __('messages.welcome.programs_title') }}
-                            </h2>
-                            <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-graphite-300">
-                                {{ __('messages.welcome.programs_description') }}
-                            </p>
+                    <div class="programs-showcase relative overflow-hidden rounded-[2rem] border border-slate-200/70 p-6 sm:p-8 lg:p-10 shadow-[0_28px_70px_-34px_rgba(15,23,42,0.75)] dark:border-brand-900/40">
+                        <div class="absolute inset-0 opacity-70">
+                            <div class="programs-orb program-float absolute -left-16 top-10 h-36 w-36 rounded-full bg-brand-500/20 blur-3xl"></div>
+                            <div class="programs-orb program-float-delayed absolute right-0 top-0 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl"></div>
+                            <div class="programs-orb program-pulse-soft absolute bottom-0 left-1/3 h-44 w-44 rounded-full bg-emerald-400/10 blur-3xl"></div>
                         </div>
-                    </div>
 
-                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <article class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
-                            <div class="aspect-[2/3] bg-gray-100 dark:bg-graphite-800">
-                                <img src="{{ asset('storage/programs/program1.jpeg') }}" alt="{{ __('messages.welcome.program_card_1_title') }}" class="h-full w-full object-cover object-center">
-                            </div>
-                            <div class="p-5">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.welcome.program_card_1_title') }}</h3>
-                                <p class="mt-2 text-sm text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.program_card_1_desc') }}</p>
-                            </div>
-                        </article>
+                        <div class="relative grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] xl:gap-10">
+                            <div>
+                                <span class="program-fade-up inline-flex items-center rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-brand-100 backdrop-blur" style="animation-delay: 80ms;">
+                                    {{ __('messages.welcome.programs_badge') }}
+                                </span>
 
-                        <article class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
-                            <div class="aspect-[2/3] bg-gray-100 dark:bg-graphite-800">
-                                <img src="{{ asset('storage/programs/beneficios1.jpeg') }}" alt="{{ __('messages.welcome.program_card_2_title') }}" class="h-full w-full object-cover object-center">
+                                <h2 class="program-fade-up mt-5 max-w-3xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl" style="animation-delay: 160ms;">
+                                    {{ __('messages.welcome.programs_title') }}
+                                </h2>
+
+                                <p class="program-fade-up mt-4 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base" style="animation-delay: 240ms;">
+                                    {{ __('messages.welcome.programs_description') }}
+                                </p>
+
+                                <div class="program-fade-up mt-6 flex flex-wrap gap-3" style="animation-delay: 320ms;">
+                                    <span class="inline-flex items-center rounded-full border border-white/12 bg-white/8 px-3 py-1 text-xs font-medium text-slate-100">{{ __('messages.welcome.programs_pill_1') }}</span>
+                                    <span class="inline-flex items-center rounded-full border border-white/12 bg-white/8 px-3 py-1 text-xs font-medium text-slate-100">{{ __('messages.welcome.programs_pill_2') }}</span>
+                                    <span class="inline-flex items-center rounded-full border border-white/12 bg-white/8 px-3 py-1 text-xs font-medium text-slate-100">{{ __('messages.welcome.programs_pill_3') }}</span>
+                                    <span class="inline-flex items-center rounded-full border border-white/12 bg-white/8 px-3 py-1 text-xs font-medium text-slate-100">{{ __('messages.welcome.programs_pill_4') }}</span>
+                                </div>
+
+                                <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+                                    <article class="program-fade-up rounded-[1.6rem] border border-white/12 bg-white/8 p-5 shadow-[0_20px_50px_-34px_rgba(15,23,42,0.95)] backdrop-blur-md" style="animation-delay: 400ms;">
+                                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-brand-200">{{ __('messages.welcome.program_card_1_eyebrow') }}</p>
+                                        <h3 class="mt-3 text-xl font-semibold text-white">{{ __('messages.welcome.program_card_1_title') }}</h3>
+                                        <p class="mt-3 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_1_desc') }}</p>
+
+                                        <ol class="mt-6 space-y-4">
+                                            <li class="flex gap-3">
+                                                <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-brand-500/20 text-sm font-semibold text-brand-100">01</span>
+                                                <div>
+                                                    <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_1_item_1_title') }}</p>
+                                                    <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_1_item_1_desc') }}</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex gap-3">
+                                                <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-brand-500/20 text-sm font-semibold text-brand-100">02</span>
+                                                <div>
+                                                    <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_1_item_2_title') }}</p>
+                                                    <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_1_item_2_desc') }}</p>
+                                                </div>
+                                            </li>
+                                            <li class="flex gap-3">
+                                                <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-brand-500/20 text-sm font-semibold text-brand-100">03</span>
+                                                <div>
+                                                    <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_1_item_3_title') }}</p>
+                                                    <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_1_item_3_desc') }}</p>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </article>
+
+                                    <article class="program-fade-up rounded-[1.6rem] border border-white/12 bg-slate-950/40 p-5 shadow-[0_20px_50px_-34px_rgba(15,23,42,0.95)] backdrop-blur-md" style="animation-delay: 480ms;">
+                                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">{{ __('messages.welcome.program_card_2_eyebrow') }}</p>
+                                        <h3 class="mt-3 text-xl font-semibold text-white">{{ __('messages.welcome.program_card_2_title') }}</h3>
+                                        <p class="mt-3 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_2_desc') }}</p>
+
+                                        <div class="mt-6 space-y-3">
+                                            <div class="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
+                                                <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_2_item_1_title') }}</p>
+                                                <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_2_item_1_desc') }}</p>
+                                            </div>
+                                            <div class="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
+                                                <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_2_item_2_title') }}</p>
+                                                <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_2_item_2_desc') }}</p>
+                                            </div>
+                                            <div class="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
+                                                <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_2_item_3_title') }}</p>
+                                                <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_2_item_3_desc') }}</p>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </div>
                             </div>
-                            <div class="p-5">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.welcome.program_card_2_title') }}</h3>
-                                <p class="mt-2 text-sm text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.program_card_2_desc') }}</p>
-                            </div>
-                        </article>
+
+                            <aside class="program-fade-up relative rounded-[1.8rem] border border-white/12 bg-white/8 p-6 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.95)] backdrop-blur-md" style="animation-delay: 560ms;">
+                                <div class="absolute -right-10 top-8 h-24 w-24 rounded-full border border-white/10"></div>
+                                <div class="absolute -right-6 top-12 h-16 w-16 rounded-full border border-brand-300/20"></div>
+
+                                <div class="flex items-center gap-4">
+                                    <div class="program-logo-shell program-pulse-soft flex h-20 w-20 items-center justify-center rounded-[1.6rem] border border-brand-300/20 bg-brand-500/12 shadow-[0_12px_30px_-18px_rgba(63,95,255,0.95)]">
+                                        <img src="{{ asset('storage/siglas2.png') }}" alt="AET Trader Academy" class="h-12 w-12 object-contain">
+                                    </div>
+
+                                    <div>
+                                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-300">{{ __('messages.welcome.programs_panel_badge') }}</p>
+                                        <p class="mt-2 text-2xl font-semibold tracking-tight text-white">AET Trader Academy</p>
+                                    </div>
+                                </div>
+
+                                <p class="mt-6 text-lg font-semibold leading-8 text-white">
+                                    {{ __('messages.welcome.programs_panel_title') }}
+                                </p>
+                                <p class="mt-3 text-sm leading-7 text-slate-300">
+                                    {{ __('messages.welcome.programs_panel_description') }}
+                                </p>
+
+                                <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                                    <div class="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-4">
+                                        <p class="text-xs uppercase tracking-[0.18em] text-slate-400">{{ __('messages.welcome.programs_stat_1_label') }}</p>
+                                        <p class="mt-2 text-sm font-semibold text-white">{{ __('messages.welcome.programs_stat_1_value') }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-4">
+                                        <p class="text-xs uppercase tracking-[0.18em] text-slate-400">{{ __('messages.welcome.programs_stat_2_label') }}</p>
+                                        <p class="mt-2 text-sm font-semibold text-white">{{ __('messages.welcome.programs_stat_2_value') }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-4">
+                                        <p class="text-xs uppercase tracking-[0.18em] text-slate-400">{{ __('messages.welcome.programs_stat_3_label') }}</p>
+                                        <p class="mt-2 text-sm font-semibold text-white">{{ __('messages.welcome.programs_stat_3_value') }}</p>
+                                    </div>
+                                </div>
+
+                                <a href="#contacto" class="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-300 focus:ring-offset-2 focus:ring-offset-slate-950">
+                                    {{ __('messages.welcome.programs_cta') }}
+                                </a>
+                            </aside>
+                        </div>
                     </div>
                 </section>
 
