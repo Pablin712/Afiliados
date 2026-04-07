@@ -14,7 +14,17 @@ class ScannerDownloadService
 {
     public function ensureCompilerConfigured(): void
     {
-        $this->resolveMetaEditorPath();
+        if ($this->effectiveDistributionMode() === 'compile') {
+            $this->resolveMetaEditorPath();
+
+            return;
+        }
+
+        foreach (['deriv', 'weltrade'] as $broker) {
+            foreach ($this->patternsForBroker($broker) as $pattern) {
+                $this->ensurePrecompiledExists($pattern);
+            }
+        }
     }
 
     /**
@@ -44,6 +54,10 @@ class ScannerDownloadService
         $expiresAt = $user->membership?->expires_at;
         if (! $expiresAt instanceof CarbonInterface) {
             throw new RuntimeException('No se encontro fecha de expiracion de membresia.');
+        }
+
+        if ($this->effectiveDistributionMode() === 'precompiled') {
+            return $this->getPrecompiledScanner($normalizedPattern);
         }
 
         $templatePath = sprintf('scanners/AET%s.mq5', $normalizedPattern);
@@ -76,6 +90,79 @@ class ScannerDownloadService
             'content' => $binaryContent,
             'fileName' => sprintf('AET%s_%s.ex5', $normalizedPattern, $safeUserName),
         ];
+    }
+
+    /**
+     * @return array{content: string, fileName: string}
+     */
+    private function getPrecompiledScanner(string $normalizedPattern): array
+    {
+        $path = $this->precompiledScannerPath($normalizedPattern);
+        $disk = (string) config('scanners.precompiled_disk', 'public');
+
+        if (! Storage::disk($disk)->exists($path)) {
+            throw new RuntimeException(__('messages.user.dashboard.scanner.precompiled_missing', [
+                'file' => basename($path),
+            ]));
+        }
+
+        return [
+            'content' => Storage::disk($disk)->get($path),
+            'fileName' => basename($path),
+        ];
+    }
+
+    private function ensurePrecompiledExists(string $normalizedPattern): void
+    {
+        $path = $this->precompiledScannerPath($normalizedPattern);
+        $disk = (string) config('scanners.precompiled_disk', 'public');
+
+        if (! Storage::disk($disk)->exists($path)) {
+            throw new RuntimeException(__('messages.user.dashboard.scanner.precompiled_missing', [
+                'file' => basename($path),
+            ]));
+        }
+    }
+
+    private function precompiledScannerPath(string $normalizedPattern): string
+    {
+        $directory = trim((string) config('scanners.precompiled_directory', 'scanners-bin'), '/');
+
+        return $directory.'/AET'.$normalizedPattern.'.ex5';
+    }
+
+    private function configuredDistributionMode(): string
+    {
+        $mode = Str::lower((string) config('scanners.distribution_mode', 'auto'));
+
+        return in_array($mode, ['compile', 'precompiled', 'auto'], true) ? $mode : 'auto';
+    }
+
+    private function effectiveDistributionMode(): string
+    {
+        $mode = $this->configuredDistributionMode();
+
+        if ($mode === 'compile' || $mode === 'precompiled') {
+            return $mode;
+        }
+
+        return $this->hasAllPrecompiledScanners() ? 'precompiled' : 'compile';
+    }
+
+    private function hasAllPrecompiledScanners(): bool
+    {
+        foreach (['deriv', 'weltrade'] as $broker) {
+            foreach ($this->patternsForBroker($broker) as $pattern) {
+                $path = $this->precompiledScannerPath($pattern);
+                $disk = (string) config('scanners.precompiled_disk', 'public');
+
+                if (! Storage::disk($disk)->exists($path)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private function compileToEx5(string $sourceCode, string $baseFileName): string
@@ -229,6 +316,14 @@ class ScannerDownloadService
             return $configuredPath;
         }
 
+        if ($configuredPath !== '' && ! File::exists($configuredPath)) {
+            throw new RuntimeException(__('messages.user.dashboard.scanner.compiler_path_invalid', [
+                'path' => $configuredPath,
+            ]));
+        }
+
+        $isWindows = strtoupper((string) PHP_OS_FAMILY) === 'WINDOWS';
+
         $commonPaths = [
             'C:\\Program Files\\MetaTrader 5\\metaeditor64.exe',
             'C:\\Program Files (x86)\\MetaTrader 5\\metaeditor64.exe',
@@ -236,10 +331,29 @@ class ScannerDownloadService
             'C:\\Program Files\\MetaTrader 5 Terminal\\MetaEditor.exe',
         ];
 
+        if (! $isWindows) {
+            $home = (string) getenv('HOME');
+            $linuxCandidates = [
+                '/root/.wine/drive_c/Program Files/MetaTrader 5/metaeditor64.exe',
+                '/root/.wine/drive_c/Program Files/MetaTrader 5 Terminal/MetaEditor64.exe',
+            ];
+
+            if ($home !== '') {
+                $linuxCandidates[] = $home.'/.wine/drive_c/Program Files/MetaTrader 5/metaeditor64.exe';
+                $linuxCandidates[] = $home.'/.wine/drive_c/Program Files/MetaTrader 5 Terminal/MetaEditor64.exe';
+            }
+
+            $commonPaths = array_merge($commonPaths, $linuxCandidates);
+        }
+
         foreach ($commonPaths as $path) {
             if (File::exists($path)) {
                 return $path;
             }
+        }
+
+        if (! $isWindows) {
+            throw new RuntimeException(__('messages.user.dashboard.scanner.compiler_not_configured_linux'));
         }
 
         throw new RuntimeException(__('messages.user.dashboard.scanner.compiler_not_configured'));
@@ -248,16 +362,16 @@ class ScannerDownloadService
     private function replaceLicenseValues(string $content, string $accountId, string $expirationDate): string
     {
         $content = preg_replace(
-            "/input\\s+long\\s+CUENTA_AUTORIZADA\\s*=\\s*\\d+\\s*;/",
-            'input long     CUENTA_AUTORIZADA ='.$accountId.';',
+            "/(?:input\\s+)?long\\s+CUENTA_AUTORIZADA\\s*=\\s*\\d+\\s*;/",
+            'long     CUENTA_AUTORIZADA ='.$accountId.';',
             $content,
             1,
             $accountReplaced
         );
 
         $content = preg_replace(
-            "/input\\s+datetime\\s+FECHA_EXPIRACION\\s*=\\s*D'\\d{4}\\.\\d{2}\\.\\d{2}'\\s*;/",
-            "input datetime FECHA_EXPIRACION  = D'{$expirationDate}';",
+            "/(?:input\\s+)?datetime\\s+FECHA_EXPIRACION\\s*=\\s*D'\\d{4}\\.\\d{2}\\.\\d{2}'\\s*;/",
+            "datetime FECHA_EXPIRACION  = D'{$expirationDate}';",
             $content,
             1,
             $dateReplaced

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Services\ScannerDownloadService;
+use Carbon\CarbonInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -107,10 +108,20 @@ class ScannerDownloadController extends Controller
 
     private function ensureEligibleMembership(Request $request): void
     {
-        $membershipTypeName = strtolower((string) ($request->user()->membership?->membershipType?->name ?? 'free'));
+        $membership = $request->user()->membership;
+        $membershipTypeName = strtolower((string) ($membership?->membershipType?->name ?? 'free'));
 
         if ($membershipTypeName === 'free') {
             throw new RuntimeException(__('messages.user.dashboard.scanner.membership_not_eligible'));
+        }
+
+        $expiresAt = $membership?->expires_at;
+        if (! $expiresAt instanceof CarbonInterface) {
+            throw new RuntimeException(__('messages.user.dashboard.scanner.membership_expiration_missing'));
+        }
+
+        if ($expiresAt->isPast()) {
+            throw new RuntimeException(__('messages.user.dashboard.scanner.membership_expired'));
         }
     }
 
