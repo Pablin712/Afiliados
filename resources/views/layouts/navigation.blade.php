@@ -23,6 +23,9 @@
                             {{ __('messages.nav.my_profits') }}
                         </x-nav-link>
                     @endrole
+                    <x-nav-link :href="route('courses.index')" :active="request()->routeIs('courses.*')">
+                        {{ __('messages.nav.courses') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                         {{ __('messages.nav.plans') }}
                     </x-nav-link>
@@ -109,6 +112,12 @@
                             </x-dropdown-link>
                         @endcan
 
+                        @role('admin')
+                            <x-dropdown-link :href="route('admin.courses.index')">
+                                {{ __('messages.admin.courses.title') }}
+                            </x-dropdown-link>
+                        @endrole
+
                         @can('report profits')
                             <x-dropdown-link :href="route('admin.financial-dashboard.index')">
                                 {{ __('messages.admin.financial_dashboard.title') }}
@@ -155,6 +164,9 @@
                     {{ __('messages.nav.my_profits') }}
                 </x-responsive-nav-link>
             @endrole
+            <x-responsive-nav-link :href="route('courses.index')" :active="request()->routeIs('courses.*')">
+                {{ __('messages.nav.courses') }}
+            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                 {{ __('messages.nav.plans') }}
             </x-responsive-nav-link>
@@ -227,6 +239,12 @@
                         {{ __('messages.admin.banks.title') }}
                     </x-responsive-nav-link>
                 @endcan
+
+                @role('admin')
+                    <x-responsive-nav-link :href="route('admin.courses.index')">
+                        {{ __('messages.admin.courses.title') }}
+                    </x-responsive-nav-link>
+                @endrole
 
                 @can('report profits')
                     <x-responsive-nav-link :href="route('admin.financial-dashboard.index')">

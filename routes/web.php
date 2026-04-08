@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ActionController;
 use App\Http\Controllers\Admin\BanksController;
+use App\Http\Controllers\Admin\CourseCatalogController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\FinancialDashboardController;
 use App\Http\Controllers\Admin\ProfitsController;
@@ -42,6 +44,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/plans', [PlansController::class, 'index'])
         ->middleware('verified')
         ->name('plans.index');
+
+    Route::get('/cursos', [CourseController::class, 'index'])
+        ->middleware('verified')
+        ->name('courses.index');
+
+    Route::get('/cursos/videos/{video}/stream', [CourseController::class, 'stream'])
+        ->middleware('verified')
+        ->name('courses.videos.stream');
 
     Route::get('/mi-red', [AffiliateNetworkController::class, 'index'])
         ->middleware(['verified', 'role:user'])
@@ -122,6 +132,30 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/banks', [BanksController::class, 'index'])
         ->middleware(['verified', 'permission:view banks'])
         ->name('admin.banks.index');
+
+    Route::get('/admin/courses', [CourseCatalogController::class, 'index'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('admin.courses.index');
+
+    Route::post('/admin/courses/modules', [CourseCatalogController::class, 'storeModule'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('admin.courses.modules.store');
+
+    Route::delete('/admin/courses/modules/{module}', [CourseCatalogController::class, 'destroyModule'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('admin.courses.modules.destroy');
+
+    Route::post('/admin/courses/videos', [CourseCatalogController::class, 'storeVideo'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('admin.courses.videos.store');
+
+    Route::delete('/admin/courses/videos/{video}', [CourseCatalogController::class, 'destroyVideo'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('admin.courses.videos.destroy');
+
+    Route::post('/admin/courses/import-existing', [CourseCatalogController::class, 'importExisting'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('admin.courses.import-existing');
 
     Route::post('/admin/banks', [BanksController::class, 'store'])
         ->middleware(['verified', 'permission:create banks'])
