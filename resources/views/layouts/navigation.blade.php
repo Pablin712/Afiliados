@@ -1,3 +1,5 @@
+@php($canAccessCourses = Auth::user()?->hasRole('admin') || strtolower((string) (Auth::user()?->membership?->membershipType?->name ?? 'free')) !== 'free')
+
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-200 dark:bg-graphite-900 dark:border-graphite-800">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,9 +25,11 @@
                             {{ __('messages.nav.my_profits') }}
                         </x-nav-link>
                     @endrole
-                    <x-nav-link :href="route('courses.index')" :active="request()->routeIs('courses.*')">
-                        {{ __('messages.nav.courses') }}
-                    </x-nav-link>
+                    @if ($canAccessCourses)
+                        <x-nav-link :href="route('courses.index')" :active="request()->routeIs('courses.*')">
+                            {{ __('messages.nav.courses') }}
+                        </x-nav-link>
+                    @endif
                     <x-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                         {{ __('messages.nav.plans') }}
                     </x-nav-link>
@@ -164,9 +168,11 @@
                     {{ __('messages.nav.my_profits') }}
                 </x-responsive-nav-link>
             @endrole
-            <x-responsive-nav-link :href="route('courses.index')" :active="request()->routeIs('courses.*')">
-                {{ __('messages.nav.courses') }}
-            </x-responsive-nav-link>
+            @if ($canAccessCourses)
+                <x-responsive-nav-link :href="route('courses.index')" :active="request()->routeIs('courses.*')">
+                    {{ __('messages.nav.courses') }}
+                </x-responsive-nav-link>
+            @endif
             <x-responsive-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                 {{ __('messages.nav.plans') }}
             </x-responsive-nav-link>

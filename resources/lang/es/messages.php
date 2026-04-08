@@ -598,6 +598,7 @@ return [
     'courses.empty_title' => 'Todavia no hay clases publicadas.',
     'courses.empty_description' => 'Cuando el administrador cargue o importe videos, apareceran aqui organizados por modulo.',
     'courses.empty_admin_cta' => 'Ir a gestion de cursos',
+    'courses.membership_required' => 'Los cursos trader son exclusivos para miembros con una membresia distinta de free.',
     'courses.module_label' => 'Modulo',
     'courses.module_videos' => ':count videos',
     'courses.video_player_label' => 'Clase activa',

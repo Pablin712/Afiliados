@@ -10,6 +10,7 @@ Implementar una biblioteca de clases para usuarios trader con experiencia tipo p
 - Tabla `course_videos`: video, modulo, archivo almacenado, peso, orden y estado.
 - Vista alumno: `courses.index`.
 - Vista admin: `admin.courses.index`.
+- Acceso alumno restringido: solo usuarios autenticados con membresia distinta de `free`; admin siempre conserva acceso.
 - Rutas nuevas:
   - `GET /cursos`
   - `GET /admin/courses`
@@ -66,3 +67,4 @@ Implementar una biblioteca de clases para usuarios trader con experiencia tipo p
 - El importador registra en base de datos los MP4 ya existentes sin volver a subirlos.
 - Los videos nuevos se cargan desde el panel admin y se guardan en `public/videos`.
 - El admin puede eliminar videos y tambien eliminar modulos vacios.
+- Los usuarios `free` no ven el enlace de cursos en navegacion y si intentan entrar manualmente son redirigidos a planes con mensaje de restriccion.

@@ -598,6 +598,7 @@ return [
     'courses.empty_title' => 'There are no published classes yet.',
     'courses.empty_description' => 'Once the administrator uploads or imports videos, they will appear here organized by module.',
     'courses.empty_admin_cta' => 'Open course management',
+    'courses.membership_required' => 'Trader courses are exclusive to members with a non-free membership.',
     'courses.module_label' => 'Module',
     'courses.module_videos' => ':count videos',
     'courses.video_player_label' => 'Active lesson',
