@@ -113,6 +113,10 @@ Route::middleware('auth')->group(function () {
         ->middleware(['verified', 'permission:view memberships'])
         ->name('memberships.index');
 
+    Route::put('/memberships/{id}', [MembershipsController::class, 'update'])
+        ->middleware(['verified', 'permission:edit memberships'])
+        ->name('memberships.update');
+
     Route::get('/membership-types', [MembershipTypeController::class, 'index'])
         ->middleware(['verified', 'permission:view membership_types'])
         ->name('membership-types.index');
