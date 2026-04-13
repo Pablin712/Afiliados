@@ -23,6 +23,7 @@ return [
     // Messages
     'success' => 'Operación completada exitosamente',
     'error' => 'Ha ocurrido un error',
+    'error_generic' => 'Ocurrió un inconveniente. Intenta nuevamente en unos minutos.',
     'warning' => 'Advertencia',
     'info' => 'Información',
 
@@ -409,6 +410,7 @@ return [
     'plans.receipt_help' => 'Formatos permitidos: JPG, PNG o WEBP. Máximo 4 MB.',
     'plans.submit_button' => 'Enviar comprobante',
     'plans.payment_submitted' => 'Comprobante enviado. El administrador lo revisará pronto.',
+    'plans.invalid_payment_method' => 'La solicitud de pago no se pudo procesar. Vuelve a enviar el formulario desde la sección de planes.',
     'plans.already_pending' => 'Ya tienes un comprobante en revisión. Espera a que sea procesado.',
     'plans.no_banks' => 'No hay bancos configurados aún. Contacta al administrador.',
     'plans.no_paid_plans' => 'No hay planes de pago disponibles aún.',

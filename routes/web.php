@@ -81,9 +81,21 @@ Route::middleware('auth')->group(function () {
         ->middleware('verified')
         ->name('plans.payment.store');
 
+    Route::get('/plans/payment', function () {
+        return redirect()
+            ->route('plans.index')
+            ->with('error', __('messages.plans.invalid_payment_method'));
+    })->middleware('verified');
+
     Route::post('/plans/renew-free', [PlansController::class, 'renewForFree'])
         ->middleware('verified')
         ->name('plans.renew-free');
+
+    Route::get('/plans/renew-free', function () {
+        return redirect()
+            ->route('plans.index')
+            ->with('error', __('messages.plans.invalid_payment_method'));
+    })->middleware('verified');
 
     Route::post('/plans/programs', [ProgramController::class, 'store'])
         ->middleware(['verified', 'role:admin'])

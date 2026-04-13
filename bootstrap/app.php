@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -30,5 +32,22 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            // Keep detailed traces only when debug mode is enabled.
+            if (config('app.debug')) {
+                return null;
+            }
+
+            $statusCode = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => __('messages.error_generic'),
+                ], $statusCode >= 400 && $statusCode < 600 ? $statusCode : 500);
+            }
+
+            return response()->view('errors.generic', [
+                'statusCode' => $statusCode,
+            ], $statusCode >= 400 && $statusCode < 600 ? $statusCode : 500);
+        });
     })->create();

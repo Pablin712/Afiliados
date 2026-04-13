@@ -23,6 +23,7 @@ return [
     // Messages
     'success' => 'Operation completed successfully',
     'error' => 'An error occurred',
+    'error_generic' => 'Something went wrong. Please try again in a few minutes.',
     'warning' => 'Warning',
     'info' => 'Information',
 
@@ -409,6 +410,7 @@ return [
     'plans.receipt_help' => 'Accepted formats: JPG, PNG or WEBP. Maximum 4 MB.',
     'plans.submit_button' => 'Submit receipt',
     'plans.payment_submitted' => 'Receipt submitted. The administrator will review it shortly.',
+    'plans.invalid_payment_method' => 'The payment request could not be processed. Please submit the form again from the plans section.',
     'plans.already_pending' => 'You already have a receipt under review. Please wait for it to be processed.',
     'plans.no_banks' => 'No banks are configured yet. Please contact the administrator.',
     'plans.no_paid_plans' => 'No paid plans are available yet.',
