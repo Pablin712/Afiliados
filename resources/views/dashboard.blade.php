@@ -33,9 +33,9 @@
                             </x-slot>
 
                             <x-slot name="content">
-                                <button type="button" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-graphite-200 dark:hover:bg-graphite-800" onclick="openScannerDownloadModal('deriv')">
+                                <a href="https://xquant.marketview.club/derivChart/?ref=Z3JleGZhcnJp" target="_blank" rel="noopener noreferrer" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-graphite-200 dark:hover:bg-graphite-800">
                                     {{ __('messages.user.dashboard.scanner.broker_deriv') }}
-                                </button>
+                                </a>
                                 <button type="button" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-graphite-200 dark:hover:bg-graphite-800" onclick="openScannerDownloadModal('weltrade')">
                                     {{ __('messages.user.dashboard.scanner.broker_weltrade') }}
                                 </button>

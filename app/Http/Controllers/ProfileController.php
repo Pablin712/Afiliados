@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserBank;
+use App\Models\User;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
@@ -80,14 +82,34 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        $fallbackSponsorId = $this->resolveFallbackSponsorId($user);
 
         Auth::logout();
 
-        $user->delete();
+        DB::transaction(function () use ($user, $fallbackSponsorId): void {
+            User::query()
+                ->where('sponsor_id', $user->id)
+                ->update(['sponsor_id' => $fallbackSponsorId]);
+
+            $user->delete();
+        });
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    private function resolveFallbackSponsorId(User $user): int
+    {
+        $sponsorId = (int) ($user->sponsor_id ?? 0);
+
+        if ($sponsorId > 0 && $sponsorId !== (int) $user->id) {
+            return $sponsorId;
+        }
+
+        return (int) (User::query()->where('id', '!=', $user->id)->whereKey(1)->value('id')
+            ?? User::query()->where('id', '!=', $user->id)->orderBy('id')->value('id')
+            ?? $user->id);
     }
 }

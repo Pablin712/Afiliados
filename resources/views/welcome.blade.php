@@ -79,6 +79,9 @@
                                     {{ __('messages.nav.dashboard') }}
                                 </a>
                             @else
+                                <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
+                                    {{ __('messages.register') }}
+                                </a>
                                 <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
                                     {{ __('messages.nav.login') }}
                                 </a>
@@ -106,6 +109,9 @@
                                     {{ __('messages.nav.dashboard') }}
                                 </a>
                             @else
+                                <a href="{{ route('register') }}" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
+                                    {{ __('messages.register') }}
+                                </a>
                                 <a href="{{ route('login') }}" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
                                     {{ __('messages.nav.login') }}
                                 </a>
@@ -200,30 +206,11 @@
                                         <p class="text-xs font-semibold uppercase tracking-[0.24em] text-brand-200">{{ __('messages.welcome.program_card_1_eyebrow') }}</p>
                                         <h3 class="mt-3 text-xl font-semibold text-white">{{ __('messages.welcome.program_card_1_title') }}</h3>
                                         <p class="mt-3 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_1_desc') }}</p>
-
-                                        <ol class="mt-6 space-y-4">
-                                            <li class="flex gap-3">
-                                                <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-brand-500/20 text-sm font-semibold text-brand-100">01</span>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_1_item_1_title') }}</p>
-                                                    <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_1_item_1_desc') }}</p>
-                                                </div>
-                                            </li>
-                                            <li class="flex gap-3">
-                                                <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-brand-500/20 text-sm font-semibold text-brand-100">02</span>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_1_item_2_title') }}</p>
-                                                    <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_1_item_2_desc') }}</p>
-                                                </div>
-                                            </li>
-                                            <li class="flex gap-3">
-                                                <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-brand-500/20 text-sm font-semibold text-brand-100">03</span>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_1_item_3_title') }}</p>
-                                                    <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_1_item_3_desc') }}</p>
-                                                </div>
-                                            </li>
-                                        </ol>
+                                        <div class="mt-6 grid gap-3">
+                                            <div class="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm font-medium text-white">{{ __('messages.welcome.program_card_1_item_1_title') }}</div>
+                                            <div class="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm font-medium text-white">{{ __('messages.welcome.program_card_1_item_2_title') }}</div>
+                                            <div class="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm font-medium text-white">{{ __('messages.welcome.program_card_1_item_3_title') }}</div>
+                                        </div>
                                     </article>
 
                                     <article class="program-fade-up rounded-[1.6rem] border border-white/12 bg-slate-950/40 p-5 shadow-[0_20px_50px_-34px_rgba(15,23,42,0.95)] backdrop-blur-md" style="animation-delay: 480ms;">
@@ -234,15 +221,12 @@
                                         <div class="mt-6 space-y-3">
                                             <div class="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
                                                 <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_2_item_1_title') }}</p>
-                                                <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_2_item_1_desc') }}</p>
                                             </div>
                                             <div class="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
                                                 <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_2_item_2_title') }}</p>
-                                                <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_2_item_2_desc') }}</p>
                                             </div>
                                             <div class="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
                                                 <p class="text-sm font-semibold text-white">{{ __('messages.welcome.program_card_2_item_3_title') }}</p>
-                                                <p class="mt-1 text-sm leading-6 text-slate-300">{{ __('messages.welcome.program_card_2_item_3_desc') }}</p>
                                             </div>
                                         </div>
                                     </article>

@@ -29,8 +29,7 @@ class RegisteredUserController extends Controller
         $sponsor = User::resolveAffiliateCode($refCode);
 
         if ($sponsor === null) {
-            $sponsor = User::role('admin')->orderBy('id')->first()
-                ?? User::query()->orderBy('id')->first();
+            $sponsor = $this->resolveDefaultSponsor();
         }
 
         abort_if($sponsor === null, 404);
@@ -120,5 +119,12 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         return redirect()->intended(route('dashboard'));
+    }
+
+    private function resolveDefaultSponsor(): ?User
+    {
+        return User::query()->find(1)
+            ?? User::role('admin')->orderBy('id')->first()
+            ?? User::query()->orderBy('id')->first();
     }
 }
