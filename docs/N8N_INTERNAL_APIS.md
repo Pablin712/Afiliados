@@ -103,6 +103,10 @@ Notas:
 ## Endpoints de verificacion de pagos (admin)
 Prefijo: `/admin`
 
+Compatibilidad adicional para flujos legados:
+- Prefijo alias: `/admin/v2/payments/n8n/recargas`
+- Objetivo: reutilizar flujos n8n que usan nombres `idrec`, `foto_url`, `aprobar`, `rechazar`.
+
 ### 9) Listar pagos pendientes para verificador
 - Método: `GET`
 - URL: `/admin/payments/pending?limit=50`
@@ -130,6 +134,9 @@ Prefijo: `/admin`
   - Binario de imagen si existe
   - `404` si no hay archivo
 
+Alias legado:
+- `GET /admin/v2/payments/n8n/recargas/{payment}/comprobante`
+
 ### 12) Aprobar pago pendiente por automatización
 - Método: `POST`
 - URL: `/admin/payments/pending/{payment}/approve`
@@ -147,6 +154,9 @@ Prefijo: `/admin`
   - Reusa la misma lógica de aprobación manual del admin.
   - Si el pago ya fue procesado, responde `422`.
 
+Alias legado:
+- `POST /admin/v2/payments/n8n/recargas/{payment}/aprobar`
+
 ### 13) Rechazar pago pendiente por automatización
 - Método: `POST`
 - URL: `/admin/payments/pending/{payment}/reject`
@@ -158,6 +168,51 @@ Prefijo: `/admin`
 }
 ```
 - Si el pago ya fue procesado, responde `422`.
+
+Alias legado:
+- `POST /admin/v2/payments/n8n/recargas/{payment}/rechazar`
+
+## Payload webhook para verificador
+Cuando se crea un pago pendiente, el backend envia `POST` a `PAYMENT_VERIFIER_WEBHOOK_URL` con payload JSON que incluye:
+- Campos actuales: `payment_id`, `payment_number`, `amount`, `bank`, `receipt_url`, `approve_url`, `reject_url`.
+- Campos de compatibilidad: `idrec`, `idcli`, `idban`, `banco_nombre`, `numcomprobante`, `valor`, `recarga_url`, `foto_url`, `banco`.
+- URL publica firmada para IA: `receipt_public_url` (tambien llega en `foto_url`).
+
+Importante para nodo OpenAI Analyze image:
+- Usa `{{$json.body.foto_url}}` (si el trigger es webhook) o `{{$json.receipt_url}}` (si viene de listado `/payments/pending`).
+- `receipt_url` ya se entrega como URL publica firmada.
+- `receipt_internal_url` queda solo para consumo interno con token.
+- No uses rutas hardcodeadas tipo `/public/admin/.../comprobante` porque pueden devolver 404.
+
+Esto permite editar un flujo n8n existente con cambios minimos.
+
+## Pruebas rapidas (curl)
+Suponiendo:
+- `API_BASE=https://tu-dominio/api`
+- `TOKEN=tu_INTERNAL_API_TOKEN`
+
+1) Listar pendientes:
+```bash
+curl -X GET "$API_BASE/admin/payments/pending?limit=5" \
+  -H "X-Internal-Token: $TOKEN" \
+  -H "Accept: application/json"
+```
+
+2) Aprobar (ruta actual):
+```bash
+curl -X POST "$API_BASE/admin/payments/pending/ID/approve" \
+  -H "X-Internal-Token: $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"trace_id":"n8n-test-001","ai_score":95}'
+```
+
+3) Rechazar (ruta alias legado):
+```bash
+curl -X POST "$API_BASE/admin/v2/payments/n8n/recargas/ID/rechazar" \
+  -H "X-Internal-Token: $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"reason":"monto_no_coincide"}'
+```
 
 ## Mapeo contable aplicado
 - Todo pago aprobado de usuarios: ingreso del admin.

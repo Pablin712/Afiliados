@@ -8,6 +8,7 @@ use App\Services\PendingPaymentReviewService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -33,6 +34,12 @@ class PaymentVerificationController extends Controller
             ->get();
 
         $data = $records->map(function (Payment $payment): array {
+            $receiptPublicUrl = URL::temporarySignedRoute(
+                'api.public.payments.receipt',
+                now()->addHours(6),
+                ['payment' => $payment->id]
+            );
+
             return [
                 'event' => 'payment.pending',
                 'payment_id' => (int) $payment->id,
@@ -51,7 +58,9 @@ class PaymentVerificationController extends Controller
                     'detail' => (string) ($payment->transaction?->bank?->detail ?? ''),
                 ],
                 'payment_url' => route('api.admin.payments.pending.show', ['payment' => $payment->id]),
-                'receipt_url' => route('api.admin.payments.pending.receipt', ['payment' => $payment->id]),
+                'receipt_url' => $receiptPublicUrl,
+                'receipt_internal_url' => route('api.admin.payments.pending.receipt', ['payment' => $payment->id]),
+                'receipt_public_url' => $receiptPublicUrl,
                 'approve_url' => route('api.admin.payments.pending.approve', ['payment' => $payment->id]),
                 'reject_url' => route('api.admin.payments.pending.reject', ['payment' => $payment->id]),
             ];
@@ -82,6 +91,12 @@ class PaymentVerificationController extends Controller
 
         $payment->load(['user:id,name,email', 'transaction.bank:id,name,owner,identification,number,detail']);
 
+        $receiptPublicUrl = URL::temporarySignedRoute(
+            'api.public.payments.receipt',
+            now()->addHours(6),
+            ['payment' => $payment->id]
+        );
+
         return response()->json([
             'message' => 'Pending payment retrieved successfully.',
             'meta' => [
@@ -103,14 +118,26 @@ class PaymentVerificationController extends Controller
                     'number' => (string) ($payment->transaction?->bank?->number ?? ''),
                     'detail' => (string) ($payment->transaction?->bank?->detail ?? ''),
                 ],
-                'receipt_url' => route('api.admin.payments.pending.receipt', ['payment' => $payment->id]),
+                'receipt_url' => $receiptPublicUrl,
+                'receipt_internal_url' => route('api.admin.payments.pending.receipt', ['payment' => $payment->id]),
+                'receipt_public_url' => $receiptPublicUrl,
                 'approve_url' => route('api.admin.payments.pending.approve', ['payment' => $payment->id]),
                 'reject_url' => route('api.admin.payments.pending.reject', ['payment' => $payment->id]),
             ],
         ]);
     }
 
+    public function publicReceipt(Payment $payment): BinaryFileResponse|JsonResponse
+    {
+        return $this->resolveReceiptResponse($payment);
+    }
+
     public function receipt(Payment $payment): BinaryFileResponse|JsonResponse
+    {
+        return $this->resolveReceiptResponse($payment);
+    }
+
+    private function resolveReceiptResponse(Payment $payment): BinaryFileResponse|JsonResponse
     {
         if (! is_string($payment->photo) || trim($payment->photo) === '') {
             return response()->json([
@@ -129,6 +156,9 @@ class PaymentVerificationController extends Controller
 
     public function approve(Request $request, Payment $payment): JsonResponse
     {
+        $payment->loadMissing('user:id,name,email');
+        $targetUser = trim((string) ($payment->user?->name ?? $payment->user?->email ?? 'Usuario #'.$payment->user_id));
+
         $validated = $request->validate([
             'reviewed_by' => ['nullable', 'integer', 'exists:users,id'],
             'trace_id' => ['nullable', 'string', 'max:120'],
@@ -159,21 +189,33 @@ class PaymentVerificationController extends Controller
                 implode(' | ', $detailParts)
             );
         } catch (RuntimeException $exception) {
+            $messageEs = 'ℹ️ Pago ya procesado para '.$targetUser;
+            $messageEn = 'ℹ️ Payment already processed for '.$targetUser;
+
             return response()->json([
-                'message' => 'Payment is already processed.',
+                'message' => $messageEs.' | '.$messageEn,
+                'message_es' => $messageEs,
+                'message_en' => $messageEn,
                 'meta' => [
                     'payment_id' => (int) $payment->id,
                     'state' => (string) $payment->state,
+                    'user' => $targetUser,
                 ],
                 'data' => null,
             ], 422);
         }
 
+        $messageEs = '✅ Pago aprobado para '.$targetUser;
+        $messageEn = '✅ Payment approved for '.$targetUser;
+
         return response()->json([
-            'message' => 'Payment approved successfully.',
+            'message' => $messageEs.' | '.$messageEn,
+            'message_es' => $messageEs,
+            'message_en' => $messageEn,
             'meta' => [
                 'payment_id' => (int) $payment->id,
                 'state' => 'approved',
+                'user' => $targetUser,
             ],
             'data' => [
                 'payment_id' => (int) $payment->id,
@@ -183,6 +225,9 @@ class PaymentVerificationController extends Controller
 
     public function reject(Request $request, Payment $payment): JsonResponse
     {
+        $payment->loadMissing('user:id,name,email');
+        $targetUser = trim((string) ($payment->user?->name ?? $payment->user?->email ?? 'Usuario #'.$payment->user_id));
+
         $validated = $request->validate([
             'reviewed_by' => ['nullable', 'integer', 'exists:users,id'],
             'reason' => ['nullable', 'string', 'max:500'],
@@ -194,22 +239,34 @@ class PaymentVerificationController extends Controller
                 isset($validated['reviewed_by']) ? (int) $validated['reviewed_by'] : null
             );
         } catch (RuntimeException $exception) {
+            $messageEs = 'ℹ️ Pago ya procesado para '.$targetUser;
+            $messageEn = 'ℹ️ Payment already processed for '.$targetUser;
+
             return response()->json([
-                'message' => 'Payment is already processed.',
+                'message' => $messageEs.' | '.$messageEn,
+                'message_es' => $messageEs,
+                'message_en' => $messageEn,
                 'meta' => [
                     'payment_id' => (int) $payment->id,
                     'state' => (string) $payment->state,
+                    'user' => $targetUser,
                 ],
                 'data' => null,
             ], 422);
         }
 
+        $messageEs = '❌ Pago rechazado para '.$targetUser;
+        $messageEn = '❌ Payment rejected for '.$targetUser;
+
         return response()->json([
-            'message' => 'Payment rejected successfully.',
+            'message' => $messageEs.' | '.$messageEn,
+            'message_es' => $messageEs,
+            'message_en' => $messageEn,
             'meta' => [
                 'payment_id' => (int) $payment->id,
                 'state' => 'rejected',
                 'reason' => (string) ($validated['reason'] ?? ''),
+                'user' => $targetUser,
             ],
             'data' => [
                 'payment_id' => (int) $payment->id,

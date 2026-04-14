@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 class PaymentPendingWebhookService
 {
@@ -16,6 +17,12 @@ class PaymentPendingWebhookService
         }
 
         $payment->loadMissing(['user:id,name,email', 'transaction.bank:id,name,owner,identification,number,detail']);
+
+        $receiptPublicUrl = URL::temporarySignedRoute(
+            'api.public.payments.receipt',
+            now()->addHours(6),
+            ['payment' => $payment->id]
+        );
 
         $payload = [
             'event' => 'payment.pending',
@@ -35,9 +42,35 @@ class PaymentPendingWebhookService
                 'detail' => (string) ($payment->transaction?->bank?->detail ?? ''),
             ],
             'payment_url' => route('api.admin.payments.pending.show', ['payment' => $payment->id]),
-            'receipt_url' => route('api.admin.payments.pending.receipt', ['payment' => $payment->id]),
+            'receipt_url' => $receiptPublicUrl,
+            'receipt_internal_url' => route('api.admin.payments.pending.receipt', ['payment' => $payment->id]),
+            'receipt_public_url' => $receiptPublicUrl,
             'approve_url' => route('api.admin.payments.pending.approve', ['payment' => $payment->id]),
             'reject_url' => route('api.admin.payments.pending.reject', ['payment' => $payment->id]),
+            // Backward-compatible aliases for existing n8n verifier flows.
+            'payment_id' => (int) $payment->id,
+            'user_id' => (int) $payment->user_id,
+            'bank_id' => (int) ($payment->transaction?->bank?->id ?? 0),
+            'banco_nombre' => (string) ($payment->transaction?->bank?->name ?? ''),
+            'numcomprobante' => (string) $payment->number,
+            'valor' => (float) $payment->amount,
+            'recarga_url' => route('api.admin.payments.pending.show', ['payment' => $payment->id]),
+            'foto_url' => $receiptPublicUrl,
+            'approve_legacy_url' => route('api.v2.payments.n8n.recargas.aprobar', ['payment' => $payment->id]),
+            'reject_legacy_url' => route('api.v2.payments.n8n.recargas.rechazar', ['payment' => $payment->id]),
+            'banco' => [
+                'id' => (int) ($payment->transaction?->bank?->id ?? 0),
+                'nombre' => (string) ($payment->transaction?->bank?->name ?? ''),
+                'propietario' => (string) ($payment->transaction?->bank?->owner ?? ''),
+                'cedula' => (string) ($payment->transaction?->bank?->identification ?? ''),
+                'numero' => (string) ($payment->transaction?->bank?->number ?? ''),
+                'tipo' => '',
+                'detalle' => (string) ($payment->transaction?->bank?->detail ?? ''),
+                'foto' => null,
+                'monto' => null,
+                'created_at' => null,
+                'updated_at' => null,
+            ],
         ];
 
         $token = trim((string) config('affiliates.payment_verifier_webhook_token', ''));

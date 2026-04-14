@@ -6,6 +6,10 @@ use App\Http\Controllers\Api\Admin\MembershipTierController;
 use App\Http\Controllers\Api\Admin\PaymentVerificationController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/public/payments/{payment}/receipt', [PaymentVerificationController::class, 'publicReceipt'])
+    ->middleware('signed')
+    ->name('api.public.payments.receipt');
+
 Route::prefix('admin')
     ->middleware(['internal_api_token'])
     ->group(function (): void {
@@ -33,4 +37,16 @@ Route::prefix('admin')
             ->name('api.admin.payments.pending.approve');
         Route::post('/payments/pending/{payment}/reject', [PaymentVerificationController::class, 'reject'])
             ->name('api.admin.payments.pending.reject');
+
+        // Legacy-compatible aliases for existing n8n flows.
+        Route::prefix('/v2/payments/n8n/recargas')->group(function (): void {
+            Route::get('/{payment}', [PaymentVerificationController::class, 'show'])
+                ->name('api.v2.payments.n8n.recargas.show');
+            Route::get('/{payment}/comprobante', [PaymentVerificationController::class, 'receipt'])
+                ->name('api.v2.payments.n8n.recargas.comprobante');
+            Route::post('/{payment}/aprobar', [PaymentVerificationController::class, 'approve'])
+                ->name('api.v2.payments.n8n.recargas.aprobar');
+            Route::post('/{payment}/rechazar', [PaymentVerificationController::class, 'reject'])
+                ->name('api.v2.payments.n8n.recargas.rechazar');
+        });
     });
