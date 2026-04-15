@@ -6,6 +6,7 @@
             step: 1,
             name: @js(old('name', '')),
             email: @js(old('email', '')),
+            phone: @js(old('phone', '')),
             identification: @js(old('identification', '')),
             passwordValue: '',
             passwordConfirmationValue: '',
@@ -164,6 +165,12 @@
                     </div>
 
                     <div>
+                        <x-input-label for="phone" :value="__('messages.auth.phone_label')" />
+                        <x-text-input id="phone" class="mt-1 block w-full" type="text" name="phone" x-model="phone" :value="old('phone')" required autocomplete="tel" />
+                        <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                    </div>
+
+                    <div>
                         <x-input-label for="identification" :value="__('messages.auth.identification_label')" />
                         <x-text-input id="identification" class="mt-1 block w-full" type="text" name="identification" x-model="identification" x-ref="identificationInput" x-on:input="identificationAvailabilityError = ''; $refs.identificationInput.setCustomValidity('');" :value="old('identification')" required autocomplete="off" />
                         <p x-show="identificationAvailabilityError" x-text="identificationAvailabilityError" class="mt-2 text-sm text-red-600 dark:text-red-400"></p>
@@ -256,6 +263,11 @@
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">
                         <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.name') }}</p>
                         <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100" x-text="name"></p>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">
+                        <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.auth.phone_label') }}</p>
+                        <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100" x-text="phone"></p>
                     </div>
 
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">

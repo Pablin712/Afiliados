@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\AffiliateTreeController;
 use App\Http\Controllers\Api\Admin\FinancialStatsController;
 use App\Http\Controllers\Api\Admin\MembershipTierController;
 use App\Http\Controllers\Api\Admin\PaymentVerificationController;
+use App\Http\Controllers\Api\Admin\UserLifecycleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/public/payments/{payment}/receipt', [PaymentVerificationController::class, 'publicReceipt'])
@@ -26,6 +27,9 @@ Route::prefix('admin')
 
         Route::post('/memberships/recalculate-tiers', [MembershipTierController::class, 'recalculate']);
         Route::get('/memberships/recalculate-tiers/{user}', [MembershipTierController::class, 'show']);
+
+        Route::post('/users/prune-inactive', [UserLifecycleController::class, 'pruneInactive'])
+            ->name('api.admin.users.prune-inactive');
 
         Route::get('/payments/pending', [PaymentVerificationController::class, 'pending'])
             ->name('api.admin.payments.pending.list');

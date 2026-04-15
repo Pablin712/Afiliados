@@ -271,6 +271,7 @@ return [
         'auth.basic_side_item_1' => 'Use a valid email; it will be your login username.',
         'auth.basic_side_item_2' => 'Identification should match your payment and support records.',
         'auth.basic_side_item_3' => 'Your password will be stored securely and can be changed later.',
+        'auth.phone_label' => 'Phone number',
         'auth.identification_label' => 'Identification',
         'auth.email_already_used' => 'This email has already been registered.',
         'auth.identification_already_used' => 'This identification has already been registered.',

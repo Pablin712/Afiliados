@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Membership;
 use App\Models\MembershipType;
 use App\Models\User;
+use App\Services\RegistrationWhatsappService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,10 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
+    public function __construct(private readonly RegistrationWhatsappService $registrationWhatsappService)
+    {
+    }
+
     /**
      * Display the registration view.
      */
@@ -71,6 +76,7 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'phone' => ['required', 'string', 'max:32', 'unique:'.User::class.',phone'],
             'identification' => ['required', 'string', 'max:50', 'unique:'.User::class.',identification'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'sponsor_id' => ['required', 'integer', 'exists:users,id'],
@@ -80,6 +86,7 @@ class RegisteredUserController extends Controller
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
+                'phone' => $request->string('phone')->toString(),
                 'identification' => $request->string('identification')->toString(),
                 'password' => Hash::make($request->password),
                 'sponsor_id' => $request->integer('sponsor_id'),
@@ -115,6 +122,8 @@ class RegisteredUserController extends Controller
 
             return $user;
         });
+
+        $this->registrationWhatsappService->send($user);
 
         Auth::login($user);
 

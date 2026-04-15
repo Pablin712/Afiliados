@@ -271,6 +271,7 @@ return [
         'auth.basic_side_item_1' => 'Usa un correo válido; será tu acceso al sistema.',
         'auth.basic_side_item_2' => 'La identificación debe coincidir con tus datos de cobro y soporte.',
         'auth.basic_side_item_3' => 'Tu contraseña se guardará cifrada y podrás cambiarla luego.',
+        'auth.phone_label' => 'Teléfono',
         'auth.identification_label' => 'Identificación',
         'auth.email_already_used' => 'Este correo ya fue registrado.',
         'auth.identification_already_used' => 'Esta cédula ya fue registrada.',

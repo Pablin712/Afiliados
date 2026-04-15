@@ -100,6 +100,25 @@ Notas:
 - URL: `/admin/memberships/recalculate-tiers/3`
 - Devuelve: tipo/status actual, cantidad de afiliados directos activos y tipo/status objetivo.
 
+## Endpoints de ciclo de vida de usuarios (admin)
+Prefijo: `/admin`
+
+### 8.1) Eliminar usuarios inactivos (cron)
+- Método: `POST`
+- URL: `/admin/users/prune-inactive`
+- Body JSON opcional:
+```json
+{
+  "months": 3,
+  "dry_run": false,
+  "limit": 500
+}
+```
+Notas:
+- Inactividad se calcula por `sessions.last_activity` (sin actividad en 3 meses por defecto).
+- Reasigna la red de afiliados del usuario eliminado para no romper `sponsor_id`.
+- Usa `dry_run=true` para ver impacto sin eliminar.
+
 ## Endpoints de verificacion de pagos (admin)
 Prefijo: `/admin`
 
@@ -249,6 +268,20 @@ curl -X POST "$API_BASE/admin/v2/payments/n8n/recargas/ID/rechazar" \
   - Si pasa reglas: `POST /admin/payments/pending/{id}/approve`
   - Si falla reglas: `POST /admin/payments/pending/{id}/reject`
 4. Guardar `trace_id`, score y errores para auditoría
+
+### Flujo F (limpieza de usuarios inactivos)
+1. Cron mensual (ejemplo: día 1, 03:00)
+2. HTTP Request `POST /admin/users/prune-inactive` con `dry_run=true`
+3. Revisar `data.total_candidates`
+4. Si es correcto, ejecutar `POST /admin/users/prune-inactive` con `dry_run=false`
+
+## APIs sugeridas para cron job
+1. `POST /admin/financial-stats/register-today`
+2. `POST /admin/financial-stats/register-yesterday`
+3. `POST /admin/financial-stats/register-range` (solo recuperación histórica/manual)
+4. `POST /admin/memberships/recalculate-tiers`
+5. `GET /admin/payments/pending` (verificador cada 5 minutos)
+6. `POST /admin/users/prune-inactive` (mensual)
 
 ## Plantilla de nodo HTTP (n8n)
 - Method: `POST`

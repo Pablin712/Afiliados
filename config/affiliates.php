@@ -16,4 +16,9 @@ return [
     // n8n webhook that receives pending payments to trigger AI verification.
     'payment_verifier_webhook_url' => env('PAYMENT_VERIFIER_WEBHOOK_URL', 'https://autobot.aaronsoft.es/webhook/afiliados-payment-verifier'),
     'payment_verifier_webhook_token' => env('PAYMENT_VERIFIER_WEBHOOK_TOKEN'),
+
+    // Webhook used to send WhatsApp notification after successful registration.
+    'registration_whatsapp_webhook_url' => env('REGISTRATION_WHATSAPP_WEBHOOK_URL'),
+    'registration_whatsapp_webhook_token' => env('REGISTRATION_WHATSAPP_WEBHOOK_TOKEN'),
+    'registration_whatsapp_default_country_code' => env('REGISTRATION_WHATSAPP_DEFAULT_COUNTRY_CODE', '593'),
 ];
