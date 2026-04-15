@@ -4,14 +4,18 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\MembershipReminderService;
 use App\Services\MembershipTierService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class MembershipTierController extends Controller
 {
-    public function __construct(private readonly MembershipTierService $membershipTierService)
-    {
+    public function __construct(
+        private readonly MembershipTierService $membershipTierService,
+        private readonly MembershipReminderService $membershipReminderService
+    ) {
     }
 
     public function recalculate(Request $request): JsonResponse
@@ -47,6 +51,32 @@ class MembershipTierController extends Controller
                 'user_id' => (int) $user->id,
             ],
             'data' => $this->membershipTierService->inspectUser($user),
+        ]);
+    }
+
+    public function expiredToday(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'date' => ['nullable', 'date_format:Y-m-d'],
+            'limit' => ['nullable', 'integer', 'min:1', 'max:2000'],
+        ]);
+
+        $date = isset($validated['date'])
+            ? Carbon::createFromFormat('Y-m-d', $validated['date'])->startOfDay()
+            : now()->startOfDay();
+
+        $limit = isset($validated['limit']) ? (int) $validated['limit'] : 500;
+
+        $users = $this->membershipReminderService->usersWithMembershipExpiredOnDate($date, $limit);
+
+        return response()->json([
+            'message' => 'Users with membership expiration for the requested date retrieved successfully.',
+            'meta' => [
+                'requested_date' => $date->toDateString(),
+                'count' => count($users),
+                'limit' => $limit,
+            ],
+            'data' => $users,
         ]);
     }
 }

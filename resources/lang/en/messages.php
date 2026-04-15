@@ -222,6 +222,7 @@ return [
     'profile.resend_verification' => 'Click here to re-send the verification email.',
     'profile.verification_sent' => 'A new verification link has been sent to your email address.',
     'profile.saved' => 'Saved.',
+    'profile.phone_label' => 'Phone number',
     'profile.current_password' => 'Current Password',
     'profile.new_password' => 'New Password',
     'profile.referral_title' => 'Affiliate Link',

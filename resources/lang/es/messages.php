@@ -222,6 +222,7 @@ return [
     'profile.resend_verification' => 'Haz clic aquí para reenviar el correo de verificación.',
     'profile.verification_sent' => 'Un nuevo enlace de verificación ha sido enviado a tu dirección de correo electrónico.',
     'profile.saved' => 'Guardado.',
+    'profile.phone_label' => 'Teléfono',
     'profile.current_password' => 'Contraseña Actual',
     'profile.new_password' => 'Nueva Contraseña',
     'profile.referral_title' => 'Enlace de Afiliación',
