@@ -10,11 +10,6 @@ class RegistrationWhatsappService
 {
     public function send(User $user): void
     {
-        $webhookUrl = trim((string) config('affiliates.registration_whatsapp_webhook_url', ''));
-        if ($webhookUrl === '') {
-            return;
-        }
-
         $rawPhone = (string) ($user->phone ?? '');
         $normalizedPhone = $this->normalizePhoneToE164($rawPhone);
 
@@ -49,6 +44,61 @@ class RegistrationWhatsappService
             'message_es' => $welcomeMessage,
             'created_at' => optional($user->created_at)?->toIso8601String(),
         ];
+
+        $this->sendPayload($user, $payload);
+    }
+
+    public function sendPostPago(User $user): void
+    {
+        $rawPhone = (string) ($user->phone ?? '');
+        $normalizedPhone = $this->normalizePhoneToE164($rawPhone);
+
+        $message = "¡Bienvenido/a a AET Trader Academy! 👨🏻‍💻\n\n"
+            ."Desde este momento estaré acompañándote en tu proceso dentro del sistema.\n"
+            ."Soy Donna - asistente de AET Trader Academy.\n\n"
+            ."Acceso a la comunidad\n\n"
+            ."Canal oficial\n"
+            ."https://t.me/+tv9B-1V8eWdhMjIx\n\n"
+            ."Señales VIP\n"
+            ."https://t.me/+AoQTrGdNxhNlMWFh\n"
+            ."https://t.me/+tJuQIHiKP0JkYzYx\n\n"
+            ."Grupo Premium\n"
+            ."https://t.me/+jVdPcBcKNFAyYzZh\n\n\n"
+            ."Si también quieres generar ingresos recomendando el sistema, responde:\n\n"
+            ."“Quiero estar en el sistema de referidos”\n\n"
+            ."y agendamos un Zoom para explicarte cómo funciona.\n\n"
+            ."A partir de ahora estaré pendiente para ayudarte en tu proceso dentro de AET TRADER ACADEMY";
+
+        $payload = [
+            'tipo' => 'post_pago',
+            'event' => 'user.post_pago',
+            'user_id' => (int) $user->id,
+            'name' => (string) $user->name,
+            'email' => (string) $user->email,
+            'phone' => $normalizedPhone,
+            'phone_raw' => $rawPhone,
+            'usuario' => [
+                'nombre' => (string) $user->name,
+                'phone' => $normalizedPhone,
+                'telefono' => $normalizedPhone,
+            ],
+            'mensaje' => $message,
+            'message_es' => $message,
+            'created_at' => optional($user->created_at)?->toIso8601String(),
+        ];
+
+        $this->sendPayload($user, $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function sendPayload(User $user, array $payload): void
+    {
+        $webhookUrl = trim((string) config('affiliates.registration_whatsapp_webhook_url', ''));
+        if ($webhookUrl === '') {
+            return;
+        }
 
         $token = trim((string) config('affiliates.registration_whatsapp_webhook_token', ''));
 

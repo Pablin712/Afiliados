@@ -14,6 +14,7 @@ class PendingPaymentReviewService
     public function __construct(
         private readonly ProfitDistributionService $profitDistributionService,
         private readonly MembershipTierService $membershipTierService,
+        private readonly RegistrationWhatsappService $registrationWhatsappService,
     ) {
     }
 
@@ -86,6 +87,10 @@ class PendingPaymentReviewService
                     'last_payment_id' => $payment->id,
                 ]
             );
+
+            if ($isFreeMembership) {
+                $this->registrationWhatsappService->sendPostPago($user);
+            }
 
             $this->profitDistributionService->distributeForApprovedPayment($payment, $membershipType);
 
