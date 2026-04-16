@@ -63,16 +63,17 @@ class MembershipTierController extends Controller
 
         $date = isset($validated['date'])
             ? Carbon::createFromFormat('Y-m-d', $validated['date'])->startOfDay()
-            : now()->startOfDay();
+            : now()->addDay()->startOfDay();
 
         $limit = isset($validated['limit']) ? (int) $validated['limit'] : 500;
 
         $users = $this->membershipReminderService->usersWithMembershipExpiredOnDate($date, $limit);
 
         return response()->json([
-            'message' => 'Users with membership expiration for the requested date retrieved successfully.',
+            'message' => 'Users with membership expiring on the requested date retrieved successfully.',
             'meta' => [
                 'requested_date' => $date->toDateString(),
+                'default_date_behavior' => isset($validated['date']) ? 'custom' : 'tomorrow',
                 'count' => count($users),
                 'limit' => $limit,
             ],

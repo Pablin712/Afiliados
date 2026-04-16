@@ -100,15 +100,15 @@ Notas:
 - URL: `/admin/memberships/recalculate-tiers/3`
 - Devuelve: tipo/status actual, cantidad de afiliados directos activos y tipo/status objetivo.
 
-### 8.2) Listar usuarios con membresia vencida hoy (cron recordatorio)
+### 8.2) Listar usuarios con membresia que vence manana (cron recordatorio)
 - Método: `GET`
 - URL: `/admin/memberships/expired-today`
 - Query opcional:
-  - `date=2026-04-15` (formato `Y-m-d`, por defecto hoy)
+  - `date=2026-04-15` (formato `Y-m-d`, por defecto manana)
   - `limit=500` (maximo 2000)
 - Data por item incluye:
   - `user_id`, `name`, `email`, `phone`, `affiliate_code`
-  - `membership` (`type`, `status`, `started_at`, `expires_at`, `expired_date`)
+  - `membership` (`type`, `status`, `started_at`, `expires_at`, `expires_on`, `expired_date`)
   - `sponsor` (`id`, `name`, `email`)
   - `reminder` (`event`, `message_es`, `message_en`)
 
@@ -290,7 +290,7 @@ curl -X POST "$API_BASE/admin/v2/payments/n8n/recargas/ID/rechazar" \
 ### Flujo G (recordatorio diario de membresias vencidas)
 1. Cron diario (ejemplo: 08:05 UTC)
 2. HTTP Request `GET /admin/memberships/expired-today`
-3. Iterar `data[]` y enviar mensaje por WhatsApp/SMS usando `phone`, `name` y `reminder.message_es`
+3. Iterar `data[]` y enviar mensaje por WhatsApp/SMS usando `phone`, `name` y `reminder.message_es` (recordatorio de un dia antes)
 4. Guardar auditoria (`user_id`, canal, estado de envio)
 
 ## APIs sugeridas para cron job
@@ -300,7 +300,7 @@ curl -X POST "$API_BASE/admin/v2/payments/n8n/recargas/ID/rechazar" \
 4. `POST /admin/memberships/recalculate-tiers`
 5. `GET /admin/payments/pending` (verificador cada 5 minutos)
 6. `POST /admin/users/prune-inactive` (mensual)
-7. `GET /admin/memberships/expired-today` (recordatorio diario)
+7. `GET /admin/memberships/expired-today` (recordatorio diario para vencimientos de manana)
 
 ## Plantilla de nodo HTTP (n8n)
 - Method: `POST`

@@ -10,10 +10,18 @@ return [
     'numeric' => 'El campo :attribute debe ser un número.',
     'password' => 'La contraseña es incorrecta.',
 
+    'custom' => [
+        'phone' => [
+            'regex' => 'El teléfono debe tener formato ecuatoriano válido (ej: 0991234567 o +593991234567).',
+        ],
+    ],
+
     'attributes' => [
         'name' => 'nombre',
         'email' => 'correo electrónico',
         'password' => 'contraseña',
+        'phone' => 'teléfono',
+        'identification' => 'identificación',
         'sponsor_id' => 'patrocinador',
         'commission_rate' => 'tasa de comisión',
         'membership_type_id' => 'tipo de membresía',

@@ -28,6 +28,7 @@ class RegistrationTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'phone' => '+593987654321',
             'identification' => 'V-12345678',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -46,6 +47,31 @@ class RegistrationTest extends TestCase
         $this->assertSame('free', $membership?->status);
         $this->assertSame('free', $membership?->membershipType?->name);
         $this->assertDatabaseMissing('payments', ['user_id' => $user->id]);
+    }
+
+    public function test_new_user_can_register_through_referral_code(): void
+    {
+        $sponsor = $this->createSponsor();
+
+        $sponsor->forceFill([
+            'affiliate_code' => User::buildAffiliateCode($sponsor->name, $sponsor->id),
+        ])->save();
+
+        $response = $this->post('/register', [
+            'name' => 'Referral User',
+            'email' => 'referral@example.com',
+            'phone' => '+593912345678',
+            'identification' => 'V-87654321',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'sponsor_id' => $sponsor->id,
+        ]);
+
+        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertAuthenticated();
+
+        $user = User::query()->where('email', 'referral@example.com')->firstOrFail();
+        $this->assertSame($sponsor->id, $user->sponsor_id);
     }
 
     private function createSponsor(): User

@@ -12,7 +12,7 @@ class ProfileUpdateRequest extends FormRequest
     {
         $accountId = trim((string) $this->input('binance_account_id', ''));
         $username = trim((string) $this->input('binance_username', ''));
-        $phone = trim((string) $this->input('phone', ''));
+        $phone = $this->normalizePhone((string) $this->input('phone', ''));
 
         $this->merge([
             'binance_account_id' => $accountId === '' ? null : $accountId,
@@ -41,8 +41,9 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
             'phone' => [
-                'nullable',
+                'required',
                 'string',
+                'regex:/^\+593\d{9}$/',
                 'max:30',
                 Rule::unique(User::class, 'phone')->ignore($this->user()->id),
             ],
@@ -55,5 +56,25 @@ class ProfileUpdateRequest extends FormRequest
             ],
             'binance_username' => ['nullable', 'string', 'max:150', 'required_with:binance_account_id'],
         ];
+    }
+
+    private function normalizePhone(string $phone): string
+    {
+        $phone = trim($phone);
+        if ($phone === '') {
+            return '';
+        }
+
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if ($digits === '') {
+            return '';
+        }
+
+        if (str_starts_with($digits, '593')) {
+            return '+'.$digits;
+        }
+
+        return $digits;
     }
 }

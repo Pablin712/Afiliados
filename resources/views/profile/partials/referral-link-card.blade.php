@@ -33,12 +33,16 @@
     <div class="mt-4">
         <x-input-label for="affiliate_link" :value="__('messages.profile.referral_link_label')" />
 
+        @php
+            $referralLink = rtrim(request()->root(), '/').'/register?ref='.urlencode($user->currentAffiliateCode());
+        @endphp
+
         <div class="mt-1 flex items-stretch gap-2">
             <x-text-input
                 id="affiliate_link"
                 type="text"
                 class="block w-full"
-                :value="route('register') . '?ref=' . urlencode($user->currentAffiliateCode())"
+                :value="$referralLink"
                 readonly
             />
 

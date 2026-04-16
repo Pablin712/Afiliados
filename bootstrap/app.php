@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\AuditLogMiddleware::class,
+            \App\Http\Middleware\EnsureUserPhoneIsSet::class,
         ]);
 
         $middleware->api(append: [
@@ -46,8 +48,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], $statusCode >= 400 && $statusCode < 600 ? $statusCode : 500);
             }
 
-            return response()->view('errors.generic', [
-                'statusCode' => $statusCode,
-            ], $statusCode >= 400 && $statusCode < 600 ? $statusCode : 500);
+            if (View::exists('errors.generic')) {
+                return response()->view('errors.generic', [
+                    'statusCode' => $statusCode,
+                ], $statusCode >= 400 && $statusCode < 600 ? $statusCode : 500);
+            }
+
+            return response(
+                __('messages.error_generic').' (HTTP '.$statusCode.')',
+                $statusCode >= 400 && $statusCode < 600 ? $statusCode : 500
+            );
         });
     })->create();

@@ -41,6 +41,7 @@ class MembershipReminderService
                     'status' => (string) ($membership?->status ?? ''),
                     'started_at' => optional($membership?->started_at)?->toIso8601String(),
                     'expires_at' => optional($membership?->expires_at)?->toIso8601String(),
+                    'expires_on' => $date->toDateString(),
                     'expired_date' => $date->toDateString(),
                 ],
                 'sponsor' => [
@@ -49,9 +50,9 @@ class MembershipReminderService
                     'email' => (string) ($user->sponsor?->email ?? ''),
                 ],
                 'reminder' => [
-                    'event' => 'membership.expired',
-                    'message_es' => 'Tu membresía venció hoy. Por favor reactiva para mantener tus beneficios.',
-                    'message_en' => 'Your membership expired today. Please reactivate to keep your benefits.',
+                    'event' => 'membership.expiring_soon',
+                    'message_es' => 'Tu membresía vence mañana. Por favor reactiva para mantener tus beneficios.',
+                    'message_en' => 'Your membership expires tomorrow. Please reactivate to keep your benefits.',
                 ],
             ];
         })->values()->all();

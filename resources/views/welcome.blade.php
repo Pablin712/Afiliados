@@ -254,6 +254,9 @@
                                 <p class="mt-3 text-sm leading-7 text-slate-300">
                                     {{ __('messages.welcome.programs_panel_description') }}
                                 </p>
+                                <p class="mt-3 rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm font-medium leading-6 text-emerald-200">
+                                    {{ __('messages.welcome.programs_premium_schedule') }}
+                                </p>
 
                                 <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-1">
                                     <div class="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-4">
@@ -279,8 +282,8 @@
                 </section>
 
                 <section id="quien-detras" class="mt-10 sm:mt-14 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                        <div class="lg:col-span-2">
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8 items-start">
+                        <div>
                             <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
                                 {{ __('messages.welcome.behind_title') }}
                             </h2>
@@ -300,13 +303,15 @@
                             </div>
                         </div>
 
-                        <aside class="rounded-2xl border border-gray-200 dark:border-graphite-800 bg-gray-50 dark:bg-graphite-800/60 p-5">
-                            <div class="flex items-center gap-3">
-                                <img src="{{ asset('storage/siglas2.png') }}" alt="AET Trader Academy" class="h-12 w-12 rounded-full object-cover">
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">AET Trader Academy</p>
-                                    <p class="text-xs text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.behind_badge') }}</p>
+                        <aside class="rounded-2xl border border-gray-200 dark:border-graphite-800 bg-gray-50 dark:bg-graphite-800/60 p-5 lg:sticky lg:top-24">
+                            <div class="overflow-hidden rounded-2xl border border-gray-200 dark:border-graphite-700 bg-white dark:bg-graphite-900">
+                                <div class="h-[360px] sm:h-[440px] lg:h-[420px] w-full bg-gray-100 dark:bg-graphite-900">
+                                    <img src="{{ asset('storage/me/esteban1.jpeg') }}" alt="Esteban - AET Trader Academy" class="h-full w-full object-cover object-top">
                                 </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">Esteban Rivera</p>
+                                <p class="text-xs text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.behind_badge') }}</p>
                             </div>
                             <p class="mt-4 text-sm text-gray-600 dark:text-graphite-300">{{ __('messages.welcome.behind_quote') }}</p>
                         </aside>

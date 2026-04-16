@@ -18,16 +18,35 @@ class RegistrationWhatsappService
         $rawPhone = (string) ($user->phone ?? '');
         $normalizedPhone = $this->normalizePhoneToE164($rawPhone);
 
+        $welcomeMessage = "¡Bienvenido/a {$user->name} a AET Trader Academy! 👨🏻‍💻\n\n"
+            ."Desde este momento estaré acompañándote en tu proceso dentro del sistema.\n"
+            ."Soy Donna - asistente de AET Trader Academy.\n\n"
+            ."Si ya estás usando la versión gratuita, el siguiente paso es simple:\n"
+            ."entra ahora a nuestro canal de Telegram.\n\n"
+            ."https://t.me/aetsas\n\n"
+            ."Ahí vas a encontrar los enlaces gratuitos y todo el contenido para que empieces correctamente.\n\n"
+            ."Además, te recomendamos crearte tu cuenta a través de los enlaces que tienes en la página principal de AET, para que puedas operar y aprovechar correctamente todas las herramientas.\n\n"
+            ."Ahora, si realmente quieres resultados y no solo mirar, el plan premium de $147 te desbloquea todo:\n"
+            ."escáner, señales y clases en vivo.\n\n"
+            ."No te quedes a medias. Avanza.\n\n"
+            ."Te recomiendo analizar en\n"
+            ."https://tradingview.deriv.com/\n\n"
+            ."Y trabajar con cuentas standar mt5 que podrás aperturar dentro de los links de nuestros brokers asociados.";
+
         $payload = [
-            'tipo' => 'registro_exitoso',
-            'event' => 'user.registered',
+            'tipo' => 'bienvenida',
+            'event' => 'user.welcome',
             'user_id' => (int) $user->id,
             'name' => (string) $user->name,
             'email' => (string) $user->email,
             'phone' => $normalizedPhone,
             'phone_raw' => $rawPhone,
-            'message_es' => '✅ Registro exitoso en Afiliados para '.$user->name,
-            'message_en' => '✅ Successful registration in Afiliados for '.$user->name,
+            'usuario' => [
+                'nombre' => (string) $user->name,
+                'telefono' => $normalizedPhone,
+            ],
+            'mensaje' => $welcomeMessage,
+            'message_es' => $welcomeMessage,
             'created_at' => optional($user->created_at)?->toIso8601String(),
         ];
 

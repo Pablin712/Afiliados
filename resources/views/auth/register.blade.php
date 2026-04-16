@@ -125,6 +125,12 @@
     >
         @csrf
 
+        @if (session('error'))
+            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/60 dark:bg-red-900/20 dark:text-red-300">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <input type="hidden" name="sponsor_id" value="{{ old('sponsor_id', $sponsor->id) }}">
 
         <div class="space-y-2">
