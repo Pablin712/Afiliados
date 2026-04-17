@@ -55,7 +55,7 @@
 
         <div>
             <x-input-label for="phone" :value="__('messages.profile.phone_label')" />
-            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" placeholder="+593961778319" />
+            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" placeholder="+12025550123" />
             <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.profile.phone_hint') }}</p>
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>

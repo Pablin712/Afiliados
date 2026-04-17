@@ -43,7 +43,7 @@ class ProfileUpdateRequest extends FormRequest
             'phone' => [
                 'required',
                 'string',
-                'regex:/^\+593\d{9}$/',
+                'regex:/^\+[1-9]\d{7,14}$/',
                 'max:30',
                 Rule::unique(User::class, 'phone')->ignore($this->user()->id),
             ],
@@ -71,10 +71,14 @@ class ProfileUpdateRequest extends FormRequest
             return '';
         }
 
-        if (str_starts_with($digits, '593')) {
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+
+        if (preg_match('/^[1-9]\d{7,14}$/', $digits)) {
             return '+'.$digits;
         }
 
-        return $digits;
+        return '';
     }
 }

@@ -12,7 +12,7 @@ return [
 
     'custom' => [
         'phone' => [
-            'regex' => 'El teléfono debe tener formato ecuatoriano válido (ej: 0991234567 o +593991234567).',
+            'regex' => 'El telefono debe estar en formato internacional valido (ej: +12025550123).',
         ],
     ],
 

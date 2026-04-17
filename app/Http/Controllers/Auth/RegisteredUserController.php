@@ -124,7 +124,7 @@ class RegisteredUserController extends Controller
             'phone' => $this->normalizePhone((string) $request->input('phone', '')),
         ]);
 
-        $phoneRules = ['required', 'string', 'regex:/^\+5939\d{8}$/', 'max:32'];
+        $phoneRules = ['required', 'string', 'regex:/^\+[1-9]\d{7,14}$/', 'max:32'];
         if ($phoneColumnAvailable) {
             $phoneRules[] = 'unique:'.User::class.',phone';
         }
@@ -244,8 +244,7 @@ class RegisteredUserController extends Controller
             $digits = substr($digits, 2);
         }
 
-        // Only accept values that already include Ecuador country code: 5939XXXXXXXX
-        if (preg_match('/^5939\d{8}$/', $digits)) {
+        if (preg_match('/^[1-9]\d{7,14}$/', $digits)) {
             return '+'.$digits;
         }
 

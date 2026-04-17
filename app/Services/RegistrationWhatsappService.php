@@ -180,20 +180,10 @@ class RegistrationWhatsappService
             return '+'.substr($digits, 2);
         }
 
-        $defaultCountryCode = preg_replace(
-            '/\D+/',
-            '',
-            (string) config('affiliates.registration_whatsapp_default_country_code', '593')
-        ) ?? '';
-
-        if ($defaultCountryCode !== '' && str_starts_with($digits, '0')) {
-            return '+'.$defaultCountryCode.ltrim($digits, '0');
+        if (preg_match('/^[1-9]\d{7,14}$/', $digits)) {
+            return '+'.$digits;
         }
 
-        if ($defaultCountryCode !== '' && ! str_starts_with($digits, $defaultCountryCode) && strlen($digits) <= 10) {
-            return '+'.$defaultCountryCode.$digits;
-        }
-
-        return '+'.$digits;
+        return '';
     }
 }
