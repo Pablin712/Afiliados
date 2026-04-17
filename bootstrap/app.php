@@ -35,6 +35,12 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Throwable $e, Request $request) {
+            // Temporary switch: by default use Laravel's native exception rendering.
+            // Set APP_USE_CUSTOM_ERROR_VIEW=true to enable the custom generic error page again.
+            if (! (bool) env('APP_USE_CUSTOM_ERROR_VIEW', false)) {
+                return null;
+            }
+
             // Keep detailed traces only when debug mode is enabled.
             if (config('app.debug')) {
                 return null;

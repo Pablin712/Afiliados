@@ -12,6 +12,7 @@
             passwordConfirmationValue: '',
             showPassword: false,
             showPasswordConfirmation: false,
+            passwordPolicyMessage: @js(__('messages.auth.password_policy_help')),
             emailAvailabilityError: '',
             identificationAvailabilityError: '',
             availabilityUrl: @js(route('register.availability')),
@@ -75,6 +76,11 @@
                 ].filter(Boolean);
 
                 refs.forEach((field) => field.setCustomValidity(''));
+
+                const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+                if (!passwordPattern.test(this.passwordValue)) {
+                    this.$refs.passwordInput?.setCustomValidity(this.passwordPolicyMessage);
+                }
 
                 if (this.passwordValue !== this.passwordConfirmationValue) {
                     this.$refs.passwordConfirmationInput?.setCustomValidity(@js(__('validation.confirmed')));
@@ -193,7 +199,7 @@
                     <div>
                         <x-input-label for="password" :value="__('messages.password')" />
                         <div class="relative">
-                            <x-text-input id="password" class="mt-1 block w-full pr-10" x-bind:type="showPassword ? 'text' : 'password'" name="password" x-ref="passwordInput" x-model="passwordValue" x-on:input="$refs.passwordInput.setCustomValidity(''); $refs.passwordConfirmationInput?.setCustomValidity('');" required autocomplete="new-password" />
+                            <x-text-input id="password" class="mt-1 block w-full pr-10" x-bind:type="showPassword ? 'text' : 'password'" name="password" x-ref="passwordInput" x-model="passwordValue" x-on:input="$refs.passwordInput.setCustomValidity(''); $refs.passwordConfirmationInput?.setCustomValidity('');" required autocomplete="new-password" minlength="8" />
                             <button
                                 type="button"
                                 class="absolute inset-y-0 right-0 mt-1 px-3 text-gray-500 hover:text-gray-700 dark:text-graphite-400 dark:hover:text-graphite-200"
@@ -210,6 +216,7 @@
                                 </svg>
                             </button>
                         </div>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.auth.password_policy_help') }}</p>
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                     </div>
 

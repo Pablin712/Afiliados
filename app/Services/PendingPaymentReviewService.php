@@ -75,6 +75,8 @@ class PendingPaymentReviewService
             $isFreeMembership = (string) ($currentMembership?->status ?? 'free') === 'free'
                 || strtolower((string) ($currentMembership?->membershipType?->name ?? 'free')) === 'free';
 
+            $isCustomerTargetMembership = strtolower((string) $membershipType->name) === 'customer';
+
             $durationMonths = $isFreeMembership ? 2 : 1;
 
             Membership::updateOrCreate(
@@ -88,7 +90,7 @@ class PendingPaymentReviewService
                 ]
             );
 
-            if ($isFreeMembership) {
+            if ($isFreeMembership && $isCustomerTargetMembership) {
                 $this->registrationWhatsappService->sendPostPago($user);
             }
 
