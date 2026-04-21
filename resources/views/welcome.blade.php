@@ -144,7 +144,7 @@
                                 <a href="#contacto" class="inline-flex items-center px-5 py-3 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
                                     {{ __('messages.welcome.button_advisor') }}
                                 </a>
-                                <a href="https://deriv.com/signup?sidc=7044F2C1-1A0C-496A-986E-570DCAD80FF8&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU17859" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-5 py-3 rounded-md bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 dark:bg-brand-500 dark:hover:bg-brand-400">
+                                <a href="https://deriv.partners/rx?sidc=7DC463EF-A2B7-4084-AC3B-25D715906684&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU304085" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-5 py-3 rounded-md bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 dark:bg-brand-500 dark:hover:bg-brand-400">
                                     {{ __('messages.welcome.button_deriv_account') }}
                                 </a>
                                 <a href="https://es.gowt.net/ib61404" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-5 py-3 rounded-md border border-sky-300 bg-sky-50 text-sm font-semibold text-sky-800 hover:border-sky-400 hover:bg-sky-100 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-300 dark:hover:border-sky-400 dark:hover:bg-sky-500/20">

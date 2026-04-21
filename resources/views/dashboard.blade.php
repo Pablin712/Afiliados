@@ -16,7 +16,7 @@
                         {{ __('messages.user.dashboard.open_network') }}
                     </a>
 
-                    <a href="https://deriv.com/signup?sidc=7044F2C1-1A0C-496A-986E-570DCAD80FF8&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU17859" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-brand-500 dark:hover:bg-brand-400">
+                    <a href="https://deriv.partners/rx?sidc=7DC463EF-A2B7-4084-AC3B-25D715906684&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU304085" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-brand-500 dark:hover:bg-brand-400">
                         {{ __('messages.user.dashboard.create_deriv_account') }}
                     </a>
 
@@ -33,7 +33,7 @@
                             </x-slot>
 
                             <x-slot name="content">
-                                <a href="https://xquant.marketview.club/derivChart/?ref=Z3JleGZhcnJp" target="_blank" rel="noopener noreferrer" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-graphite-200 dark:hover:bg-graphite-800">
+                                <a href="https://xquant.marketview.club/derivChart/?ref=RXN0ZWJhbnRy" target="_blank" rel="noopener noreferrer" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-graphite-200 dark:hover:bg-graphite-800">
                                     {{ __('messages.user.dashboard.scanner.broker_deriv') }}
                                 </a>
                                 <button type="button" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-graphite-200 dark:hover:bg-graphite-800" onclick="openScannerDownloadModal('weltrade')">
@@ -129,7 +129,7 @@
                             <p class="text-xs uppercase tracking-[0.18em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.quick_actions') }}</p>
                             <div class="mt-3 grid gap-2">
                                 @unless($isAdmin)
-                                    <a href="https://deriv.com/signup?sidc=7044F2C1-1A0C-496A-986E-570DCAD80FF8&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU17859" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-brand-400 hover:text-brand-700 dark:border-graphite-800 dark:text-graphite-200 dark:hover:border-brand-500 dark:hover:text-brand-300">
+                                    <a href="https://deriv.partners/rx?sidc=7DC463EF-A2B7-4084-AC3B-25D715906684&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU304085" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-brand-400 hover:text-brand-700 dark:border-graphite-800 dark:text-graphite-200 dark:hover:border-brand-500 dark:hover:text-brand-300">
                                         <span>{{ __('messages.user.dashboard.create_deriv_account') }}</span>
                                         <span>{{ __('messages.user.dashboard.external_link_badge') }}</span>
                                     </a>
