@@ -5,11 +5,15 @@ use App\Http\Controllers\Api\Admin\FinancialStatsController;
 use App\Http\Controllers\Api\Admin\MembershipTierController;
 use App\Http\Controllers\Api\Admin\PaymentVerificationController;
 use App\Http\Controllers\Api\Admin\UserLifecycleController;
+use App\Http\Controllers\Api\MembershipVerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/public/payments/{payment}/receipt', [PaymentVerificationController::class, 'publicReceipt'])
     ->middleware('signed')
     ->name('api.public.payments.receipt');
+
+Route::get('/verify-membership', [MembershipVerificationController::class, 'verify'])
+    ->name('api.verify-membership');
 
 Route::prefix('admin')
     ->middleware(['internal_api_token'])
