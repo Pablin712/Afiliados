@@ -1,0 +1,6 @@
+{
+  "python.analysis.stubPath": "c:\\laragon\\www\\Afiliados\\.stubs\\pyspark34",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingModuleSource": "none"
+  }
+}
