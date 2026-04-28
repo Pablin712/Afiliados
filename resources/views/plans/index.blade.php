@@ -160,14 +160,14 @@
                 </div>
             </div>
 
-            {{-- Programs list --}}
-            @if (! $canSubmitPaidRenewal)
+            {{-- Tier free-renew benefit (rule: 3 new direct customers in current month) --}}
+            @if ($isTierUser)
                 <div class="rounded-3xl border border-indigo-200 bg-indigo-50/70 p-6 shadow-sm dark:border-indigo-800/50 dark:bg-indigo-900/15">
                     <h4 class="text-base font-semibold text-indigo-900 dark:text-indigo-200">
                         {{ __('messages.plans.tier_benefit_title') }}
                     </h4>
                     <p class="mt-1 text-sm text-indigo-800 dark:text-indigo-300">
-                        {{ __('messages.plans.tier_benefit_description', ['count' => (int) ($activeDirectAffiliates ?? 0)]) }}
+                        {{ __('messages.plans.tier_benefit_description', ['count' => (int) ($monthlyNewDirectCustomers ?? 0)]) }}
                     </p>
 
                     @if ($canFreeRenewToday)
@@ -182,6 +182,13 @@
                             {{ __('messages.plans.renew_free_waiting') }}
                         </p>
                     @endif
+                </div>
+            @endif
+
+            {{-- Programs list --}}
+            @if (! $canSubmitPaidRenewal)
+                <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/40">
+                    <p class="text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.plans.only_customer_or_free_can_pay') }}</p>
                 </div>
             @elseif ($programs->isEmpty())
                 <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-graphite-800 dark:bg-graphite-950/40">

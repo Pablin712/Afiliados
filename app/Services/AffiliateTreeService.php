@@ -11,7 +11,7 @@ class AffiliateTreeService
     /**
      * @return array<int, array{level:int,user:User}>
      */
-    public function sponsorsByLevel(User $user, int $maxLevels = 3): array
+    public function sponsorsByLevel(User $user, int $maxLevels = 7): array
     {
         $levels = [];
         $current = $user;
@@ -45,7 +45,7 @@ class AffiliateTreeService
     /**
      * @return array<int, Collection<int, User>>
      */
-    public function affiliatesByLevel(User $user, int $maxLevels = 3): array
+    public function affiliatesByLevel(User $user, int $maxLevels = 7): array
     {
         $result = [];
         $frontier = collect([$user->id]);
@@ -97,8 +97,10 @@ class AffiliateTreeService
     {
         $user->loadMissing(['membership.membershipType', 'payments' => fn ($q) => $q->where('state', 'approved')->latest('reviewed_at')]);
 
-        $sponsors = $this->sponsorsByLevel($user, (int) config('affiliates.max_sponsor_levels', 3));
-        $affiliates = $this->affiliatesByLevel($user, 3);
+        $levels = (int) config('affiliates.max_sponsor_levels', 7);
+
+        $sponsors = $this->sponsorsByLevel($user, $levels);
+        $affiliates = $this->affiliatesByLevel($user, $levels);
 
         return [
             'user' => [
@@ -203,13 +205,13 @@ class AffiliateTreeService
 
         $sponsors = $isSponsor
             ? collect()
-            : collect($this->sponsorsByLevel($subject, (int) config('affiliates.max_sponsor_levels', 3)))
+            : collect($this->sponsorsByLevel($subject, (int) config('affiliates.max_sponsor_levels', 7)))
                 ->filter(fn (array $row): bool => $this->canAccessInUserScope($viewer, $row['user']))
                 ->values();
 
         $affiliates = $isSponsor
             ? []
-            : collect($this->affiliatesByLevel($subject, 3))->mapWithKeys(function (Collection $rows, int $level) use ($viewer): array {
+            : collect($this->affiliatesByLevel($subject, (int) config('affiliates.max_sponsor_levels', 7)))->mapWithKeys(function (Collection $rows, int $level) use ($viewer): array {
                 $visibleRows = $rows
                     ->filter(fn (User $affiliate): bool => $this->isDescendantOfViewer($viewer, $affiliate))
                     ->values();

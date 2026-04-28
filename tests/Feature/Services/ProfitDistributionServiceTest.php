@@ -30,13 +30,20 @@ class ProfitDistributionServiceTest extends TestCase
             'profit' => 0,
         ]);
 
+        $beginnerType = MembershipType::query()->create([
+            'name' => 'beginner',
+            'affiliates_required' => 1,
+            'cost' => 0,
+            'profit' => 0,
+        ]);
+
         $sponsor = User::factory()->create([
             'commission_balance' => 0,
         ]);
 
         Membership::query()->create([
             'user_id' => $sponsor->id,
-            'membership_type_id' => $customerType->id,
+            'membership_type_id' => $beginnerType->id,
             'status' => 'active',
         ]);
 
@@ -65,7 +72,7 @@ class ProfitDistributionServiceTest extends TestCase
         ]);
 
         $sponsor->refresh();
-        $this->assertSame(20.0, (float) $sponsor->commission_balance);
+        $this->assertSame(22.0, (float) $sponsor->commission_balance);
     }
 
     public function test_it_does_not_generate_profit_when_sponsor_membership_is_free(): void

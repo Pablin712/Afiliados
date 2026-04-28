@@ -35,11 +35,11 @@ class ComprehensiveTestScenarioSeeder extends Seeder
         $admin->save();
 
         $membershipTypes = MembershipType::query()
-            ->whereIn('name', ['free', 'customer', 'beginner', 'explorer', 'professional', 'elite'])
+            ->whereIn('name', ['free', 'customer', 'beginner', 'constructor', 'explorer', 'professional', 'elite', 'master', 'legend'])
             ->get()
             ->keyBy(fn (MembershipType $type) => strtolower((string) $type->name));
 
-        foreach (['free', 'customer', 'beginner', 'explorer', 'professional', 'elite'] as $requiredType) {
+        foreach (['free', 'customer', 'beginner', 'constructor', 'explorer', 'professional', 'elite', 'master', 'legend'] as $requiredType) {
             if (! $membershipTypes->has($requiredType)) {
                 throw new \RuntimeException("Membership type '{$requiredType}' is required before seeding test scenario.");
             }

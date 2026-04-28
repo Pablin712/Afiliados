@@ -17,10 +17,13 @@ class MembershipTypeSeeder extends Seeder
         $rows = [
             ['name' => 'free', 'affiliates_required' => 0, 'cost' => 0, 'profit' => 0],
             ['name' => 'customer', 'affiliates_required' => 0, 'cost' => 97, 'profit' => 0],
-            ['name' => 'beginner', 'affiliates_required' => 3, 'cost' => 0, 'profit' => 0],
-            ['name' => 'explorer', 'affiliates_required' => 10, 'cost' => 0, 'profit' => 100],
-            ['name' => 'professional', 'affiliates_required' => 20, 'cost' => 0, 'profit' => 200],
-            ['name' => 'elite', 'affiliates_required' => 30, 'cost' => 0, 'profit' => 300],
+            ['name' => 'beginner', 'affiliates_required' => 1, 'cost' => 0, 'profit' => 0],
+            ['name' => 'constructor', 'affiliates_required' => 3, 'cost' => 0, 'profit' => 0],
+            ['name' => 'explorer', 'affiliates_required' => 5, 'cost' => 0, 'profit' => 40],
+            ['name' => 'professional', 'affiliates_required' => 8, 'cost' => 0, 'profit' => 100],
+            ['name' => 'elite', 'affiliates_required' => 10, 'cost' => 0, 'profit' => 250],
+            ['name' => 'master', 'affiliates_required' => 12, 'cost' => 0, 'profit' => 550],
+            ['name' => 'legend', 'affiliates_required' => 15, 'cost' => 0, 'profit' => 1100],
         ];
 
         foreach ($rows as $row) {

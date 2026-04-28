@@ -46,7 +46,7 @@ class MembershipTierApiTest extends TestCase
 
         $beginnerType = MembershipType::query()->create([
             'name' => 'beginner',
-            'affiliates_required' => 3,
+            'affiliates_required' => 1,
             'cost' => 0,
             'profit' => 0,
         ]);
@@ -86,7 +86,7 @@ class MembershipTierApiTest extends TestCase
         ]);
     }
 
-    public function test_it_promotes_active_customer_to_beginner_when_reaching_three_active_direct_affiliates(): void
+    public function test_it_promotes_active_customer_to_constructor_when_reaching_three_active_direct_affiliates(): void
     {
         $customerType = MembershipType::query()->create([
             'name' => 'customer',
@@ -95,8 +95,15 @@ class MembershipTierApiTest extends TestCase
             'profit' => 0,
         ]);
 
-        $beginnerType = MembershipType::query()->create([
+        MembershipType::query()->create([
             'name' => 'beginner',
+            'affiliates_required' => 1,
+            'cost' => 0,
+            'profit' => 0,
+        ]);
+
+        $constructorType = MembershipType::query()->create([
+            'name' => 'constructor',
             'affiliates_required' => 3,
             'cost' => 0,
             'profit' => 0,
@@ -133,7 +140,7 @@ class MembershipTierApiTest extends TestCase
 
         $this->assertDatabaseHas('memberships', [
             'user_id' => $sponsor->id,
-            'membership_type_id' => $beginnerType->id,
+            'membership_type_id' => $constructorType->id,
             'status' => 'active',
         ]);
     }

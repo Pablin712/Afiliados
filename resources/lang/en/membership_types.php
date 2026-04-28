@@ -38,8 +38,12 @@ return [
         'free' => 'Free',
         'customer' => 'Customer',
         'beginner' => 'Beginner',
+        'constructor' => 'Constructor',
         'explorer' => 'Explorer',
         'professional' => 'Professional',
+        'proffesional' => 'Professional',
         'elite' => 'Elite',
+        'master' => 'Master',
+        'legend' => 'Legend',
     ],
 ];

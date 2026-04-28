@@ -37,13 +37,14 @@ class PlansController extends Controller
         $membershipTypeName = strtolower((string) ($membership?->membershipType?->name ?? 'free'));
         $membershipStatus = (string) ($membership?->status ?? 'free');
         $canSubmitPaidRenewal = ! $isAdmin && $this->canSubmitPaidRenewal($membershipTypeName, $membershipStatus);
+        $isTierUser = ! in_array($membershipTypeName, ['free', 'customer', ''], true);
 
-        $activeDirectAffiliates = 0;
+        $monthlyNewDirectCustomers = 0;
         $canFreeRenewToday = false;
 
         if (! $isAdmin && $membership instanceof Membership) {
-            $activeDirectAffiliates = $this->countActiveDirectAffiliates((int) $membership->user_id);
-            $canFreeRenewToday = $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus, $activeDirectAffiliates);
+            $monthlyNewDirectCustomers = $this->countMonthlyNewDirectCustomers((int) $membership->user_id, now());
+            $canFreeRenewToday = $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus, $monthlyNewDirectCustomers);
         }
 
         $pendingPayment = null;
@@ -64,8 +65,10 @@ class PlansController extends Controller
 
         $banks = Bank::query()->orderBy('name')->get();
 
-        // Customer renewals/reactivations are monthly.
-        $hasApprovedPayment = ! $isAdmin && $membershipTypeName === 'customer' && in_array($membershipStatus, ['active', 'expired'], true);
+        // Renewals/reactivations use renewal cost for users with previous approved payments.
+        $hasApprovedPayment = ! $isAdmin
+            && $membershipStatus !== 'free'
+            && Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
 
         return view('plans.index', compact(
             'membership',
@@ -77,8 +80,9 @@ class PlansController extends Controller
             'membershipTypeName',
             'membershipStatus',
             'canSubmitPaidRenewal',
+            'isTierUser',
             'canFreeRenewToday',
-            'activeDirectAffiliates'
+            'monthlyNewDirectCustomers'
         ));
     }
 
@@ -117,9 +121,10 @@ class PlansController extends Controller
 
         $program = Program::query()->findOrFail($validated['program_id']);
 
-        $isCustomerRenewal = $membershipTypeName === 'customer' && in_array($membershipStatus, ['active', 'expired'], true);
+        $isRenewalOrReactivation = $membershipStatus !== 'free'
+            && Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
 
-        $calculatedAmount = $isCustomerRenewal
+        $calculatedAmount = $isRenewalOrReactivation
             ? (float) $program->renewal_cost
             : (float) $program->first_payment_cost;
 
@@ -177,9 +182,9 @@ class PlansController extends Controller
             return back()->with('error', __('messages.plans.already_pending'));
         }
 
-        $activeDirectAffiliates = $this->countActiveDirectAffiliates((int) $membership->user_id);
+        $monthlyNewDirectCustomers = $this->countMonthlyNewDirectCustomers((int) $membership->user_id, now());
 
-        if (! $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus, $activeDirectAffiliates)) {
+        if (! $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus, $monthlyNewDirectCustomers)) {
             return back()->with('error', __('messages.plans.free_renew_not_eligible'));
         }
 
@@ -198,14 +203,14 @@ class PlansController extends Controller
 
     private function canSubmitPaidRenewal(string $membershipTypeName, string $membershipStatus): bool
     {
-        if ($membershipTypeName === 'customer') {
-            return in_array($membershipStatus, ['active', 'expired'], true);
+        if ($membershipTypeName === '') {
+            return false;
         }
 
-        return $membershipTypeName === 'free' || $membershipStatus === 'free';
+        return in_array($membershipStatus, ['active', 'expired', 'free'], true);
     }
 
-    private function canFreeRenewToday(Membership $membership, string $membershipTypeName, string $membershipStatus, int $activeDirectAffiliates): bool
+    private function canFreeRenewToday(Membership $membership, string $membershipTypeName, string $membershipStatus, int $monthlyNewDirectCustomers): bool
     {
         if (in_array($membershipTypeName, ['free', 'customer', ''], true)) {
             return false;
@@ -219,19 +224,31 @@ class PlansController extends Controller
             return false;
         }
 
-        $required = (int) ($membership->membershipType?->affiliates_required ?? 0);
+        $required = 3;
 
-        return $activeDirectAffiliates >= $required;
+        return $monthlyNewDirectCustomers >= $required;
     }
 
-    private function countActiveDirectAffiliates(int $sponsorId): int
+    private function countMonthlyNewDirectCustomers(int $sponsorId, Carbon $referenceDate): int
     {
-        return (int) DB::table('users as child')
-            ->join('memberships as m', 'm.user_id', '=', 'child.id')
-            ->join('membership_types as mt', 'mt.id', '=', 'm.membership_type_id')
-            ->where('child.sponsor_id', $sponsorId)
-            ->where('m.status', 'active')
-            ->whereRaw('LOWER(mt.name) <> ?', ['free'])
+        $monthStart = $referenceDate->copy()->startOfMonth();
+        $monthEnd = $referenceDate->copy()->endOfMonth();
+
+        return (int) DB::table('payments as p')
+            ->join('users as direct', 'direct.id', '=', 'p.user_id')
+            ->join('programs as pr', 'pr.id', '=', 'p.program_id')
+            ->join('membership_types as mt', 'mt.id', '=', 'pr.membership_type_id')
+            ->where('direct.sponsor_id', $sponsorId)
+            ->where('p.state', 'approved')
+            ->whereBetween('p.reviewed_at', [$monthStart, $monthEnd])
+            ->whereRaw('LOWER(mt.name) = ?', ['customer'])
+            ->whereNotExists(function ($query): void {
+                $query->select(DB::raw(1))
+                    ->from('payments as prev')
+                    ->whereColumn('prev.user_id', 'p.user_id')
+                    ->where('prev.state', 'approved')
+                    ->whereColumn('prev.id', '<', 'p.id');
+            })
             ->count();
     }
 }
