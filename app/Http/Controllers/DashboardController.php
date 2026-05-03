@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\AffiliateTreeService;
+use App\Services\MembershipTierService;
 use Illuminate\Support\Collection;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -15,8 +16,10 @@ use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
-    public function __construct(private readonly AffiliateTreeService $affiliateTreeService)
-    {
+    public function __construct(
+        private readonly AffiliateTreeService $affiliateTreeService,
+        private readonly MembershipTierService $membershipTierService,
+    ) {
     }
 
     public function __invoke(Request $request): View
@@ -51,6 +54,7 @@ class DashboardController extends Controller
             ->where('state', 'made');
 
         $hasSourcePaymentColumn = Schema::hasColumn('profits', 'source_payment_id');
+        $rankProgress = $isAdmin ? null : $this->buildRankProgress($user);
 
         $adminKpis = $isAdmin ? [
             'users_total' => (int) User::query()
@@ -108,6 +112,126 @@ class DashboardController extends Controller
                 ->limit(6)
                 ->get(),
             'adminKpis' => $adminKpis,
+            'rankProgress' => $rankProgress,
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function buildRankProgress(User $user): ?array
+    {
+        $membershipTypeName = strtolower((string) ($user->membership?->membershipType?->name ?? 'free'));
+        $membershipStatus = strtolower((string) ($user->membership?->status ?? 'free'));
+
+        $snapshot = $this->membershipTierService->inspectUser($user);
+        $currentRankIndex = (int) ($snapshot['rank_index'] ?? 0);
+        $directAffiliates = (int) ($snapshot['active_direct_affiliates'] ?? 0);
+        $teamPoints = (int) ($snapshot['team_points'] ?? 0);
+
+        $rankOrder = ['beginner', 'constructor', 'explorer', 'professional', 'elite', 'master', 'legend'];
+        $rankRules = (array) config('affiliates.rank_rules', []);
+        $pointsPerAffiliate = max(1, (int) config('affiliates.points_per_affiliate', 100));
+
+        if ($membershipStatus !== 'active' || in_array($membershipTypeName, ['free', 'customer', ''], true)) {
+            $nextRankName = 'beginner';
+            $currentRankName = $membershipTypeName === 'free' ? 'free' : 'customer';
+        } else {
+            $currentRankName = $rankOrder[$currentRankIndex - 1] ?? 'customer';
+            $nextRankName = $rankOrder[$currentRankIndex] ?? null;
+        }
+
+        if ($nextRankName === null) {
+            return [
+                'current_rank_name' => $currentRankName,
+                'next_rank_name' => null,
+                'direct_affiliates' => $directAffiliates,
+                'team_points' => $teamPoints,
+                'is_max_rank' => true,
+                'progress_percent' => 100,
+            ];
+        }
+
+        /** @var array<string, int|null> $rule */
+        $rule = (array) ($rankRules[$nextRankName] ?? []);
+        $requiredDirect = (int) ($rule['direct_affiliates'] ?? 0);
+        $requiredTeamPoints = (int) ($rule['team_points'] ?? 0);
+        $requiredDirectRankMin = isset($rule['direct_rank_min']) ? (int) $rule['direct_rank_min'] : null;
+        $requiredDirectRankCount = (int) ($rule['direct_rank_count'] ?? 0);
+        $requiredPointsByDirects = $requiredDirect * $pointsPerAffiliate;
+        $effectiveRequiredPoints = max($requiredTeamPoints, $requiredPointsByDirects);
+
+        $remainingDirect = max(0, $requiredDirect - $directAffiliates);
+        $remainingPoints = max(0, $effectiveRequiredPoints - $teamPoints);
+        $remainingTeamAffiliates = (int) ceil($remainingPoints / $pointsPerAffiliate);
+
+        $qualifiedDirectByRank = 0;
+        $remainingQualifiedDirectByRank = 0;
+
+        if ($requiredDirectRankMin !== null && $requiredDirectRankCount > 0) {
+            $directs = $this->affiliateTreeService->affiliatesByLevel($user, 1)[1] ?? collect();
+
+            foreach ($directs as $direct) {
+                if (! $direct instanceof User) {
+                    continue;
+                }
+
+                $directSnapshot = $this->membershipTierService->inspectUser($direct);
+                $directRankIndex = (int) ($directSnapshot['rank_index'] ?? 0);
+
+                if ($directRankIndex >= $requiredDirectRankMin) {
+                    $qualifiedDirectByRank++;
+                }
+            }
+
+            $remainingQualifiedDirectByRank = max(0, $requiredDirectRankCount - $qualifiedDirectByRank);
+        }
+
+        $totalCriteria = 0;
+        $metCriteria = 0;
+
+        if ($requiredDirect > 0) {
+            $totalCriteria++;
+            if ($remainingDirect === 0) {
+                $metCriteria++;
+            }
+        }
+
+        if ($requiredTeamPoints > 0) {
+            $totalCriteria++;
+            if ($remainingPoints === 0) {
+                $metCriteria++;
+            }
+        }
+
+        if ($requiredDirectRankMin !== null && $requiredDirectRankCount > 0) {
+            $totalCriteria++;
+            if ($remainingQualifiedDirectByRank === 0) {
+                $metCriteria++;
+            }
+        }
+
+        $progressPercent = $totalCriteria > 0
+            ? (int) round(($metCriteria / $totalCriteria) * 100)
+            : 100;
+
+        return [
+            'current_rank_name' => $currentRankName,
+            'next_rank_name' => $nextRankName,
+            'direct_affiliates' => $directAffiliates,
+            'team_points' => $teamPoints,
+            'required_direct' => $requiredDirect,
+            'required_team_points' => $requiredTeamPoints,
+            'required_effective_points' => $effectiveRequiredPoints,
+            'required_direct_rank_min' => $requiredDirectRankMin,
+            'required_direct_rank_count' => $requiredDirectRankCount,
+            'qualified_direct_by_rank' => $qualifiedDirectByRank,
+            'remaining_direct' => $remainingDirect,
+            'remaining_points' => $remainingPoints,
+            'remaining_team_affiliates' => $remainingTeamAffiliates,
+            'remaining_qualified_direct_by_rank' => $remainingQualifiedDirectByRank,
+            'is_max_rank' => false,
+            'progress_percent' => max(0, min(100, $progressPercent)),
+        ];
     }
 }

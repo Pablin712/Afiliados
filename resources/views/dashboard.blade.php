@@ -156,6 +156,91 @@
                 </div>
             </div>
 
+            @unless($isAdmin)
+                @if(is_array($rankProgress ?? null))
+                    <div class="relative overflow-hidden rounded-3xl border border-sky-200 bg-white shadow-sm dark:border-sky-900/40 dark:bg-graphite-900">
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(14,165,233,0.18),_transparent_32%),radial-gradient(circle_at_left,_rgba(245,158,11,0.14),_transparent_28%)]"></div>
+                        <div class="relative grid gap-6 p-6 lg:grid-cols-[1.2fr_0.8fr] lg:p-7">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600 dark:text-sky-300">{{ __('messages.user.dashboard.rank_progress.badge') }}</p>
+                                <h3 class="mt-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-graphite-100">
+                                    {{ __('messages.user.dashboard.rank_progress.title') }}
+                                </h3>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-graphite-300">
+                                    {{ __('messages.user.dashboard.rank_progress.description') }}
+                                </p>
+
+                                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                                    <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 dark:border-graphite-800 dark:bg-graphite-950/60">
+                                        <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.rank_progress.current_rank') }}</p>
+                                        <p class="mt-2 text-xl font-semibold text-gray-900 dark:text-graphite-100">{{ __('membership_types.types.' . ($rankProgress['current_rank_name'] ?? 'customer')) }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 dark:border-graphite-800 dark:bg-graphite-950/60">
+                                        <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.rank_progress.next_rank') }}</p>
+                                        <p class="mt-2 text-xl font-semibold text-gray-900 dark:text-graphite-100">
+                                            @if(($rankProgress['is_max_rank'] ?? false) === true)
+                                                {{ __('messages.user.dashboard.rank_progress.max_rank') }}
+                                            @else
+                                                {{ __('membership_types.types.' . ($rankProgress['next_rank_name'] ?? 'customer')) }}
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5">
+                                    <div class="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-graphite-400">
+                                        <span>{{ __('messages.user.dashboard.rank_progress.completion') }}</span>
+                                        <span>{{ (int) ($rankProgress['progress_percent'] ?? 0) }}%</span>
+                                    </div>
+                                    <div class="h-2.5 overflow-hidden rounded-full bg-gray-200 dark:bg-graphite-800">
+                                        <div class="h-full rounded-full bg-gradient-to-r from-amber-400 via-sky-500 to-emerald-500" style="width: {{ (int) ($rankProgress['progress_percent'] ?? 0) }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 dark:border-graphite-800 dark:bg-graphite-950/60">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.rank_progress.team_points') }}</p>
+                                    <p class="mt-2 text-2xl font-semibold text-sky-600 dark:text-sky-300">{{ number_format((int) ($rankProgress['team_points'] ?? 0)) }}</p>
+                                    @if(($rankProgress['is_max_rank'] ?? false) !== true)
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">
+                                            {{ __('messages.user.dashboard.rank_progress.points_remaining', [
+                                                'points' => number_format((int) ($rankProgress['remaining_points'] ?? 0)),
+                                                'affiliates' => number_format((int) ($rankProgress['remaining_team_affiliates'] ?? 0)),
+                                            ]) }}
+                                        </p>
+                                    @endif
+                                </div>
+
+                                <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 dark:border-graphite-800 dark:bg-graphite-950/60">
+                                    <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.rank_progress.direct_affiliates') }}</p>
+                                    <p class="mt-2 text-2xl font-semibold text-amber-600 dark:text-amber-300">{{ (int) ($rankProgress['direct_affiliates'] ?? 0) }}</p>
+                                    @if(($rankProgress['is_max_rank'] ?? false) !== true)
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">
+                                            {{ __('messages.user.dashboard.rank_progress.direct_remaining', ['count' => (int) ($rankProgress['remaining_direct'] ?? 0)]) }}
+                                        </p>
+                                    @endif
+                                </div>
+
+                                @if(($rankProgress['required_direct_rank_count'] ?? 0) > 0)
+                                    <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 dark:border-graphite-800 dark:bg-graphite-950/60">
+                                        <p class="text-xs uppercase tracking-[0.16em] text-gray-500 dark:text-graphite-400">{{ __('messages.user.dashboard.rank_progress.qualified_directs') }}</p>
+                                        <p class="mt-2 text-2xl font-semibold text-emerald-600 dark:text-emerald-300">{{ (int) ($rankProgress['qualified_direct_by_rank'] ?? 0) }}</p>
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">
+                                            {{ __('messages.user.dashboard.rank_progress.qualified_directs_requirement', [
+                                                'remaining' => (int) ($rankProgress['remaining_qualified_direct_by_rank'] ?? 0),
+                                                'required' => (int) ($rankProgress['required_direct_rank_count'] ?? 0),
+                                                'rank' => __('membership_types.types.' . (($rankProgress['required_direct_rank_min'] ?? 0) >= 4 ? 'professional' : (($rankProgress['required_direct_rank_min'] ?? 0) >= 2 ? 'constructor' : 'beginner'))),
+                                            ]) }}
+                                        </p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endunless
+
             <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
                 @unless($isAdmin)
                     <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
