@@ -607,6 +607,7 @@ return [
     'user.dashboard.scanner.compiler_dependencies_missing' => 'Compilation dependencies are missing in the MetaTrader environment (for example n8n.mqh).',
     'user.dashboard.scanner.compile_failed' => 'The scanner could not be compiled to EX5.',
     'user.dashboard.scanner.compile_failed_with_log' => 'The scanner could not be compiled to EX5. Log: :log',
+    'user.dashboard.scanner.deriv_register_failed' => 'We could not automatically register you in XQuant right now. Please try again in a few minutes.',
     'user.dashboard.scanner.download_now' => 'Download',
     'user.dashboard.admin_panel_title' => 'Administrator context',
     'user.dashboard.admin_panel_description' => 'Your admin account does not use membership or personal profits. Manage finances, global tree, and payouts from the admin menu in your profile.',

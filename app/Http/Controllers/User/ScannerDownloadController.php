@@ -5,8 +5,11 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Services\ScannerDownloadService;
 use Carbon\CarbonInterface;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,8 +17,44 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ScannerDownloadController extends Controller
 {
+    private const XQUANT_BASE_URL = 'https://xquant.marketview.club';
+
+    private const XQUANT_SCANNER_REGISTER_URL = 'https://xquant.marketview.club/api/auth/scanner/register';
+
     public function __construct(private readonly ScannerDownloadService $scannerDownloadService)
     {
+    }
+
+    public function registerDerivAndRedirect(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $targetUrl = self::XQUANT_BASE_URL;
+
+        try {
+            $response = Http::acceptJson()
+                ->asJson()
+                ->timeout(12)
+                ->post(self::XQUANT_SCANNER_REGISTER_URL, [
+                    'email' => $user->email,
+                ]);
+
+            if (! $response->successful()) {
+                Log::warning('xquant scanner register failed', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+            }
+        } catch (\Throwable $throwable) {
+            Log::warning('xquant scanner register request exception', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $throwable->getMessage(),
+            ]);
+        }
+
+        return redirect()->away($targetUrl);
     }
 
     public function prepare(Request $request): JsonResponse

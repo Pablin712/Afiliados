@@ -69,6 +69,9 @@ Route::middleware('auth')->group(function () {
         ->middleware(['verified', 'role:user'])
         ->name('scanners.')
         ->group(function (): void {
+            Route::get('/deriv/open', [ScannerDownloadController::class, 'registerDerivAndRedirect'])
+                ->name('deriv.redirect');
+
             Route::post('/prepare', [ScannerDownloadController::class, 'prepare'])
                 ->name('prepare');
 
