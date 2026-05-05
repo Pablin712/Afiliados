@@ -264,6 +264,15 @@ class AffiliateTreeService
             return $admin;
         }
 
+        $adminByRole = User::query()
+            ->whereHas('roles', fn ($query) => $query->where('name', 'admin'))
+            ->orderBy('id')
+            ->first();
+
+        if ($adminByRole instanceof User) {
+            return $adminByRole;
+        }
+
         return User::query()->orderBy('id')->firstOrFail();
     }
 

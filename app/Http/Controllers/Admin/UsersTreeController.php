@@ -30,31 +30,7 @@ class UsersTreeController extends Controller
             : null;
 
         $tree = $this->affiliateTreeService->buildTree($rootUser, $depth);
-
-        $users = User::query()
-            ->select(['id', 'name', 'email', 'sponsor_id', 'commission_balance', 'created_at'])
-            ->with(['membership.membershipType'])
-            ->orderBy('id')
-            ->get();
-
-        $graph = [
-            'nodes' => $users->map(fn (User $user): array => [
-                'id' => $user->id,
-                'label' => $user->name,
-                'email' => $user->email,
-                'membership' => $user->membership?->membershipType?->name,
-                'commission_balance' => (float) $user->commission_balance,
-                'joined_at' => optional($user->created_at)->toDateTimeString(),
-            ])->values()->all(),
-            'edges' => $users
-                ->filter(fn (User $user): bool => (int) $user->id !== (int) $user->sponsor_id)
-                ->map(fn (User $user): array => [
-                    'from' => (int) $user->sponsor_id,
-                    'to' => (int) $user->id,
-                ])
-                ->values()
-                ->all(),
-        ];
+        $graph = $this->graphFromTree($tree);
 
         return view('admin.users-tree.index', [
             'tree' => $tree,
@@ -70,5 +46,44 @@ class UsersTreeController extends Controller
         return response()->json([
             'data' => $this->affiliateTreeService->userInsights($user),
         ]);
+    }
+
+    /**
+     * @param array<string, mixed> $tree
+     * @return array{nodes: array<int, array<string, mixed>>, edges: array<int, array<string, int>>}
+     */
+    private function graphFromTree(array $tree): array
+    {
+        $nodes = [];
+        $edges = [];
+
+        $walk = function (array $node) use (&$walk, &$nodes, &$edges): void {
+            $nodes[] = [
+                'id' => (int) ($node['id'] ?? 0),
+                'label' => (string) ($node['name'] ?? ''),
+                'email' => (string) ($node['email'] ?? ''),
+                'membership' => $node['membership'] ?? null,
+                'commission_balance' => (float) ($node['commission_balance'] ?? 0),
+                'joined_at' => $node['joined_at'] ?? null,
+            ];
+
+            $children = collect($node['children'] ?? []);
+
+            $children->each(function (array $child) use (&$walk, &$edges, $node): void {
+                $edges[] = [
+                    'from' => (int) ($node['id'] ?? 0),
+                    'to' => (int) ($child['id'] ?? 0),
+                ];
+
+                $walk($child);
+            });
+        };
+
+        $walk($tree);
+
+        return [
+            'nodes' => collect($nodes)->unique('id')->values()->all(),
+            'edges' => collect($edges)->values()->all(),
+        ];
     }
 }

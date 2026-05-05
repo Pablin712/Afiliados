@@ -95,15 +95,18 @@
                 const usersTreeInsightsPattern = @json(route('admin.users-tree.insights', ['user' => '__ID__']));
                 const inboundNodeIds = new Set(graph.edges.map((edge) => edge.to));
 
-                const paletteByMembership = {
+                const paletteByMembership = Object.assign(Object.create(null), {
                     free: ['#CBD5E1', '#64748B', '#F8FAFC'],
                     customer: ['#BFDBFE', '#2563EB', '#EFF6FF'],
                     beginner: ['#FDE68A', '#D97706', '#FFFBEB'],
+                    constructor: ['#FCD34D', '#B45309', '#FFFBEB'],
                     explorer: ['#A7F3D0', '#059669', '#ECFDF5'],
                     professional: ['#DDD6FE', '#7C3AED', '#F5F3FF'],
                     elite: ['#FBCFE8', '#DB2777', '#FFF1F2'],
+                    master: ['#BAE6FD', '#0369A1', '#F0F9FF'],
+                    legend: ['#E9D5FF', '#6D28D9', '#FAF5FF'],
                     root: ['#FDE68A', '#B45309', '#FFF7ED'],
-                };
+                });
 
                 const buildInitials = (label) => String(label || 'U')
                     .split(/\s+/)
