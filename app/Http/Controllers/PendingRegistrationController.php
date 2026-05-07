@@ -25,7 +25,34 @@ class PendingRegistrationController extends Controller
         $perPage   = max(5, min(100, (int) $request->integer('per_page', 15)));
         $search    = trim((string) $request->input('search', ''));
         $sortOrder = strtolower((string) $request->input('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
-        $sortBy    = $this->resolveSortBy((string) $request->input('sort_by', 'created_at'));
+        $tab       = strtolower((string) $request->input('tab', 'pending'));
+
+        if ($tab === 'history') {
+            $sortBy = $this->resolveHistorySortBy((string) $request->input('sort_by', 'created_at'));
+
+            $query = Payment::query()
+                ->with(['user', 'transaction.bank', 'reviewer']);
+
+            if ($search !== '') {
+                $query->where(function (Builder $q) use ($search): void {
+                    $q->whereHas('user', function (Builder $inner) use ($search): void {
+                        $inner->where('name', 'like', "%{$search}%")
+                              ->orWhere('email', 'like', "%{$search}%");
+                    })->orWhere('number', 'like', "%{$search}%");
+                });
+            }
+
+            $records = $query->orderBy($sortBy, $sortOrder)->paginate($perPage);
+
+            return response()->json([
+                'html'          => view('admin.pending-registrations.partials.history-rows', ['records' => $records->items()])->render(),
+                'total_records' => $records->total(),
+                'current_page'  => $records->currentPage(),
+                'per_page'      => $records->perPage(),
+            ]);
+        }
+
+        $sortBy = $this->resolveSortBy((string) $request->input('sort_by', 'created_at'));
 
         $query = Payment::query()
             ->with(['user', 'transaction.bank'])
@@ -51,9 +78,12 @@ class PendingRegistrationController extends Controller
             ]);
         }
 
+        $historyTotal = Payment::query()->count();
+
         return view('admin.pending-registrations.index', [
             'records'      => $records,
             'totalRecords' => $records->total(),
+            'historyTotal' => $historyTotal,
         ]);
     }
 
@@ -90,6 +120,13 @@ class PendingRegistrationController extends Controller
     protected function resolveSortBy(string $requested): string
     {
         $allowed = ['created_at', 'amount', 'number'];
+
+        return in_array($requested, $allowed, true) ? $requested : 'created_at';
+    }
+
+    protected function resolveHistorySortBy(string $requested): string
+    {
+        $allowed = ['created_at', 'amount', 'number', 'state', 'reviewed_at'];
 
         return in_array($requested, $allowed, true) ? $requested : 'created_at';
     }
