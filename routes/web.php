@@ -3,6 +3,7 @@
 use App\Http\Controllers\ActionController;
 use App\Http\Controllers\Admin\BanksController;
 use App\Http\Controllers\Admin\CourseCatalogController;
+use App\Http\Controllers\Admin\UsersAdminController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\FinancialDashboardController;
@@ -143,6 +144,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/users-tree/{user}/insights', [UsersTreeController::class, 'insights'])
         ->middleware(['verified', 'permission:view users'])
         ->name('admin.users-tree.insights');
+
+    Route::get('/admin/users', [UsersAdminController::class, 'index'])
+        ->middleware(['verified', 'permission:view users'])
+        ->name('admin.users.index');
+
+    Route::get('/admin/users/search-sponsors', [UsersAdminController::class, 'searchSponsors'])
+        ->middleware(['verified', 'permission:edit users'])
+        ->name('admin.users.search-sponsors');
+
+    Route::post('/admin/users/{user}/sponsor', [UsersAdminController::class, 'updateSponsor'])
+        ->middleware(['verified', 'permission:edit users'])
+        ->name('admin.users.update-sponsor');
 
     Route::get('/admin/financial-dashboard', [FinancialDashboardController::class, 'index'])
         ->middleware(['verified', 'permission:report profits'])

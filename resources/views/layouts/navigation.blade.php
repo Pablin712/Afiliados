@@ -104,6 +104,12 @@
                             </x-dropdown-link>
                         @endcan
 
+                        @can('edit users')
+                            <x-dropdown-link :href="route('admin.users.index')">
+                                {{ __('messages.admin.users.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         @can('view profits')
                             <x-dropdown-link :href="route('admin.profits.index')">
                                 {{ __('messages.admin.profits.title') }}
@@ -231,6 +237,12 @@
                 @can('view users')
                     <x-responsive-nav-link :href="route('admin.users-tree.index')">
                         {{ __('messages.admin.users_tree.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('edit users')
+                    <x-responsive-nav-link :href="route('admin.users.index')">
+                        {{ __('messages.admin.users.title') }}
                     </x-responsive-nav-link>
                 @endcan
 
