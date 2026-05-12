@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Membership;
 use App\Models\MembershipType;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -479,6 +480,16 @@ class MembershipTierService
 
         $typeName = Str::lower((string) ($membership->membershipType?->name ?? ''));
 
-        return $typeName !== '' && $typeName !== 'free';
+        if ($typeName === '' || $typeName === 'free') {
+            return false;
+        }
+
+        // Ranks are earned only if users have paid: verify at least one approved payment exists
+        $hasApprovedPayment = Payment::query()
+            ->where('user_id', (int) $user->id)
+            ->where('state', 'approved')
+            ->exists();
+
+        return $hasApprovedPayment;
     }
 }

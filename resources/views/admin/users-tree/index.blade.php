@@ -96,16 +96,16 @@
                 const inboundNodeIds = new Set(graph.edges.map((edge) => edge.to));
 
                 const paletteByMembership = Object.assign(Object.create(null), {
-                    free: ['#CBD5E1', '#64748B', '#F8FAFC'],
-                    customer: ['#BFDBFE', '#2563EB', '#EFF6FF'],
-                    beginner: ['#FDE68A', '#D97706', '#FFFBEB'],
-                    constructor: ['#FCD34D', '#B45309', '#FFFBEB'],
+                    free: ['#FECACA', '#991B1B', '#FEE2E2'],
+                    customer: ['#A7F3D0', '#059669', '#ECFDF5'],
+                    beginner: ['#A7F3D0', '#059669', '#ECFDF5'],
+                    constructor: ['#A7F3D0', '#059669', '#ECFDF5'],
                     explorer: ['#A7F3D0', '#059669', '#ECFDF5'],
-                    professional: ['#DDD6FE', '#7C3AED', '#F5F3FF'],
-                    elite: ['#FBCFE8', '#DB2777', '#FFF1F2'],
-                    master: ['#BAE6FD', '#0369A1', '#F0F9FF'],
-                    legend: ['#E9D5FF', '#6D28D9', '#FAF5FF'],
-                    root: ['#FDE68A', '#B45309', '#FFF7ED'],
+                    professional: ['#A7F3D0', '#059669', '#ECFDF5'],
+                    elite: ['#A7F3D0', '#059669', '#ECFDF5'],
+                    master: ['#A7F3D0', '#059669', '#ECFDF5'],
+                    legend: ['#A7F3D0', '#059669', '#ECFDF5'],
+                    root: ['#93C5FD', '#1D4ED8', '#EFF6FF'],
                 });
 
                 const buildInitials = (label) => String(label || 'U')
@@ -142,6 +142,12 @@
                 };
 
                 const container = document.getElementById('users-tree-network');
+                const nodeDegree = graph.edges.reduce((acc, edge) => {
+                    acc[edge.from] = (acc[edge.from] || 0) + 1;
+                    acc[edge.to] = (acc[edge.to] || 0) + 1;
+                    return acc;
+                }, {});
+
                 const nodes = new vis.DataSet(
                     graph.nodes.map((node) => ({
                         id: node.id,
@@ -150,22 +156,26 @@
                         shape: 'circularImage',
                         image: buildAvatarSvg(node),
                         brokenImage: buildAvatarSvg(node),
-                        size: 30,
+                        size: 42,
+                        mass: Math.max(1, Math.min(12, (nodeDegree[node.id] || 0) * 0.8 + 1)),
+                        margin: 32,
                         font: {
                             face: 'Figtree, Arial, sans-serif',
-                            size: 11,
-                            color: '#1f2937',
+                            size: 12,
+                            color: '#0f172a',
                             strokeWidth: 0,
-                            strokeColor: '#fffdf8',
-                            vadjust: 0,
-                            background: 'rgba(255,253,248,0.88)',
+                            strokeColor: '#ffffff',
+                            vadjust: 24,
+                            multi: 'html',
+                            align: 'bottom',
+                            background: 'rgba(255,255,255,0.92)',
                         },
                         shadow: {
                             enabled: true,
-                            color: 'rgba(15, 23, 42, 0.18)',
-                            size: 10,
+                            color: 'rgba(15, 23, 42, 0.15)',
+                            size: 15,
                             x: 0,
-                            y: 6,
+                            y: 8,
                         },
                     }))
                 );
@@ -176,38 +186,49 @@
                     arrows: 'to',
                     color: { color: '#94a3b8', highlight: '#475569' },
                     width: 2,
+                    length: 280,
                     arrowStrikethrough: false,
-                    smooth: { type: 'cubicBezier', roundness: 0.4 },
+                    smooth: { type: 'dynamic', roundness: 0.3 },
                 })));
 
                 const network = new vis.Network(container, { nodes, edges }, {
                     autoResize: true,
                     interaction: {
-                        dragNodes: false,
+                        dragNodes: true,
                         dragView: true,
                         zoomView: true,
                         hover: true,
                     },
                     physics: {
-                        enabled: false,
-                        stabilization: { iterations: 250 },
-                        barnesHut: {
-                            springLength: 130,
-                            springConstant: 0.02,
-                            damping: 0.4,
+                        enabled: true,
+                        solver: 'repulsion',
+                        repulsion: {
+                            centralGravity: 0.01,
+                            springLength: 420,
+                            springConstant: 0.04,
+                            nodeDistance: 320,
+                            damping: 0.92,
                         },
+                        stabilization: {
+                            enabled: true,
+                            iterations: 800,
+                            fit: true,
+                        },
+                        minVelocity: 1,
+                        maxVelocity: 60,
                     },
                     layout: {
-                        hierarchical: {
+                        improvedLayout: true,
+                    },
+                    edges: {
+                        smooth: {
                             enabled: true,
-                            direction: 'UD',
-                            sortMethod: 'directed',
-                            levelSeparation: 210,
-                            nodeSpacing: 170,
-                            treeSpacing: 220,
-                            blockShifting: true,
-                            edgeMinimization: true,
-                            parentCentralization: true,
+                            type: 'dynamic',
+                        },
+                        color: {
+                            color: '#64748B',
+                            highlight: '#1E293B',
+                            hover: '#1E293B',
                         },
                     },
                 });
