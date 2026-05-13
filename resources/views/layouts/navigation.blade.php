@@ -1,4 +1,11 @@
-@php($canAccessCourses = Auth::user()?->hasRole('admin') || strtolower((string) (Auth::user()?->membership?->membershipType?->name ?? 'free')) !== 'free')
+@php
+    $canAccessCourses = Auth::user()?->hasRole('admin')
+        || strtolower((string) (Auth::user()?->membership?->membershipType?->name ?? 'free')) !== 'free'
+        || (Auth::check() && \App\Models\CourseModule::where('is_active', true)
+                ->where('for_free', true)
+                ->whereHas('videos', fn ($q) => $q->where('is_active', true))
+                ->exists());
+@endphp
 
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-200 dark:bg-graphite-900 dark:border-graphite-800">
     <!-- Primary Navigation Menu -->

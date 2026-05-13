@@ -173,6 +173,10 @@ Route::middleware('auth')->group(function () {
         ->middleware(['verified', 'role:admin'])
         ->name('admin.courses.modules.store');
 
+    Route::patch('/admin/courses/modules/{module}/toggle-free', [CourseCatalogController::class, 'toggleFree'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('admin.courses.modules.toggle-free');
+
     Route::delete('/admin/courses/modules/{module}', [CourseCatalogController::class, 'destroyModule'])
         ->middleware(['verified', 'role:admin'])
         ->name('admin.courses.modules.destroy');

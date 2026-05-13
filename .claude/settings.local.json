@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"c:\\\\laragon\\\\www\\\\Afiliados\"; php artisan tinker --execute=\"use App\\\\Models\\\\CourseModule; \\\\$m = CourseModule::first\\(\\); echo json_encode\\(['id'=>\\\\$m->id,'for_free'=>\\\\$m->for_free, 'fillable'=>\\\\$m->getFillable\\(\\)]\\);\" 2>&1)",
+      "PowerShell(Set-Location \"c:\\\\laragon\\\\www\\\\Afiliados\"; Get-ChildItem \"storage\\\\framework\\\\views\" | ForEach-Object { if \\(\\(Get-Content $_.FullName -Raw\\) -match \"toggle-free\"\\) { $_.FullName } })",
+      "PowerShell(Set-Location \"c:\\\\laragon\\\\www\\\\Afiliados\"; $content = Get-Content \"storage\\\\framework\\\\views\\\\aff259aba9bcb37d4e54ef65ac5ec0ac.php\" -Raw; $idx = $content.IndexOf\\('toggle-free'\\); $content.Substring\\([Math]::Max\\(0,$idx-50\\), 400\\))",
+      "Bash(Get-Content \"c:\\\\laragon\\\\www\\\\Afiliados\\\\storage\\\\logs\\\\laravel.log\" -Tail 80)",
+      "PowerShell($phpErrorLog = php -r \"echo ini_get\\('error_log'\\);\" 2>&1; Write-Host \"PHP error log: $phpErrorLog\"; if \\(Test-Path $phpErrorLog\\) { Get-Content $phpErrorLog -Tail 30 } else { Write-Host \"Log file not found\" })"
+    ]
+  }
+}

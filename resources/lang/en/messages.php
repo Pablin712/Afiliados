@@ -694,6 +694,13 @@ return [
     'admin.courses.messages.video_created' => 'Video uploaded successfully.',
     'admin.courses.messages.video_deleted' => 'Video deleted successfully.',
     'admin.courses.messages.imported' => ':count existing videos were imported into the catalog.',
+    'admin.courses.field_for_free' => 'Available for free users',
+    'admin.courses.for_free_badge' => 'Free',
+    'admin.courses.members_only_badge' => 'Members only',
+    'admin.courses.toggle_to_free' => 'Grant free access',
+    'admin.courses.toggle_to_members_only' => 'Restrict to members',
+    'admin.courses.messages.module_made_free' => 'The module is now accessible to free users.',
+    'admin.courses.messages.module_made_members_only' => 'The module is now restricted to active members only.',
 
     'user.network.title' => 'My network',
     'user.network.description' => 'Personal affiliate tree with your direct sponsor and your own descendant branch.',

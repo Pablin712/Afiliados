@@ -16,6 +16,7 @@ class CourseModule extends Model
         'description',
         'sort_order',
         'is_active',
+        'for_free',
     ];
 
     protected function casts(): array
@@ -23,6 +24,7 @@ class CourseModule extends Model
         return [
             'sort_order' => 'integer',
             'is_active' => 'boolean',
+            'for_free' => 'boolean',
         ];
     }
 

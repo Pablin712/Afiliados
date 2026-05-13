@@ -15,21 +15,30 @@ class CourseController extends Controller
 {
     public function index(Request $request): View|RedirectResponse
     {
-        $accessRedirect = $this->ensureCourseAccess($request->user());
-        if ($accessRedirect !== null) {
-            return $accessRedirect;
+        $user = $request->user();
+
+        if ($user === null) {
+            return redirect()->route('login');
         }
 
-        $modules = CourseModule::query()
+        $isFree = $this->userIsFree($user);
+
+        $query = CourseModule::query()
             ->where('is_active', true)
             ->with([
-                'videos' => fn ($query) => $query
+                'videos' => fn ($q) => $q
                     ->where('is_active', true)
                     ->orderBy('sort_order')
                     ->orderBy('id'),
             ])
             ->orderBy('sort_order')
-            ->orderBy('id')
+            ->orderBy('id');
+
+        if ($isFree) {
+            $query->where('for_free', true);
+        }
+
+        $modules = $query
             ->get()
             ->filter(fn (CourseModule $module) => $module->videos->isNotEmpty())
             ->values();
@@ -50,10 +59,11 @@ class CourseController extends Controller
         $videosCount = $modules->sum(fn (CourseModule $module) => $module->videos->count());
 
         return view('courses.index', [
-            'modules' => $modules,
+            'modules'        => $modules,
             'selectedModule' => $selectedModule,
-            'selectedVideo' => $selectedVideo,
-            'videosCount' => $videosCount,
+            'selectedVideo'  => $selectedVideo,
+            'videosCount'    => $videosCount,
+            'isFree'         => $isFree,
         ]);
     }
 
@@ -61,12 +71,19 @@ class CourseController extends Controller
     {
         $user = $request->user();
 
-        if (! $this->userCanAccessCourses($user)) {
+        if ($user === null) {
             abort(403);
         }
 
-        if (! $video->is_active && ! $user?->hasRole('admin')) {
+        if (! $video->is_active && ! $user->hasRole('admin')) {
             abort(404);
+        }
+
+        if ($this->userIsFree($user) && ! $user->hasRole('admin')) {
+            $video->loadMissing('module');
+            if (! $video->module?->for_free) {
+                abort(403);
+            }
         }
 
         if (! Storage::disk($video->disk)->exists($video->file_path)) {
@@ -77,39 +94,28 @@ class CourseController extends Controller
         $safeName = preg_replace('/[^A-Za-z0-9\-_\.]/', '-', $video->slug).'.mp4';
 
         return response()->file($path, [
-            'Content-Type' => $video->mime_type ?: 'video/mp4',
-            'Content-Disposition' => 'inline; filename="'.$safeName.'"',
-            'Cache-Control' => 'private, no-store, no-cache, must-revalidate, max-age=0',
-            'Pragma' => 'no-cache',
-            'Expires' => '0',
+            'Content-Type'           => $video->mime_type ?: 'video/mp4',
+            'Content-Disposition'    => 'inline; filename="'.$safeName.'"',
+            'Cache-Control'          => 'private, no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma'                 => 'no-cache',
+            'Expires'                => '0',
             'X-Content-Type-Options' => 'nosniff',
-            'X-Frame-Options' => 'SAMEORIGIN',
+            'X-Frame-Options'        => 'SAMEORIGIN',
         ]);
     }
 
-    protected function ensureCourseAccess(?User $user): ?RedirectResponse
-    {
-        if ($this->userCanAccessCourses($user)) {
-            return null;
-        }
-
-        return redirect()
-            ->route('plans.index')
-            ->with('error', __('messages.courses.membership_required'));
-    }
-
-    protected function userCanAccessCourses(?User $user): bool
+    protected function userIsFree(?User $user): bool
     {
         if ($user === null) {
-            return false;
+            return true;
         }
 
         if ($user->hasRole('admin')) {
-            return true;
+            return false;
         }
 
         $membershipTypeName = strtolower((string) ($user->membership?->membershipType?->name ?? 'free'));
 
-        return $membershipTypeName !== 'free';
+        return $membershipTypeName === 'free';
     }
 }

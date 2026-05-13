@@ -74,7 +74,12 @@
                                 <div class="rounded-2xl border {{ $selectedModule?->id === $module->id ? 'border-brand-300 bg-brand-50 dark:border-brand-500/40 dark:bg-brand-500/10' : 'border-gray-200 bg-gray-50 dark:border-graphite-800 dark:bg-graphite-950/60' }} p-4">
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
-                                            <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ $module->name }}</p>
+                                            <div class="flex items-center gap-2">
+                                                <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ $module->name }}</p>
+                                                @if ($module->for_free)
+                                                    <span class="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{{ __('messages.admin.courses.for_free_badge') }}</span>
+                                                @endif
+                                            </div>
                                             <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.courses.module_videos', ['count' => $module->videos->count()]) }}</p>
                                         </div>
                                         <span class="inline-flex rounded-full px-2 py-1 text-[11px] font-semibold {{ $selectedModule?->id === $module->id ? 'bg-white text-brand-700 dark:bg-graphite-900 dark:text-brand-300' : 'bg-gray-200 text-gray-700 dark:bg-graphite-800 dark:text-graphite-300' }}">

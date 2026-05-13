@@ -86,6 +86,11 @@
                             {{ __('messages.admin.courses.field_is_active') }}
                         </label>
 
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-graphite-300">
+                            <input type="checkbox" name="for_free" value="1" class="rounded border-gray-300 text-emerald-600 shadow-sm focus:ring-emerald-500">
+                            {{ __('messages.admin.courses.field_for_free') }}
+                        </label>
+
                         <div class="pt-2">
                             <x-primary-button>{{ __('messages.admin.courses.create_module') }}</x-primary-button>
                         </div>
@@ -150,9 +155,14 @@
                         <article class="rounded-3xl border border-gray-200 bg-gray-50 p-5 dark:border-graphite-800 dark:bg-graphite-950/60">
                             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                 <div>
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex flex-wrap items-center gap-2">
                                         <span class="inline-flex rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">{{ $module->name }}</span>
                                         <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-600 dark:bg-graphite-900 dark:text-graphite-300">{{ __('messages.courses.module_videos', ['count' => $module->videos->count()]) }}</span>
+                                        @if ($module->for_free)
+                                            <span class="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">{{ __('messages.admin.courses.for_free_badge') }}</span>
+                                        @else
+                                            <span class="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">{{ __('messages.admin.courses.members_only_badge') }}</span>
+                                        @endif
                                     </div>
                                     @if ($module->description)
                                         <p class="mt-3 max-w-3xl text-sm text-gray-600 dark:text-graphite-300">{{ $module->description }}</p>
@@ -163,6 +173,19 @@
                                     <a href="{{ route('courses.index', ['module' => $module->slug]) }}" class="inline-flex items-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-brand-400 hover:text-brand-600 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-200 dark:hover:border-brand-500 dark:hover:text-brand-300">
                                         {{ __('messages.admin.courses.video_study_view') }}
                                     </a>
+                                    <form method="POST" action="{{ route('admin.courses.modules.toggle-free', $module) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit"
+                                                class="inline-flex items-center rounded-xl border px-4 py-2 text-sm font-semibold transition
+                                                {{ $module->for_free
+                                                    ? 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 dark:border-emerald-700/50 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:border-emerald-500'
+                                                    : 'border-amber-300 bg-amber-50 text-amber-700 hover:border-amber-400 hover:bg-amber-100 dark:border-amber-700/50 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:border-amber-500' }}">
+                                            {{ $module->for_free
+                                                ? __('messages.admin.courses.toggle_to_members_only')
+                                                : __('messages.admin.courses.toggle_to_free') }}
+                                        </button>
+                                    </form>
                                     <form method="POST" action="{{ route('admin.courses.modules.destroy', $module) }}">
                                         @csrf
                                         @method('DELETE')

@@ -694,6 +694,13 @@ return [
     'admin.courses.messages.video_created' => 'Video cargado correctamente.',
     'admin.courses.messages.video_deleted' => 'Video eliminado correctamente.',
     'admin.courses.messages.imported' => 'Se importaron :count videos existentes al catalogo.',
+    'admin.courses.field_for_free' => 'Disponible para usuarios free',
+    'admin.courses.for_free_badge' => 'Free',
+    'admin.courses.members_only_badge' => 'Solo miembros',
+    'admin.courses.toggle_to_free' => 'Dar acceso free',
+    'admin.courses.toggle_to_members_only' => 'Restringir a miembros',
+    'admin.courses.messages.module_made_free' => 'El modulo ahora es accesible para usuarios free.',
+    'admin.courses.messages.module_made_members_only' => 'El modulo ahora es exclusivo para miembros activos.',
 
     'user.network.title' => 'Mi red',
     'user.network.description' => 'Arbol personal de afiliados con sponsor directo y tu rama descendente.',

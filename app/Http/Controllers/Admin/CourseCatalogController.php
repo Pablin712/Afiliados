@@ -39,6 +39,7 @@ class CourseCatalogController extends Controller
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:999'],
             'is_active' => ['nullable', 'boolean'],
+            'for_free' => ['nullable', 'boolean'],
         ]);
 
         $slug = $this->uniqueModuleSlug($validated['name']);
@@ -49,11 +50,25 @@ class CourseCatalogController extends Controller
             'description' => $validated['description'] ?? null,
             'sort_order' => (int) ($validated['sort_order'] ?? 0),
             'is_active' => $request->boolean('is_active', true),
+            'for_free' => $request->boolean('for_free', false),
         ]);
 
         return redirect()
             ->route('admin.courses.index')
             ->with('status', __('messages.admin.courses.messages.module_created'));
+    }
+
+    public function toggleFree(CourseModule $module): RedirectResponse
+    {
+        $module->update(['for_free' => ! $module->for_free]);
+
+        $messageKey = $module->for_free
+            ? 'messages.admin.courses.messages.module_made_free'
+            : 'messages.admin.courses.messages.module_made_members_only';
+
+        return redirect()
+            ->route('admin.courses.index')
+            ->with('status', __($messageKey));
     }
 
     public function destroyModule(CourseModule $module): RedirectResponse
