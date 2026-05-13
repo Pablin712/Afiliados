@@ -634,6 +634,9 @@ return [
     'user.dashboard.scanner.compile_failed_with_log' => 'The scanner could not be compiled to EX5. Log: :log',
     'user.dashboard.scanner.deriv_register_failed' => 'We could not automatically register you in XQuant right now. Please try again in a few minutes.',
     'user.dashboard.scanner.download_now' => 'Download',
+    'user.dashboard.scanner.free_promo_button' => 'Try Deriv scanner for free',
+    'user.dashboard.scanner.free_promo_hint' => 'Exclusive 12-hour access · Time remaining:',
+    'user.dashboard.scanner.free_window_expired' => 'Your Deriv scanner trial has expired. Activate your membership to continue.',
     'user.dashboard.admin_panel_title' => 'Administrator context',
     'user.dashboard.admin_panel_description' => 'Your admin account does not use membership or personal profits. Manage finances, global tree, and payouts from the admin menu in your profile.',
 

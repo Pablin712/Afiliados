@@ -28,6 +28,18 @@ class ScannerDownloadController extends Controller
     public function registerDerivAndRedirect(Request $request): RedirectResponse
     {
         $user = $request->user();
+
+        $membershipTypeName = strtolower((string) ($user->membership?->membershipType?->name ?? 'free'));
+        $isFreeUser = ! $user->hasRole('admin') && $membershipTypeName === 'free';
+
+        if ($isFreeUser) {
+            $windowEnd = $user->created_at->copy()->addHours(12);
+            if (now()->gte($windowEnd)) {
+                return redirect()->route('dashboard')
+                    ->with('error', __('messages.user.dashboard.scanner.free_window_expired'));
+            }
+        }
+
         $targetUrl = self::XQUANT_BASE_URL;
 
         try {

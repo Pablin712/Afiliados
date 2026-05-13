@@ -44,6 +44,44 @@
                                 </button>
                             </x-slot>
                         </x-dropdown>
+                    @elseif($freeDerivWindowOpen)
+                        <div
+                            x-data="{
+                                expiresAt: {{ $freeDerivWindowExpiresAt->timestamp * 1000 }},
+                                remaining: '',
+                                expired: false,
+                                init() {
+                                    this.tick();
+                                    setInterval(() => this.tick(), 1000);
+                                },
+                                tick() {
+                                    const diff = Math.max(0, this.expiresAt - Date.now());
+                                    if (diff === 0) { this.expired = true; return; }
+                                    const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+                                    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+                                    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+                                    this.remaining = h + ':' + m + ':' + s;
+                                }
+                            }"
+                            x-show="!expired"
+                            class="flex flex-col items-start gap-1"
+                        >
+                            <a
+                                href="{{ route('scanners.deriv.redirect') }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:border-amber-400 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:border-amber-500/60"
+                            >
+                                <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/>
+                                </svg>
+                                {{ __('messages.user.dashboard.scanner.free_promo_button') }}
+                            </a>
+                            <p class="flex items-center gap-1 px-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                                <span>{{ __('messages.user.dashboard.scanner.free_promo_hint') }}</span>
+                                <span x-text="remaining" class="font-mono font-semibold"></span>
+                            </p>
+                        </div>
                     @endif
                 </div>
             @endunless

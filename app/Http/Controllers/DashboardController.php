@@ -30,6 +30,10 @@ class DashboardController extends Controller
         $membershipTypeName = strtolower((string) ($user->membership?->membershipType?->name ?? 'free'));
         $canDownloadScanners = ! $isAdmin && $membershipTypeName !== 'free';
 
+        $isFreeUser = ! $isAdmin && $membershipTypeName === 'free';
+        $freeDerivWindowExpiresAt = $isFreeUser ? $user->created_at->copy()->addHours(12) : null;
+        $freeDerivWindowOpen = $isFreeUser && now()->lt($freeDerivWindowExpiresAt);
+
         $user->loadMissing([
             'membership.membershipType',
             'membership.lastPayment',
@@ -82,6 +86,8 @@ class DashboardController extends Controller
             'user' => $user,
             'isAdmin' => $isAdmin,
             'canDownloadScanners' => $canDownloadScanners,
+            'freeDerivWindowOpen' => $freeDerivWindowOpen,
+            'freeDerivWindowExpiresAt' => $freeDerivWindowExpiresAt,
             'currentMembership' => $isAdmin
                 ? __('messages.user.dashboard.admin_membership')
                 : ($user->membership?->membershipType?->name ?? 'Free'),
