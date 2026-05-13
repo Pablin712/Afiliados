@@ -8,6 +8,9 @@ use App\Models\Profit;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
@@ -38,17 +41,55 @@ class MyProfitsController extends Controller
             'to' => (string) $request->input('to', ''),
         ];
 
+        $pendingTotal = (float) Profit::query()->where('user_id', $user->id)->where('state', 'pending')->sum('amount');
+
         return view('user.profits.index', [
-            'records' => $records,
+            'records'      => $records,
             'totalRecords' => $records->total(),
-            'filters' => $filters,
-            'pendingTotal' => (float) Profit::query()->where('user_id', $user->id)->where('state', 'pending')->sum('amount'),
-            'paidTotal' => (float) Profit::query()->where('user_id', $user->id)->where('state', 'made')->sum('amount'),
-            'monthTotal' => (float) Profit::query()
+            'filters'      => $filters,
+            'pendingTotal' => $pendingTotal,
+            'paidTotal'    => (float) Profit::query()->where('user_id', $user->id)->where('state', 'made')->sum('amount'),
+            'monthTotal'   => (float) Profit::query()
                 ->where('user_id', $user->id)
                 ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
                 ->sum('amount'),
+            'hasBank' => $user->userBanks()->exists(),
         ]);
+    }
+
+    public function requestPayout(Request $request): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if (! $user->userBanks()->exists()) {
+            return back()->with('payout_error', 'no_bank');
+        }
+
+        $pendingTotal = (float) Profit::query()
+            ->where('user_id', $user->id)
+            ->where('state', 'pending')
+            ->sum('amount');
+
+        if ($pendingTotal <= 0) {
+            return back()->with('payout_error', 'no_pending');
+        }
+
+        $message = "Hola Esteban, el usuario *{$user->name}* ha solicitado el cobro de sus ganancias de *\$"
+            . number_format($pendingTotal, 2)
+            . "*. Por favor, revisa su solicitud y realiza el pago correspondiente.";
+
+        try {
+            Http::withHeaders(['apiKey' => 'DAF579E359CA-43AA-959F-16EE1ED51F7A'])
+                ->post('https://evoapi.abigailsoft.com/message/sendText/AET-SAS', [
+                    'number' => '+593986248511',
+                    'text'   => $message,
+                ]);
+        } catch (\Throwable) {
+            return back()->with('payout_error', 'api_error');
+        }
+
+        return back()->with('payout_success', true);
     }
 
     protected function buildQuery(IndexOwnProfitsRequest $request, User $user): Builder

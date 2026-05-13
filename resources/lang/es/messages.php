@@ -239,9 +239,18 @@ return [
     'profile.binance_description' => 'Agrega o edita tus datos de Binance para recibir pagos.',
     'profile.binance_account_id_label' => 'Tu cuenta de Binance (ID de cuenta)',
     'profile.binance_username_label' => 'Tu usuario de Binance',
-    'profile.binance_hint' => 'Por ahora solo puedes tener una cuenta bancaria asociada a tu perfil.',
+    'profile.binance_hint' => 'Guarda tu cuenta Binance para cobros en criptomoneda.',
     'profile.binance_save_button' => 'Guardar cuenta Binance',
     'profile.binance_detail_value' => 'Tu cuenta de Binance: :account, tu usuario de Binance: :username',
+
+    'profile.other_bank_title' => 'Otro Banco',
+    'profile.other_bank_description' => 'Agrega o edita tu cuenta bancaria para recibir pagos (Pichincha, Guayaquil, Produbanco, etc.).',
+    'profile.other_bank_name_label' => 'Nombre del banco',
+    'profile.other_bank_owner_label' => 'Titular de la cuenta',
+    'profile.other_bank_number_label' => 'Número de cuenta',
+    'profile.other_bank_identification_label' => 'Cédula / Identificación del titular (opcional)',
+    'profile.other_bank_save_button' => 'Guardar banco',
+    'profile.other_bank_updated' => 'Banco guardado correctamente.',
 
     // Common
 
@@ -757,5 +766,28 @@ return [
     'user.profits.created_at' => 'Fecha',
     'user.profits.system_origin' => 'Sin afiliado asociado',
     'user.profits.level_badge' => 'Nivel :level',
+
+    'user.profits.request_payout_button' => 'Cobrar ganancias',
+    'user.profits.no_pending_title' => 'Sin ganancias pendientes',
+    'user.profits.no_pending_text' => 'No tienes ganancias pendientes por cobrar en este momento.',
+    'user.profits.no_bank_title' => 'Sin cuenta bancaria',
+    'user.profits.no_bank_text' => 'Para cobrar tus ganancias debes tener una cuenta bancaria asociada (Binance u otro banco).',
+    'user.profits.no_bank_add_button' => 'Agregar mi cuenta bancaria',
+    'user.profits.confirm_payout_title' => 'Solicitar cobro de ganancias',
+    'user.profits.confirm_payout_text' => 'Se notificará al administrador para que realice el pago de',
+    'user.profits.confirm_payout_button' => 'Confirmar solicitud',
+    'user.profits.payout_requested' => 'Solicitud enviada correctamente. El administrador revisará y realizará el pago.',
+    'user.profits.payout_api_error' => 'No se pudo enviar la notificación al administrador. Por favor intenta de nuevo.',
+
+    'admin.profits.tab_individual' => 'Ganancias por usuario',
+    'admin.profits.tab_totals' => 'Totales por usuario',
+    'admin.profits.user_column' => 'Usuario',
+    'admin.profits.total_amount_column' => 'Total pendiente',
+    'admin.profits.count_column' => 'N° ganancias',
+    'admin.profits.mark_all_as_paid' => 'Pagar todo',
+    'admin.profits.mark_all_modal_title' => 'Confirmar pago total',
+    'admin.profits.mark_all_modal_text' => 'Vas a marcar como pagadas todas las ganancias pendientes de:',
+    'admin.profits.all_marked_as_paid' => 'Todas las ganancias pendientes fueron marcadas como pagadas.',
+    'admin.profits.no_grouped_records' => 'No hay ganancias pendientes.',
 ];
 

@@ -21,7 +21,8 @@ class ProfileController extends Controller
     {
         return view('profile.edit', [
             'user' => $request->user(),
-            'userBank' => $request->user()->userBanks()->first(),
+            'userBank' => $request->user()->userBanks()->where('type', 'binance')->first(),
+            'otherBank' => $request->user()->userBanks()->where('type', 'other_bank')->first(),
         ]);
     }
 
@@ -48,7 +49,7 @@ class ProfileController extends Controller
         $binanceUsername = trim((string) ($validated['binance_username'] ?? ''));
 
         if ($binanceAccountId !== '' && $binanceUsername !== '') {
-            $userBank = $request->user()->userBanks()->first();
+            $userBank = $request->user()->userBanks()->where('type', 'binance')->first();
 
             $bankPayload = [
                 'bank_name' => 'Binance',
@@ -71,6 +72,35 @@ class ProfileController extends Controller
         }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    public function updateOtherBank(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'other_bank_name'           => ['required', 'string', 'max:120'],
+            'other_bank_owner'          => ['required', 'string', 'max:150'],
+            'other_bank_number'         => ['required', 'string', 'max:80'],
+            'other_bank_identification' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $otherBank = $request->user()->userBanks()->where('type', 'other_bank')->first();
+
+        $payload = [
+            'bank_name'      => $validated['other_bank_name'],
+            'owner'          => $validated['other_bank_owner'],
+            'number'         => $validated['other_bank_number'],
+            'identification' => $validated['other_bank_identification'] ?? null,
+            'type'           => 'other_bank',
+            'is_default'     => false,
+        ];
+
+        if ($otherBank instanceof UserBank) {
+            $otherBank->update($payload);
+        } else {
+            $request->user()->userBanks()->create($payload);
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'other-bank-updated');
     }
 
     /**

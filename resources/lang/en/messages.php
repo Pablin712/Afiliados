@@ -239,9 +239,18 @@ return [
     'profile.binance_description' => 'Add or edit your Binance payout details.',
     'profile.binance_account_id_label' => 'Your Binance account (Account ID)',
     'profile.binance_username_label' => 'Your Binance username',
-    'profile.binance_hint' => 'For now, you can only keep one bank account linked to your profile.',
+    'profile.binance_hint' => 'Save your Binance account to receive crypto payments.',
     'profile.binance_save_button' => 'Save Binance account',
     'profile.binance_detail_value' => 'Your Binance account: :account, your Binance username: :username',
+
+    'profile.other_bank_title' => 'Other Bank',
+    'profile.other_bank_description' => 'Add or edit your bank account to receive payments (Pichincha, Guayaquil, Produbanco, etc.).',
+    'profile.other_bank_name_label' => 'Bank name',
+    'profile.other_bank_owner_label' => 'Account holder',
+    'profile.other_bank_number_label' => 'Account number',
+    'profile.other_bank_identification_label' => 'Holder ID / Identification (optional)',
+    'profile.other_bank_save_button' => 'Save bank',
+    'profile.other_bank_updated' => 'Bank saved successfully.',
 
     // Common
 
@@ -757,5 +766,28 @@ return [
     'user.profits.created_at' => 'Date',
     'user.profits.system_origin' => 'No linked affiliate',
     'user.profits.level_badge' => 'Level :level',
+
+    'user.profits.request_payout_button' => 'Request payout',
+    'user.profits.no_pending_title' => 'No pending earnings',
+    'user.profits.no_pending_text' => 'You have no pending earnings to collect at this time.',
+    'user.profits.no_bank_title' => 'No bank account linked',
+    'user.profits.no_bank_text' => 'You need a linked bank account (Binance or other bank) to request a payout.',
+    'user.profits.no_bank_add_button' => 'Add my bank account',
+    'user.profits.confirm_payout_title' => 'Request earnings payout',
+    'user.profits.confirm_payout_text' => 'The administrator will be notified to send payment of',
+    'user.profits.confirm_payout_button' => 'Confirm request',
+    'user.profits.payout_requested' => 'Request sent. The administrator will review and process your payment.',
+    'user.profits.payout_api_error' => 'Could not send notification to the administrator. Please try again.',
+
+    'admin.profits.tab_individual' => 'Earnings per user',
+    'admin.profits.tab_totals' => 'Totals per user',
+    'admin.profits.user_column' => 'User',
+    'admin.profits.total_amount_column' => 'Pending total',
+    'admin.profits.count_column' => '# earnings',
+    'admin.profits.mark_all_as_paid' => 'Pay all',
+    'admin.profits.mark_all_modal_title' => 'Confirm full payment',
+    'admin.profits.mark_all_modal_text' => 'You are about to mark all pending earnings as paid for:',
+    'admin.profits.all_marked_as_paid' => 'All pending earnings have been marked as paid.',
+    'admin.profits.no_grouped_records' => 'No pending earnings.',
 ];
 

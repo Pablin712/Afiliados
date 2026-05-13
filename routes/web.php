@@ -48,6 +48,7 @@ Route::middleware(['auth'])->name('auth.device-conflict.')->prefix('auth/device-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/other-bank', [ProfileController::class, 'updateOtherBank'])->name('profile.other-bank.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/plans', [PlansController::class, 'index'])
@@ -73,6 +74,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/mis-ganancias', [MyProfitsController::class, 'index'])
         ->middleware(['verified', 'role:user'])
         ->name('user.profits.index');
+
+    Route::post('/mis-ganancias/solicitar-cobro', [MyProfitsController::class, 'requestPayout'])
+        ->middleware(['verified', 'role:user'])
+        ->name('user.profits.request-payout');
 
     Route::prefix('/scanners')
         ->middleware(['verified', 'role:user'])
@@ -228,6 +233,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/profits/{profit}/mark-as-paid', [ProfitsController::class, 'markAsPaid'])
         ->middleware(['verified', 'permission:manage profits'])
         ->name('admin.profits.mark-as-paid');
+
+    Route::post('/admin/profits/users/{user}/mark-all-as-paid', [ProfitsController::class, 'markAllAsPaid'])
+        ->middleware(['verified', 'permission:manage profits'])
+        ->name('admin.profits.mark-all-as-paid');
 
     Route::post('/membership-types', [MembershipTypeController::class, 'store'])
         ->middleware(['verified', 'permission:create membership_types'])

@@ -13,8 +13,21 @@
             <p class="text-xs text-gray-500 dark:text-graphite-400">{{ $profit->user?->email }}</p>
         </td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">
-            <p>{{ $profit->userBank?->bank_name }}</p>
-            <p class="text-xs text-gray-500 dark:text-graphite-400">{{ $profit->userBank?->number }}</p>
+            @php $userBanks = $profit->user?->userBanks ?? collect(); @endphp
+            @forelse ($userBanks as $bank)
+                <div class="{{ $loop->first ? '' : 'mt-2 pt-2 border-t border-gray-100 dark:border-graphite-700/50' }}">
+                    <p class="font-medium text-gray-900 dark:text-graphite-100">{{ $bank->bank_name }}</p>
+                    @if ($bank->type === 'binance')
+                        <p class="text-xs text-gray-500 dark:text-graphite-400">ID: {{ $bank->identification }}</p>
+                        <p class="text-xs text-gray-500 dark:text-graphite-400">{{ '@'.$bank->owner }}</p>
+                    @else
+                        <p class="text-xs text-gray-500 dark:text-graphite-400">Cta: {{ $bank->number }}</p>
+                        <p class="text-xs text-gray-500 dark:text-graphite-400">{{ $bank->owner }}</p>
+                    @endif
+                </div>
+            @empty
+                <span class="text-xs text-gray-400 dark:text-graphite-500">—</span>
+            @endforelse
         </td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200 font-semibold">${{ number_format((float) $profit->amount, 2) }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">
