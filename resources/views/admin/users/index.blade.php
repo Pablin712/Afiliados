@@ -29,6 +29,7 @@
                     ['label' => __('messages.admin.users.sponsor'),            'type' => 'string',  'sort_by' => 'sponsor'],
                     ['label' => __('messages.admin.users.membership'),         'type' => 'string',  'sort_by' => 'membership'],
                     ['label' => __('messages.admin.registered_at'),            'type' => 'string',  'sort_by' => 'created_at'],
+                    ['label' => __('messages.admin.users.active_session'),     'type' => 'string',  'sort_by' => 'id'],
                     ['label' => __('messages.actions'),                        'type' => 'actions', 'sort_by' => 'id'],
                 ]"
                 :serverSide="true"
@@ -42,7 +43,7 @@
                 :table_void="$records->isEmpty()"
             >
                 <tbody class="divide-y divide-gray-200 dark:divide-graphite-800">
-                    @include('admin.users.partials.table-rows', ['records' => $records->items()])
+                    @include('admin.users.partials.table-rows', ['records' => $records->items(), 'activeSessions' => $activeSessions])
                 </tbody>
             </x-enhanced-table>
 

@@ -363,6 +363,18 @@ return [
     'admin.users.error_self_sponsor' => 'Un usuario no puede ser su propio sponsor.',
     'admin.users.error_circular_sponsor' => 'No se puede asignar ese sponsor porque crearía una referencia circular en el árbol.',
     'admin.users.no_users' => 'No se encontraron usuarios.',
+    'admin.users.active_session' => 'Sesión activa',
+    'admin.users.session_online' => 'En línea',
+    'admin.users.session_offline' => 'Sin sesión activa',
+
+    'auth.device.conflict_title' => 'Sesión activa en otro dispositivo',
+    'auth.device.conflict_subtitle' => 'Tu cuenta ya tiene una sesión abierta. Solo se permite un dispositivo a la vez.',
+    'auth.device.active_device' => 'Dispositivo conectado',
+    'auth.device.last_activity' => 'Última actividad',
+    'auth.device.takeover_button' => 'Cerrar esa sesión y entrar aquí',
+    'auth.device.cancel_button' => 'Cancelar',
+    'auth.device.conflict_note' => 'Si cierras la otra sesión, ese dispositivo será desconectado inmediatamente.',
+    'auth.device.session_taken_over' => 'Tu sesión fue cerrada porque otro dispositivo inició sesión en tu cuenta.',
 
     'name' => 'Nombre',
     'email' => 'Correo Electrónico',

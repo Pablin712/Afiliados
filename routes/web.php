@@ -3,6 +3,7 @@
 use App\Http\Controllers\ActionController;
 use App\Http\Controllers\Admin\BanksController;
 use App\Http\Controllers\Admin\CourseCatalogController;
+use App\Http\Controllers\Auth\DeviceConflictController;
 use App\Http\Controllers\Admin\UsersAdminController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
@@ -36,6 +37,13 @@ Route::get('/locale/{locale}', function ($locale) {
 })->name('locale.change');
 
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
+
+// Device conflict (single-session enforcement)
+Route::middleware(['auth'])->name('auth.device-conflict.')->prefix('auth/device-conflict')->group(function () {
+    Route::get('/',         [DeviceConflictController::class, 'show'])->name('show');
+    Route::post('/takeover', [DeviceConflictController::class, 'takeover'])->name('takeover');
+    Route::get('/cancel',   [DeviceConflictController::class, 'cancel'])->name('cancel');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

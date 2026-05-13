@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\UserAgentParser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class UsersAdminController extends Controller
@@ -34,9 +36,32 @@ class UsersAdminController extends Controller
 
         $records = $query->paginate($perPage);
 
+        // Active sessions per user (active = last activity within 15 min, not kicked)
+        $activeSessionsThreshold = now()->subMinutes(15)->timestamp;
+        $activeSessions = DB::table('sessions')
+            ->whereNotNull('user_id')
+            ->whereNull('kicked_at')
+            ->where('last_activity', '>=', $activeSessionsThreshold)
+            ->select('user_id', 'ip_address', 'user_agent', 'last_activity')
+            ->get()
+            ->keyBy('user_id')
+            ->map(function (object $s): array {
+                $parsed = UserAgentParser::parse((string) ($s->user_agent ?? ''));
+
+                return [
+                    'browser'       => $parsed['browser'],
+                    'os'            => $parsed['os'],
+                    'ip'            => $s->ip_address ?? '—',
+                    'last_activity' => $s->last_activity,
+                ];
+            });
+
         if ($request->boolean('ajax')) {
             return response()->json([
-                'html'          => view('admin.users.partials.table-rows', ['records' => $records->items()])->render(),
+                'html'          => view('admin.users.partials.table-rows', [
+                    'records'        => $records->items(),
+                    'activeSessions' => $activeSessions,
+                ])->render(),
                 'total_records' => $records->total(),
                 'current_page'  => $records->currentPage(),
                 'per_page'      => $records->perPage(),
@@ -57,9 +82,10 @@ class UsersAdminController extends Controller
             });
 
         return view('admin.users.index', [
-            'records'      => $records,
-            'sponsors'     => $sponsors,
-            'totalRecords' => $records->total(),
+            'records'        => $records,
+            'sponsors'       => $sponsors,
+            'totalRecords'   => $records->total(),
+            'activeSessions' => $activeSessions,
         ]);
     }
 

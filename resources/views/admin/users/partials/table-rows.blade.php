@@ -8,6 +8,7 @@
                 'text' => $user->sponsor->name . ' (' . ($user->sponsor->affiliate_code ?? '#' . $user->sponsor->id) . ') — ' . $user->sponsor->email,
             ] : null,
         ]) . ')';
+        $session = ($activeSessions ?? collect())->get($user->id);
     @endphp
     <tr class="hover:bg-gray-50 dark:hover:bg-graphite-800/60 transition-colors duration-150">
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-500 dark:text-graphite-400 font-mono">#{{ $user->id }}</td>
@@ -35,6 +36,23 @@
             {{ $user->created_at?->format('Y-m-d') }}
         </td>
         <td class="px-4 sm:px-6 py-3 text-sm">
+            @if ($session)
+                <div class="flex flex-col gap-0.5">
+                    <span class="inline-flex items-center gap-1">
+                        <span class="relative flex h-2 w-2">
+                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                        </span>
+                        <span class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{{ __('messages.admin.users.session_online') }}</span>
+                    </span>
+                    <span class="text-[11px] text-gray-500 dark:text-graphite-400">{{ $session['browser'] }} · {{ $session['os'] }}</span>
+                    <span class="text-[11px] text-gray-400 dark:text-graphite-500 font-mono">{{ $session['ip'] }}</span>
+                </div>
+            @else
+                <span class="text-xs text-gray-400 dark:text-graphite-600">{{ __('messages.admin.users.session_offline') }}</span>
+            @endif
+        </td>
+        <td class="px-4 sm:px-6 py-3 text-sm">
             @can('edit users')
                 <x-action-icon-button
                     variant="edit"
@@ -47,7 +65,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
+        <td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
             {{ __('messages.admin.users.no_users') }}
         </td>
     </tr>

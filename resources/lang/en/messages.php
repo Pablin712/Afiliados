@@ -363,6 +363,18 @@ return [
     'admin.users.error_self_sponsor' => 'A user cannot be their own sponsor.',
     'admin.users.error_circular_sponsor' => 'Cannot assign that sponsor as it would create a circular reference in the tree.',
     'admin.users.no_users' => 'No users found.',
+    'admin.users.active_session' => 'Active session',
+    'admin.users.session_online' => 'Online',
+    'admin.users.session_offline' => 'No active session',
+
+    'auth.device.conflict_title' => 'Active session on another device',
+    'auth.device.conflict_subtitle' => 'Your account already has an open session. Only one device is allowed at a time.',
+    'auth.device.active_device' => 'Connected device',
+    'auth.device.last_activity' => 'Last activity',
+    'auth.device.takeover_button' => 'Close that session and sign in here',
+    'auth.device.cancel_button' => 'Cancel',
+    'auth.device.conflict_note' => 'If you close the other session, that device will be disconnected immediately.',
+    'auth.device.session_taken_over' => 'Your session was closed because another device signed into your account.',
 
     'name' => 'Name',
     'email' => 'Email',

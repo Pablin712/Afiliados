@@ -16,7 +16,7 @@ class EnsureUserPhoneIsSet
             return $next($request);
         }
 
-        if ($request->routeIs('profile.edit', 'profile.update', 'profile.destroy', 'logout')) {
+        if ($request->routeIs('profile.edit', 'profile.update', 'profile.destroy', 'logout', 'auth.device-conflict.*')) {
             return $next($request);
         }
 
