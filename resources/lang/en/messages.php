@@ -702,7 +702,7 @@ return [
     'admin.courses.field_is_active' => 'Active',
     'admin.courses.field_module' => 'Module',
     'admin.courses.field_video_file' => 'Video file',
-    'admin.courses.field_video_help' => 'Suggested formats: MP4, MOV or WEBM. Approximate max size: 500 MB.',
+    'admin.courses.field_video_help' => 'Suggested formats: MP4, MOV or WEBM. Max size: 1 GB.',
     'admin.courses.create_module' => 'Create module',
     'admin.courses.upload_video' => 'Upload video',
     'admin.courses.catalog_title' => 'Manageable catalog',

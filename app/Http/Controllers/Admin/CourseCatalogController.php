@@ -7,6 +7,7 @@ use App\Models\CourseModule;
 use App\Models\CourseVideo;
 use App\Services\CourseCatalogImportService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -86,13 +87,13 @@ class CourseCatalogController extends Controller
             ->with('status', __('messages.admin.courses.messages.module_deleted'));
     }
 
-    public function storeVideo(Request $request): RedirectResponse
+    public function storeVideo(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'course_module_id' => ['required', 'integer', 'exists:course_modules,id'],
             'title' => ['required', 'string', 'max:180'],
             'description' => ['nullable', 'string'],
-            'video' => ['required', 'file', 'mimetypes:video/mp4,video/quicktime,video/webm', 'max:512000'],
+            'video' => ['required', 'file', 'mimetypes:video/mp4,video/quicktime,video/webm', 'max:1048576'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:999'],
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -115,9 +116,15 @@ class CourseCatalogController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ]);
 
+        $message = __('messages.admin.courses.messages.video_created');
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
         return redirect()
             ->route('admin.courses.index')
-            ->with('status', __('messages.admin.courses.messages.video_created'));
+            ->with('status', $message);
     }
 
     public function destroyVideo(CourseVideo $video): RedirectResponse

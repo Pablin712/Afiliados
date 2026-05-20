@@ -100,7 +100,7 @@
                 <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.admin.courses.video_form_title') }}</h3>
 
-                    <form method="POST" action="{{ route('admin.courses.videos.store') }}" enctype="multipart/form-data" class="mt-5 grid gap-4">
+                    <form id="video-upload-form" method="POST" action="{{ route('admin.courses.videos.store') }}" enctype="multipart/form-data" class="mt-5 grid gap-4">
                         @csrf
 
                         <div>
@@ -140,9 +140,121 @@
                         </label>
 
                         <div class="pt-2">
-                            <x-primary-button>{{ __('messages.admin.courses.upload_video') }}</x-primary-button>
+                            <x-primary-button id="video-upload-btn">{{ __('messages.admin.courses.upload_video') }}</x-primary-button>
                         </div>
+
+                        {{-- Barra de progreso --}}
+                        <div id="upload-progress-container" class="hidden space-y-2 rounded-2xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-900/40 dark:bg-brand-950/20">
+                            <div class="flex items-center justify-between text-sm font-medium text-brand-800 dark:text-brand-300">
+                                <span id="upload-progress-status">Subiendo video...</span>
+                                <span id="upload-progress-text">0%</span>
+                            </div>
+                            <div class="h-3 w-full overflow-hidden rounded-full bg-brand-200 dark:bg-brand-900/60">
+                                <div id="upload-progress-bar" class="h-full w-0 rounded-full bg-brand-500 transition-all duration-200"></div>
+                            </div>
+                            <p class="text-xs text-amber-700 dark:text-amber-400">No cierre esta pestaña mientras se sube el video.</p>
+                        </div>
+
+                        <div id="upload-error-container" class="hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-300"></div>
                     </form>
+
+                    <script>
+                    (function () {
+                        var form       = document.getElementById('video-upload-form');
+                        var fileInput  = document.getElementById('course_video_file');
+                        var submitBtn  = document.getElementById('video-upload-btn');
+                        var container  = document.getElementById('upload-progress-container');
+                        var bar        = document.getElementById('upload-progress-bar');
+                        var pct        = document.getElementById('upload-progress-text');
+                        var status     = document.getElementById('upload-progress-status');
+                        var errBox     = document.getElementById('upload-error-container');
+                        var MAX_BYTES  = 1024 * 1024 * 1024; // 1 GB
+
+                        fileInput.addEventListener('change', function () {
+                            var file = this.files[0];
+                            if (file && file.size > MAX_BYTES) {
+                                errBox.textContent = 'El archivo supera el límite de 1 GB.';
+                                errBox.classList.remove('hidden');
+                                this.value = '';
+                            } else {
+                                errBox.classList.add('hidden');
+                            }
+                        });
+
+                        form.addEventListener('submit', function (e) {
+                            e.preventDefault();
+
+                            var file = fileInput.files[0];
+                            if (!file) return;
+
+                            if (file.size > MAX_BYTES) {
+                                errBox.textContent = 'El archivo supera el límite de 1 GB.';
+                                errBox.classList.remove('hidden');
+                                return;
+                            }
+
+                            errBox.classList.add('hidden');
+                            container.classList.remove('hidden');
+                            submitBtn.disabled = true;
+
+                            bar.className = 'h-full w-0 rounded-full bg-brand-500 transition-all duration-200';
+                            bar.style.width = '0%';
+                            pct.textContent = '0%';
+                            status.textContent = 'Subiendo video, por favor espere...';
+
+                            var xhr = new XMLHttpRequest();
+
+                            xhr.upload.addEventListener('progress', function (e) {
+                                if (e.lengthComputable) {
+                                    var p = Math.round((e.loaded / e.total) * 100);
+                                    bar.style.width = p + '%';
+                                    pct.textContent = p + '%';
+                                    status.textContent = p < 100
+                                        ? 'Subiendo video (' + p + '%)... Por favor espere.'
+                                        : 'Procesando en el servidor...';
+                                }
+                            });
+
+                            xhr.addEventListener('load', function () {
+                                if (xhr.status >= 200 && xhr.status < 300) {
+                                    bar.style.width = '100%';
+                                    pct.textContent = '100%';
+                                    bar.className = 'h-full w-full rounded-full bg-green-500';
+                                    status.textContent = '¡Video subido exitosamente! Recargando...';
+                                    setTimeout(function () { window.location.reload(); }, 1200);
+                                } else {
+                                    var msg = 'Error al subir el video.';
+                                    try {
+                                        var res = JSON.parse(xhr.responseText);
+                                        if (res.errors) {
+                                            msg = Object.values(res.errors).flat().join(' ');
+                                        } else if (res.message) {
+                                            msg = res.message;
+                                        }
+                                    } catch (err) {}
+                                    bar.className = 'h-full rounded-full bg-red-500';
+                                    status.textContent = 'Error al subir.';
+                                    errBox.textContent = msg;
+                                    errBox.classList.remove('hidden');
+                                    submitBtn.disabled = false;
+                                }
+                            });
+
+                            xhr.addEventListener('error', function () {
+                                bar.className = 'h-full rounded-full bg-red-500';
+                                status.textContent = 'Error de conexión.';
+                                errBox.textContent = 'No se pudo conectar con el servidor. Verifique su conexión e intente nuevamente.';
+                                errBox.classList.remove('hidden');
+                                submitBtn.disabled = false;
+                            });
+
+                            xhr.open('POST', form.action);
+                            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                            xhr.setRequestHeader('Accept', 'application/json');
+                            xhr.send(new FormData(form));
+                        });
+                    }());
+                    </script>
                 </div>
             </div>
 
