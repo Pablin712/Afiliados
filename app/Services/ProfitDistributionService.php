@@ -92,7 +92,7 @@ class ProfitDistributionService
         }
 
         $typeName = strtolower((string) ($membership->membershipType?->name ?? ''));
-        if ($typeName === '' || $typeName === 'free' || $typeName === 'customer') {
+        if ($typeName === '' || $typeName === 'free') {
             return false;
         }
 
@@ -120,6 +120,7 @@ class ProfitDistributionService
         $normalized = Str::lower($typeName);
 
         return match ($normalized) {
+            'customer' => 1,
             'beginner' => 1,
             'constructor' => 2,
             'explorer' => 3,
