@@ -13,11 +13,13 @@ class ProfileUpdateRequest extends FormRequest
         $accountId = trim((string) $this->input('binance_account_id', ''));
         $username = trim((string) $this->input('binance_username', ''));
         $phone = $this->normalizePhone((string) $this->input('phone', ''));
+        $email = strtolower(trim((string) $this->input('email', '')));
 
         $this->merge([
             'binance_account_id' => $accountId === '' ? null : $accountId,
             'binance_username' => $username === '' ? null : $username,
             'phone' => $phone === '' ? null : $phone,
+            'email' => $email,
         ]);
     }
 
@@ -35,7 +37,6 @@ class ProfileUpdateRequest extends FormRequest
             'email' => [
                 'required',
                 'string',
-                'lowercase',
                 'email',
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),

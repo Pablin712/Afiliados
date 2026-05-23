@@ -15,6 +15,7 @@
 
         <input type="hidden" name="name" value="{{ old('name', $user->name) }}">
         <input type="hidden" name="email" value="{{ old('email', $user->email) }}">
+        <input type="hidden" name="phone" value="{{ old('phone', $user->phone) }}">
 
         <div>
             <x-input-label for="binance_account_id" :value="__('messages.profile.binance_account_id_label')" />
