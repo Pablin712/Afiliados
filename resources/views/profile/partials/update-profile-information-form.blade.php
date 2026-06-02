@@ -31,7 +31,8 @@
 
         <div>
             <x-input-label for="email" :value="__('messages.email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
+            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" placeholder="tunombre@gmail.com" />
+            <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.auth.email_gmail_only') }}</p>
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
@@ -55,7 +56,7 @@
 
         <div>
             <x-input-label for="phone" :value="__('messages.profile.phone_label')" />
-            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" placeholder="+12025550123" />
+            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" placeholder="12025550123" pattern="[1-9][0-9]{7,14}" />
             <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.profile.phone_hint') }}</p>
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>

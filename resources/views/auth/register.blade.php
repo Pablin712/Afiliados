@@ -13,7 +13,9 @@
             showPassword: false,
             showPasswordConfirmation: false,
             passwordPolicyMessage: @js(__('messages.auth.password_policy_help')),
+            gmailOnlyMessage: @js(__('messages.auth.email_gmail_only')),
             emailAvailabilityError: '',
+            gmailOnlyError: '',
             identificationAvailabilityError: '',
             availabilityUrl: @js(route('register.availability')),
             async checkAvailability() {
@@ -76,6 +78,12 @@
                 ].filter(Boolean);
 
                 refs.forEach((field) => field.setCustomValidity(''));
+
+                const gmailPattern = /^[^\s@]+@gmail\.com$/i;
+                if (this.email && !gmailPattern.test(this.email)) {
+                    this.$refs.emailInput?.setCustomValidity(this.gmailOnlyMessage);
+                    this.gmailOnlyError = this.gmailOnlyMessage;
+                }
 
                 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
                 if (!passwordPattern.test(this.passwordValue)) {
@@ -178,7 +186,8 @@
 
                     <div>
                         <x-input-label for="phone" :value="__('messages.auth.phone_label')" />
-                        <x-text-input id="phone" class="mt-1 block w-full" type="text" name="phone" x-model="phone" :value="old('phone')" required autocomplete="tel" />
+                        <x-text-input id="phone" class="mt-1 block w-full" type="text" name="phone" x-model="phone" :value="old('phone')" required autocomplete="tel" pattern="[1-9][0-9]{7,14}" placeholder="593961778319" />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.auth.phone_hint') }}</p>
                         <x-input-error :messages="$errors->get('phone')" class="mt-2" />
                     </div>
 
@@ -191,8 +200,10 @@
 
                     <div class="md:col-span-2">
                         <x-input-label for="email" :value="__('messages.email')" />
-                        <x-text-input id="email" class="mt-1 block w-full" type="email" name="email" x-model="email" x-ref="emailInput" x-on:input="emailAvailabilityError = ''; $refs.emailInput.setCustomValidity('');" :value="old('email')" required autocomplete="username" />
+                        <x-text-input id="email" class="mt-1 block w-full" type="email" name="email" x-model="email" x-ref="emailInput" x-on:input="emailAvailabilityError = ''; gmailOnlyError = ''; $refs.emailInput.setCustomValidity('');" :value="old('email')" required autocomplete="username" placeholder="tunombre@gmail.com" />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.auth.email_gmail_only') }}</p>
                         <p x-show="emailAvailabilityError" x-text="emailAvailabilityError" class="mt-2 text-sm text-red-600 dark:text-red-400"></p>
+                        <p x-show="gmailOnlyError" x-text="gmailOnlyError" class="mt-2 text-sm text-red-600 dark:text-red-400"></p>
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 

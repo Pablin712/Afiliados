@@ -38,13 +38,14 @@ class ProfileUpdateRequest extends FormRequest
                 'required',
                 'string',
                 'email',
+                'ends_with:@gmail.com',
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
             'phone' => [
                 'required',
                 'string',
-                'regex:/^\+[1-9]\d{7,14}$/',
+                'regex:/^[1-9]\d{7,14}$/',
                 'max:30',
                 Rule::unique(User::class, 'phone')->ignore($this->user()->id),
             ],
@@ -77,7 +78,7 @@ class ProfileUpdateRequest extends FormRequest
         }
 
         if (preg_match('/^[1-9]\d{7,14}$/', $digits)) {
-            return '+'.$digits;
+            return $digits;
         }
 
         return '';

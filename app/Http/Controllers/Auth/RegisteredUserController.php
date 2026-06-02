@@ -122,16 +122,17 @@ class RegisteredUserController extends Controller
         $request->merge([
             'sponsor_id' => $sponsorId,
             'phone' => $this->normalizePhone((string) $request->input('phone', '')),
+            'email' => Str::lower(trim((string) $request->input('email', ''))),
         ]);
 
-        $phoneRules = ['required', 'string', 'regex:/^\+[1-9]\d{7,14}$/', 'max:32'];
+        $phoneRules = ['required', 'string', 'regex:/^[1-9]\d{7,14}$/', 'max:32'];
         if ($phoneColumnAvailable) {
             $phoneRules[] = 'unique:'.User::class.',phone';
         }
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'ends_with:@gmail.com', 'max:255', 'unique:'.User::class],
             'phone' => $phoneRules,
             'identification' => ['required', 'string', 'max:50', 'unique:'.User::class.',identification'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -245,7 +246,7 @@ class RegisteredUserController extends Controller
         }
 
         if (preg_match('/^[1-9]\d{7,14}$/', $digits)) {
-            return '+'.$digits;
+            return $digits;
         }
 
         return '';
