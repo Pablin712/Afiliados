@@ -20,6 +20,8 @@ class Payment extends Model
         'photo',
         'amount',
         'state',
+        'payment_method',
+        'payphone_client_transaction_id',
         'reviewed_by',
         'reviewed_at',
     ];
