@@ -518,6 +518,150 @@
                                 </div>
 
                             </div>
+                            @if ($banks->isEmpty())
+                                <div class="p-6">
+                                    <p class="text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.plans.no_banks') }}</p>
+                                </div>
+                            @else
+                                <div
+                                    class="p-6"
+                                    x-data="{
+                                        selectedBankId: @js(old('bank_id', '')),
+                                        banks: @js($banks),
+                                        get selectedBank() {
+                                            if (!this.selectedBankId) return null;
+                                            return this.banks.find(b => String(b.id) === String(this.selectedBankId)) ?? null;
+                                        }
+                                    }"
+                                >
+                                    <h4 class="text-base font-semibold text-gray-900 dark:text-graphite-100">
+                                        {{ __('messages.plans.upgrade_title') }}
+                                    </h4>
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-graphite-400">
+                                        {{ __('messages.plans.upgrade_description') }}
+                                    </p>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ route('plans.payment.store') }}"
+                                        enctype="multipart/form-data"
+                                        class="mt-5"
+                                    >
+                                        @csrf
+
+                                        <input type="hidden" name="program_id" value="{{ $program->id }}">
+
+                                        <div class="grid gap-6 lg:grid-cols-2">
+
+                                            {{-- Left: Bank selection + details --}}
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <x-input-label for="bank_id_{{ $program->id }}" :value="__('messages.plans.select_bank_label')" />
+                                                    <select
+                                                        id="bank_id_{{ $program->id }}"
+                                                        name="bank_id"
+                                                        x-model="selectedBankId"
+                                                        required
+                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-300 focus:ring focus:ring-brand-200 focus:ring-opacity-50 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100"
+                                                    >
+                                                        <option value="">{{ __('messages.plans.select_bank_placeholder') }}</option>
+                                                        @foreach ($banks as $bank)
+                                                            <option value="{{ $bank->id }}" {{ old('bank_id') == $bank->id ? 'selected' : '' }}>
+                                                                {{ $bank->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <x-input-error :messages="$errors->get('bank_id')" class="mt-2" />
+                                                </div>
+
+                                                <div
+                                                    x-show="selectedBank"
+                                                    x-cloak
+                                                    x-transition:enter="transition ease-out duration-200"
+                                                    x-transition:enter-start="opacity-0 translate-y-1"
+                                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                                    class="rounded-xl border border-brand-100 bg-brand-50/50 p-4 text-sm dark:border-brand-900/50 dark:bg-brand-900/10"
+                                                >
+                                                    <h5 class="mb-3 font-medium text-brand-700 dark:text-brand-400">
+                                                        {{ __('messages.plans.bank_details_title') }}
+                                                    </h5>
+                                                    <dl class="space-y-1.5">
+                                                        <div class="flex gap-2">
+                                                            <dt class="min-w-28 text-gray-500 dark:text-graphite-400">{{ __('messages.plans.bank_owner') }}:</dt>
+                                                            <dd class="font-medium text-gray-900 dark:text-graphite-100" x-text="selectedBank?.owner ?? ''"></dd>
+                                                        </div>
+                                                        <div class="flex gap-2">
+                                                            <dt class="min-w-28 text-gray-500 dark:text-graphite-400">{{ __('messages.plans.bank_identification') }}:</dt>
+                                                            <dd class="font-medium text-gray-900 dark:text-graphite-100" x-text="selectedBank?.identification ?? ''"></dd>
+                                                        </div>
+                                                        <div class="flex gap-2">
+                                                            <dt class="min-w-28 text-gray-500 dark:text-graphite-400">{{ __('messages.plans.bank_number') }}:</dt>
+                                                            <dd class="font-mono font-medium text-gray-900 dark:text-graphite-100" x-text="selectedBank?.number ?? ''"></dd>
+                                                        </div>
+                                                        <div x-show="selectedBank?.detail" class="flex gap-2">
+                                                            <dt class="min-w-28 text-gray-500 dark:text-graphite-400">{{ __('messages.plans.bank_detail') }}:</dt>
+                                                            <dd class="text-gray-700 dark:text-graphite-300" x-text="selectedBank?.detail ?? ''"></dd>
+                                                        </div>
+                                                    </dl>
+                                                </div>
+                                            </div>
+
+                                            {{-- Right: Payment fields --}}
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <x-input-label for="number" :value="__('messages.plans.reference_label')" />
+                                                    <x-text-input
+                                                        id="number"
+                                                        class="mt-1 block w-full"
+                                                        type="text"
+                                                        name="number"
+                                                        :value="old('number')"
+                                                        required
+                                                        autocomplete="off"
+                                                    />
+                                                    <x-input-error :messages="$errors->get('number')" class="mt-2" />
+                                                </div>
+
+                                                <div>
+                                                    <x-input-label :value="__('messages.plans.amount_label')" />
+                                                    @php($fixedAmount = $hasApprovedPayment ? (float) $program->renewal_cost : (float) $program->first_payment_cost)
+                                                    <div class="mt-1 flex items-center justify-between rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 dark:border-brand-900/60 dark:bg-brand-900/20">
+                                                        <span class="text-sm text-gray-700 dark:text-graphite-300">{{ __('messages.plans.fixed_amount_note') }}</span>
+                                                        <span class="text-lg font-bold text-brand-700 dark:text-brand-300">${{ number_format($fixedAmount, 2) }}</span>
+                                                    </div>
+                                                    <input type="hidden" name="amount" value="{{ number_format($fixedAmount, 2, '.', '') }}">
+                                                </div>
+
+                                                <div>
+                                                    <x-input-label for="photo" :value="__('messages.plans.receipt_label')" />
+                                                    <input
+                                                        id="photo"
+                                                        name="photo"
+                                                        type="file"
+                                                        accept="image/jpeg,image/png,image/webp"
+                                                        required
+                                                        class="mt-1 block w-full text-sm text-gray-700 dark:text-graphite-300
+                                                            file:mr-3 file:cursor-pointer file:rounded-md file:border-0
+                                                            file:bg-brand-600 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white
+                                                            hover:file:bg-brand-700 dark:file:bg-brand-700 dark:hover:file:bg-brand-600"
+                                                    />
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">
+                                                        {{ __('messages.plans.receipt_help') }}
+                                                    </p>
+                                                    <x-input-error :messages="$errors->get('photo')" class="mt-2" />
+                                                </div>
+
+                                                <div class="pt-2">
+                                                    <x-primary-button type="submit">
+                                                        {{ __('messages.plans.submit_button') }}
+                                                    </x-primary-button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </form>
+                                </div>
+                            @endif
                         @endif
 
                     </div>

@@ -8,6 +8,21 @@ use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $accountId = trim((string) $this->input('binance_account_id', ''));
+        $username = trim((string) $this->input('binance_username', ''));
+        $phone = $this->normalizePhone((string) $this->input('phone', ''));
+        $email = strtolower(trim((string) $this->input('email', '')));
+
+        $this->merge([
+            'binance_account_id' => $accountId === '' ? null : $accountId,
+            'binance_username' => $username === '' ? null : $username,
+            'phone' => $phone === '' ? null : $phone,
+            'email' => $email,
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -15,16 +30,56 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userBankId = $this->user()?->userBanks()->value('id');
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'string',
-                'lowercase',
                 'email',
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^\+[1-9]\d{7,14}$/',
+                'max:30',
+                Rule::unique(User::class, 'phone')->ignore($this->user()->id),
+            ],
+            'binance_account_id' => [
+                'nullable',
+                'string',
+                'max:80',
+                'required_with:binance_username',
+                Rule::unique('user_banks', 'identification')->ignore($userBankId),
+            ],
+            'binance_username' => ['nullable', 'string', 'max:150', 'required_with:binance_account_id'],
         ];
+    }
+
+    private function normalizePhone(string $phone): string
+    {
+        $phone = trim($phone);
+        if ($phone === '') {
+            return '';
+        }
+
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if ($digits === '') {
+            return '';
+        }
+
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+
+        if (preg_match('/^[1-9]\d{7,14}$/', $digits)) {
+            return '+'.$digits;
+        }
+
+        return '';
     }
 }

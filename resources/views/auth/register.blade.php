@@ -6,11 +6,13 @@
             step: 1,
             name: @js(old('name', '')),
             email: @js(old('email', '')),
+            phone: @js(old('phone', '')),
             identification: @js(old('identification', '')),
             passwordValue: '',
             passwordConfirmationValue: '',
             showPassword: false,
             showPasswordConfirmation: false,
+            passwordPolicyMessage: @js(__('messages.auth.password_policy_help')),
             emailAvailabilityError: '',
             identificationAvailabilityError: '',
             availabilityUrl: @js(route('register.availability')),
@@ -75,6 +77,11 @@
 
                 refs.forEach((field) => field.setCustomValidity(''));
 
+                const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+                if (!passwordPattern.test(this.passwordValue)) {
+                    this.$refs.passwordInput?.setCustomValidity(this.passwordPolicyMessage);
+                }
+
                 if (this.passwordValue !== this.passwordConfirmationValue) {
                     this.$refs.passwordConfirmationInput?.setCustomValidity(@js(__('validation.confirmed')));
                 }
@@ -124,6 +131,12 @@
     >
         @csrf
 
+        @if (session('error'))
+            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/60 dark:bg-red-900/20 dark:text-red-300">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <input type="hidden" name="sponsor_id" value="{{ old('sponsor_id', $sponsor->id) }}">
 
         <div class="space-y-2">
@@ -164,6 +177,12 @@
                     </div>
 
                     <div>
+                        <x-input-label for="phone" :value="__('messages.auth.phone_label')" />
+                        <x-text-input id="phone" class="mt-1 block w-full" type="text" name="phone" x-model="phone" :value="old('phone')" required autocomplete="tel" />
+                        <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                    </div>
+
+                    <div>
                         <x-input-label for="identification" :value="__('messages.auth.identification_label')" />
                         <x-text-input id="identification" class="mt-1 block w-full" type="text" name="identification" x-model="identification" x-ref="identificationInput" x-on:input="identificationAvailabilityError = ''; $refs.identificationInput.setCustomValidity('');" :value="old('identification')" required autocomplete="off" />
                         <p x-show="identificationAvailabilityError" x-text="identificationAvailabilityError" class="mt-2 text-sm text-red-600 dark:text-red-400"></p>
@@ -180,7 +199,7 @@
                     <div>
                         <x-input-label for="password" :value="__('messages.password')" />
                         <div class="relative">
-                            <x-text-input id="password" class="mt-1 block w-full pr-10" x-bind:type="showPassword ? 'text' : 'password'" name="password" x-ref="passwordInput" x-model="passwordValue" x-on:input="$refs.passwordInput.setCustomValidity(''); $refs.passwordConfirmationInput?.setCustomValidity('');" required autocomplete="new-password" />
+                            <x-text-input id="password" class="mt-1 block w-full pr-10" x-bind:type="showPassword ? 'text' : 'password'" name="password" x-ref="passwordInput" x-model="passwordValue" x-on:input="$refs.passwordInput.setCustomValidity(''); $refs.passwordConfirmationInput?.setCustomValidity('');" required autocomplete="new-password" minlength="8" />
                             <button
                                 type="button"
                                 class="absolute inset-y-0 right-0 mt-1 px-3 text-gray-500 hover:text-gray-700 dark:text-graphite-400 dark:hover:text-graphite-200"
@@ -197,6 +216,7 @@
                                 </svg>
                             </button>
                         </div>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.auth.password_policy_help') }}</p>
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                     </div>
 
@@ -256,6 +276,11 @@
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">
                         <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.name') }}</p>
                         <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100" x-text="name"></p>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">
+                        <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.auth.phone_label') }}</p>
+                        <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100" x-text="phone"></p>
                     </div>
 
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">

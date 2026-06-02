@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"c:\\\\laragon\\\\www\\\\Afiliados\"; php artisan tinker --execute=\"use App\\\\Models\\\\CourseModule; \\\\$m = CourseModule::first\\(\\); echo json_encode\\(['id'=>\\\\$m->id,'for_free'=>\\\\$m->for_free, 'fillable'=>\\\\$m->getFillable\\(\\)]\\);\" 2>&1)",
+      "PowerShell(Set-Location \"c:\\\\laragon\\\\www\\\\Afiliados\"; Get-ChildItem \"storage\\\\framework\\\\views\" | ForEach-Object { if \\(\\(Get-Content $_.FullName -Raw\\) -match \"toggle-free\"\\) { $_.FullName } })",
+      "PowerShell(Set-Location \"c:\\\\laragon\\\\www\\\\Afiliados\"; $content = Get-Content \"storage\\\\framework\\\\views\\\\aff259aba9bcb37d4e54ef65ac5ec0ac.php\" -Raw; $idx = $content.IndexOf\\('toggle-free'\\); $content.Substring\\([Math]::Max\\(0,$idx-50\\), 400\\))",
+      "Bash(Get-Content \"c:\\\\laragon\\\\www\\\\Afiliados\\\\storage\\\\logs\\\\laravel.log\" -Tail 80)",
+      "PowerShell($phpErrorLog = php -r \"echo ini_get\\('error_log'\\);\" 2>&1; Write-Host \"PHP error log: $phpErrorLog\"; if \\(Test-Path $phpErrorLog\\) { Get-Content $phpErrorLog -Tail 30 } else { Write-Host \"Log file not found\" })",
+      "Bash(php artisan *)",
+      "Bash(Get-Content \"c:\\\\laragon\\\\www\\\\Afiliados\\\\storage\\\\logs\\\\laravel.log\" -Tail 60)",
+      "PowerShell($file = \"c:\\\\laragon\\\\www\\\\Afiliados\\\\storage\\\\logs\\\\laravel.log\"; $content = Get-Content $file -Encoding UTF8; $total = $content.Count; Write-Host \"Total lines: $total\"; $content | Select-Object -Last 100)",
+      "Read(//c/laragon/bin/apache/**)",
+      "Read(//c/laragon/bin/**)",
+      "PowerShell(Head *)",
+      "PowerShell(php --ini 2>&1)",
+      "PowerShell(php -r \"echo 'upload_max_filesize=' . ini_get\\('upload_max_filesize'\\) . PHP_EOL; echo 'post_max_size=' . ini_get\\('post_max_size'\\) . PHP_EOL; echo 'max_execution_time=' . ini_get\\('max_execution_time'\\) . PHP_EOL;\")",
+      "Bash(xargs grep -l \"Payment.*Observer\\\\|Payment.*Listener\\\\|bootPayment\\\\|booted\")"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -652,23 +652,25 @@ function exportTableToJSON(config, filename = 'export.json') {
     downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' }), filename);
 }
 
-function exportTableToExcel(config, filename = 'export.xlsx') {
+async function exportTableToExcel(config, filename = 'export.xlsx') {
     if (config.isServerSide) {
         exportFromServer(config, 'excel');
         return;
     }
 
     const { headerLabels, dataRows } = getExportMeta(config);
-    const worksheet = XLSX.utils.aoa_to_sheet([headerLabels, ...dataRows]);
-    const workbook = XLSX.utils.book_new();
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Data');
 
-    worksheet['!cols'] = headerLabels.map((header, index) => {
-        const maxLength = Math.max(header.length, ...dataRows.map((row) => (row[index] || '').length));
-        return { wch: Math.min(maxLength + 2, 50) };
+    worksheet.columns = headerLabels.map((header, index) => {
+        const maxLength = Math.max(header.length, ...dataRows.map((row) => String(row[index] || '').length));
+        return { header, width: Math.min(maxLength + 2, 50) };
     });
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
-    XLSX.writeFile(workbook, filename);
+    dataRows.forEach((row) => worksheet.addRow(row));
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    downloadBlob(new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), filename);
 }
 
 function exportTableToPDF(config, filename = 'export.pdf') {

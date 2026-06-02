@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -25,6 +26,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'affiliate_code',
         'identification',
         'password',
@@ -135,5 +137,31 @@ class User extends Authenticatable
     public function userBanks(): HasMany
     {
         return $this->hasMany(UserBank::class);
+    }
+
+    public function defaultUserBank(): HasOne
+    {
+        return $this->hasOne(UserBank::class)->where('is_default', true);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function membership(): HasOne
+    {
+        return $this->hasOne(Membership::class);
+    }
+
+    public function affiliates(): HasMany
+    {
+        return $this->hasMany(self::class, 'sponsor_id')
+            ->whereColumn('users.id', '!=', 'users.sponsor_id');
+    }
+
+    public function profits(): HasMany
+    {
+        return $this->hasMany(Profit::class);
     }
 }

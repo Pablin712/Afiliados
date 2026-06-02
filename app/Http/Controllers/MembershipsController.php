@@ -8,9 +8,11 @@ use App\Models\MembershipType;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -20,6 +22,9 @@ class MembershipsController extends Controller
     public function index(IndexMembershipsRequest $request): View|JsonResponse|Response|StreamedResponse
     {
         $query = $this->buildQuery($request);
+        $membershipTypes = MembershipType::query()->select('id', 'name')->orderBy('name')->get();
+        $statusOptions = ['active', 'free', 'expired', 'pending_payment'];
+        $canEdit = $request->user()?->can('edit memberships') ?? false;
 
         if ($request->filled('export')) {
             return $this->export($request, $query);
@@ -30,7 +35,12 @@ class MembershipsController extends Controller
 
         if ($request->boolean('ajax')) {
             return response()->json([
-                'html' => view('memberships.partials.table-rows', ['records' => $records->items()])->render(),
+                'html' => view('memberships.partials.table-rows', [
+                    'records' => $records->items(),
+                    'membershipTypes' => $membershipTypes,
+                    'statusOptions' => $statusOptions,
+                    'canEdit' => $canEdit,
+                ])->render(),
                 'total_records' => $records->total(),
                 'current_page' => $records->currentPage(),
                 'per_page' => $records->perPage(),
@@ -38,17 +48,16 @@ class MembershipsController extends Controller
         }
 
         $canReport = $request->user()?->can('report memberships') ?? false;
-        $membershipTypes = MembershipType::query()->select('id', 'name')->orderBy('name')->get();
         $filters = [
             'status' => (string) $request->input('status', ''),
             'membership_type_id' => (string) $request->input('membership_type_id', ''),
         ];
-        $statusOptions = ['active', 'free', 'expired', 'pending_payment'];
 
         return view('memberships.index', [
             'records' => $records,
             'totalRecords' => $records->total(),
             'canReport' => $canReport,
+            'canEdit' => $canEdit,
             'membershipTypes' => $membershipTypes,
             'filters' => $filters,
             'statusOptions' => $statusOptions,
@@ -239,9 +248,57 @@ class MembershipsController extends Controller
         // TODO: Use StoreMembershipsRequest and implement create flow.
     }
 
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): RedirectResponse
     {
-        // TODO: Use UpdateMembershipsRequest and implement update flow.
+        if (! ($request->user()?->can('edit memberships') ?? false)) {
+            throw new HttpException(403, 'No tienes permiso para editar membresias.');
+        }
+
+        $membership = Membership::query()
+            ->with(['membershipType'])
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'membership_type_id' => ['required', 'integer', Rule::exists('membership_types', 'id')],
+            'status' => ['required', 'string', Rule::in(['active', 'free', 'expired', 'pending_payment'])],
+            'started_at' => ['nullable', 'date'],
+            'expires_at' => ['nullable', 'date'],
+        ]);
+
+        $membershipType = MembershipType::query()->findOrFail((int) $validated['membership_type_id']);
+        $typeName = strtolower((string) $membershipType->name);
+
+        if ($typeName === 'free') {
+            $validated['status'] = 'free';
+            $validated['started_at'] = null;
+            $validated['expires_at'] = null;
+        } elseif ($validated['status'] === 'free') {
+            return back()->with('error', __('memberships.messages.invalid_paid_status'));
+        }
+
+        $startedAt = isset($validated['started_at']) && $validated['started_at'] !== null
+            ? Carbon::parse((string) $validated['started_at'])
+            : null;
+
+        $expiresAt = isset($validated['expires_at']) && $validated['expires_at'] !== null
+            ? Carbon::parse((string) $validated['expires_at'])
+            : null;
+
+        if ($startedAt && $expiresAt && $expiresAt->lt($startedAt)) {
+            return back()->with('error', __('memberships.messages.invalid_dates'));
+        }
+
+        if ($typeName !== 'free' && in_array($validated['status'], ['active', 'expired', 'pending_payment'], true) && ! $startedAt) {
+            $startedAt = now();
+        }
+
+        $membership->membership_type_id = (int) $membershipType->id;
+        $membership->status = (string) $validated['status'];
+        $membership->started_at = $startedAt;
+        $membership->expires_at = $expiresAt;
+        $membership->save();
+
+        return back()->with('status', __('memberships.messages.updated'));
     }
 
     public function destroy(int $id)

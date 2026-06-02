@@ -1,3 +1,12 @@
+@php
+    $canAccessCourses = Auth::user()?->hasRole('admin')
+        || strtolower((string) (Auth::user()?->membership?->membershipType?->name ?? 'free')) !== 'free'
+        || (Auth::check() && \App\Models\CourseModule::where('is_active', true)
+                ->where('for_free', true)
+                ->whereHas('videos', fn ($q) => $q->where('is_active', true))
+                ->exists());
+@endphp
+
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-200 dark:bg-graphite-900 dark:border-graphite-800">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,6 +23,25 @@
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('messages.nav.dashboard') }}
+                    </x-nav-link>
+                    @role('user')
+                        <x-nav-link :href="route('user.network.index')" :active="request()->routeIs('user.network.*')">
+                            {{ __('messages.nav.my_network') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('user.profits.index')" :active="request()->routeIs('user.profits.*')">
+                            {{ __('messages.nav.my_profits') }}
+                        </x-nav-link>
+                    @endrole
+                    @if ($canAccessCourses)
+                        <x-nav-link :href="route('courses.index')" :active="request()->routeIs('courses.*')">
+                            {{ __('messages.nav.courses') }}
+                        </x-nav-link>
+                    @endif
+                    <x-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
+                        {{ __('messages.nav.plans') }}
+                    </x-nav-link>
+                    <x-nav-link :href="url('/')" :active="request()->is('/')">
+                        {{ __('messages.nav.main_site') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -77,6 +105,42 @@
                             </x-dropdown-link>
                         @endcan
 
+                        @can('view users')
+                            <x-dropdown-link :href="route('admin.users-tree.index')">
+                                {{ __('messages.admin.users_tree.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
+                        @can('edit users')
+                            <x-dropdown-link :href="route('admin.users.index')">
+                                {{ __('messages.admin.users.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
+                        @can('view profits')
+                            <x-dropdown-link :href="route('admin.profits.index')">
+                                {{ __('messages.admin.profits.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
+                        @can('view banks')
+                            <x-dropdown-link :href="route('admin.banks.index')">
+                                {{ __('messages.admin.banks.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
+                        @role('admin')
+                            <x-dropdown-link :href="route('admin.courses.index')">
+                                {{ __('messages.admin.courses.title') }}
+                            </x-dropdown-link>
+                        @endrole
+
+                        @can('report profits')
+                            <x-dropdown-link :href="route('admin.financial-dashboard.index')">
+                                {{ __('messages.admin.financial_dashboard.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -108,6 +172,25 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('messages.nav.dashboard') }}
+            </x-responsive-nav-link>
+            @role('user')
+                <x-responsive-nav-link :href="route('user.network.index')" :active="request()->routeIs('user.network.*')">
+                    {{ __('messages.nav.my_network') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('user.profits.index')" :active="request()->routeIs('user.profits.*')">
+                    {{ __('messages.nav.my_profits') }}
+                </x-responsive-nav-link>
+            @endrole
+            @if ($canAccessCourses)
+                <x-responsive-nav-link :href="route('courses.index')" :active="request()->routeIs('courses.*')">
+                    {{ __('messages.nav.courses') }}
+                </x-responsive-nav-link>
+            @endif
+            <x-responsive-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
+                {{ __('messages.nav.plans') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="url('/')" :active="request()->is('/')">
+                {{ __('messages.nav.main_site') }}
             </x-responsive-nav-link>
         </div>
 
@@ -155,6 +238,42 @@
                 @can('manage payments')
                     <x-responsive-nav-link :href="route('admin.pending-registrations.index')">
                         {{ __('messages.admin.pending_registrations_title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view users')
+                    <x-responsive-nav-link :href="route('admin.users-tree.index')">
+                        {{ __('messages.admin.users_tree.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('edit users')
+                    <x-responsive-nav-link :href="route('admin.users.index')">
+                        {{ __('messages.admin.users.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view profits')
+                    <x-responsive-nav-link :href="route('admin.profits.index')">
+                        {{ __('messages.admin.profits.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view banks')
+                    <x-responsive-nav-link :href="route('admin.banks.index')">
+                        {{ __('messages.admin.banks.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @role('admin')
+                    <x-responsive-nav-link :href="route('admin.courses.index')">
+                        {{ __('messages.admin.courses.title') }}
+                    </x-responsive-nav-link>
+                @endrole
+
+                @can('report profits')
+                    <x-responsive-nav-link :href="route('admin.financial-dashboard.index')">
+                        {{ __('messages.admin.financial_dashboard.title') }}
                     </x-responsive-nav-link>
                 @endcan
 

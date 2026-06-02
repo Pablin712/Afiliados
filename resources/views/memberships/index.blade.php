@@ -7,6 +7,24 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
+            @if (session('status'))
+                <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-700/50 dark:bg-emerald-900/20 dark:text-emerald-200">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-700/50 dark:bg-rose-900/20 dark:text-rose-200">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-200">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
             <div class="bg-white dark:bg-graphite-900 rounded-lg border border-gray-200 dark:border-graphite-800 p-4 sm:p-6">
                 <p class="text-sm text-gray-600 dark:text-graphite-300">
                     {{ __('memberships.messages.description') }}
@@ -23,6 +41,7 @@
                     ['label' => __('memberships.columns.started_at'), 'type' => 'string', 'sort_by' => 'started_at'],
                     ['label' => __('memberships.columns.expires_at'), 'type' => 'string', 'sort_by' => 'expires_at'],
                     ['label' => __('memberships.columns.created_at'), 'type' => 'string', 'sort_by' => 'created_at'],
+                    ...($canEdit ? [['label' => __('memberships.columns.actions'), 'type' => 'string', 'sort_by' => null]] : []),
                 ]"
                 :serverSide="true"
                 :totalRecords="$totalRecords"
@@ -72,7 +91,12 @@
                 </x-slot>
 
                 <tbody class="divide-y divide-gray-200 dark:divide-graphite-800">
-                    @include('memberships.partials.table-rows', ['records' => $records])
+                    @include('memberships.partials.table-rows', [
+                        'records' => $records,
+                        'membershipTypes' => $membershipTypes,
+                        'statusOptions' => $statusOptions,
+                        'canEdit' => $canEdit,
+                    ])
                 </tbody>
             </x-enhanced-table>
 

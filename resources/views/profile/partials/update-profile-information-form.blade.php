@@ -17,6 +17,12 @@
         @csrf
         @method('patch')
 
+        @if (session('phone_required'))
+            <div class="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200">
+                {{ session('phone_required') }}
+            </div>
+        @endif
+
         <div>
             <x-input-label for="name" :value="__('messages.name')" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
@@ -45,6 +51,13 @@
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div>
+            <x-input-label for="phone" :value="__('messages.profile.phone_label')" />
+            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" placeholder="+12025550123" />
+            <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.profile.phone_hint') }}</p>
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 
         <div class="flex items-center gap-4">
