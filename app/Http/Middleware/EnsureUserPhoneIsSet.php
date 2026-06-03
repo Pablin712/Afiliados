@@ -22,7 +22,7 @@ class EnsureUserPhoneIsSet
 
         $phone = trim((string) ($user->phone ?? ''));
 
-        if (! preg_match('/^\+[1-9]\d{7,14}$/', $phone)) {
+        if (! preg_match('/^\+?[1-9]\d{7,14}$/', $phone)) {
             return redirect()
                 ->route('profile.edit')
                 ->with('phone_required', __('messages.profile.phone_required'));
