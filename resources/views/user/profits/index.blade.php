@@ -27,6 +27,12 @@
                 </div>
             @endif
 
+            @if (session('payout_error') === 'window_closed')
+                <div class="rounded-md border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800 dark:border-sky-700 dark:bg-sky-900/20 dark:text-sky-300">
+                    {{ __('messages.user.profits.payout_window_closed_flash', ['day' => now()->daysInMonth - 4]) }}
+                </div>
+            @endif
+
             {{-- Stats + Cobrar button --}}
             <div class="grid gap-3 md:grid-cols-3">
                 <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
@@ -44,7 +50,7 @@
             </div>
 
             {{-- Cobrar button --}}
-            <div class="flex justify-end">
+            <div class="flex flex-col items-end gap-1">
                 @if ($pendingTotal <= 0)
                     <button
                         type="button"
@@ -61,6 +67,17 @@
                     >
                         {{ __('messages.user.profits.request_payout_button') }}
                     </button>
+                @elseif (! $isPayoutWindowOpen)
+                    <button
+                        type="button"
+                        onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'payout-window-closed-modal' }))"
+                        class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-400 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-500"
+                    >
+                        {{ __('messages.user.profits.request_payout_button') }}
+                    </button>
+                    <p class="text-xs text-gray-400 dark:text-graphite-500">
+                        {{ __('messages.user.profits.payout_window_hint', ['day' => $payoutWindowStartDay]) }}
+                    </p>
                 @else
                     <button
                         type="button"
@@ -123,6 +140,21 @@
             </x-enhanced-table>
         </div>
     </div>
+
+    {{-- Modal: ventana de cobro cerrada --}}
+    <x-modal name="payout-window-closed-modal" :show="false" maxWidth="sm">
+        <div class="p-6 space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-graphite-100">
+                {{ __('messages.user.profits.payout_window_closed_title') }}
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-graphite-300">
+                {{ __('messages.user.profits.payout_window_closed_text', ['day' => $payoutWindowStartDay]) }}
+            </p>
+            <div class="flex justify-end">
+                <x-secondary-button x-on:click.prevent="$dispatch('close')">{{ __('messages.user.profits.payout_window_closed_button') }}</x-secondary-button>
+            </div>
+        </div>
+    </x-modal>
 
     {{-- Modal: sin ganancias pendientes --}}
     <x-modal name="payout-no-pending-modal" :show="false" maxWidth="sm">

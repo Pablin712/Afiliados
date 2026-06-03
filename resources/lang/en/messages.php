@@ -778,6 +778,11 @@ return [
     'user.profits.reason_payment' => 'Payment #:id',
 
     'user.profits.request_payout_button' => 'Request payout',
+    'user.profits.payout_window_hint' => 'Available from day :day through end of month.',
+    'user.profits.payout_window_closed_title' => 'Payout not available yet',
+    'user.profits.payout_window_closed_text' => 'Payout requests are only enabled during the last 5 days of each month (from day :day onward). Come back then to submit your request.',
+    'user.profits.payout_window_closed_button' => 'Got it',
+    'user.profits.payout_window_closed_flash' => 'Payout requests are only available from day :day of each month.',
     'user.profits.no_pending_title' => 'No pending earnings',
     'user.profits.no_pending_text' => 'You have no pending earnings to collect at this time.',
     'user.profits.no_bank_title' => 'No bank account linked',

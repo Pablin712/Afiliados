@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Membership;
 use App\Models\Profit;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -54,7 +55,14 @@ class RankBonusService
             return;
         }
 
-        if ($this->hasAnyRankBonusInPeriod($user->id, $currentTypeName, $periodMonth)) {
+        // During the initial 2-month activation, only one maintenance bonus is allowed for
+        // the whole period (not one per calendar month). Subsequent 1-month renewals use
+        // the regular per-period check.
+        if ($this->isInitialActivationPeriod($membership)) {
+            if ($this->hasAnyMaintenanceBonusSince($user->id, $currentTypeName, $membership->started_at)) {
+                return;
+            }
+        } elseif ($this->hasAnyRankBonusInPeriod($user->id, $currentTypeName, $periodMonth)) {
             return;
         }
 
@@ -100,6 +108,26 @@ class RankBonusService
             ->whereDate('period_month', $periodMonth)
             ->where('detail', 'like', sprintf('rank_bonus|%%|%s|%%', $rankName))
             ->exists();
+    }
+
+    private function hasAnyMaintenanceBonusSince(int $userId, string $rankName, mixed $since): bool
+    {
+        return Profit::query()
+            ->where('user_id', $userId)
+            ->where('created_at', '>=', $since)
+            ->where('detail', 'like', sprintf('rank_bonus|maintenance|%s|%%', $rankName))
+            ->exists();
+    }
+
+    private function isInitialActivationPeriod(Membership $membership): bool
+    {
+        if ($membership->started_at === null || $membership->expires_at === null) {
+            return false;
+        }
+
+        // Initial activation grants 2 months; renewals grant 1 month (~28-31 days).
+        // A period longer than 45 days can only be the initial 2-month window.
+        return $membership->started_at->diffInDays($membership->expires_at) > 45;
     }
 
     private function normalizeTypeName(string $typeName): string

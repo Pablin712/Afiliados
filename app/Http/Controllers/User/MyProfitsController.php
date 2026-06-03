@@ -44,16 +44,18 @@ class MyProfitsController extends Controller
         $pendingTotal = (float) Profit::query()->where('user_id', $user->id)->where('state', 'pending')->sum('amount');
 
         return view('user.profits.index', [
-            'records'      => $records,
-            'totalRecords' => $records->total(),
-            'filters'      => $filters,
-            'pendingTotal' => $pendingTotal,
-            'paidTotal'    => (float) Profit::query()->where('user_id', $user->id)->where('state', 'made')->sum('amount'),
-            'monthTotal'   => (float) Profit::query()
+            'records'             => $records,
+            'totalRecords'        => $records->total(),
+            'filters'             => $filters,
+            'pendingTotal'        => $pendingTotal,
+            'paidTotal'           => (float) Profit::query()->where('user_id', $user->id)->where('state', 'made')->sum('amount'),
+            'monthTotal'          => (float) Profit::query()
                 ->where('user_id', $user->id)
                 ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
                 ->sum('amount'),
-            'hasBank' => $user->userBanks()->exists(),
+            'hasBank'             => $user->userBanks()->exists(),
+            'isPayoutWindowOpen'  => now()->day >= now()->daysInMonth - 4,
+            'payoutWindowStartDay' => now()->daysInMonth - 4,
         ]);
     }
 
@@ -61,6 +63,10 @@ class MyProfitsController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+
+        if (now()->day < now()->daysInMonth - 4) {
+            return back()->with('payout_error', 'window_closed');
+        }
 
         if (! $user->userBanks()->exists()) {
             return back()->with('payout_error', 'no_bank');

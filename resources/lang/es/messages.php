@@ -778,6 +778,11 @@ return [
     'user.profits.reason_payment' => 'Pago #:id',
 
     'user.profits.request_payout_button' => 'Cobrar ganancias',
+    'user.profits.payout_window_hint' => 'Disponible del día :day al cierre del mes.',
+    'user.profits.payout_window_closed_title' => 'Cobro no disponible aún',
+    'user.profits.payout_window_closed_text' => 'Las solicitudes de cobro solo están habilitadas durante los últimos 5 días de cada mes (a partir del día :day). Vuelve en esas fechas para solicitar tu pago.',
+    'user.profits.payout_window_closed_button' => 'Entendido',
+    'user.profits.payout_window_closed_flash' => 'El cobro de ganancias solo está disponible a partir del día :day de cada mes.',
     'user.profits.no_pending_title' => 'Sin ganancias pendientes',
     'user.profits.no_pending_text' => 'No tienes ganancias pendientes por cobrar en este momento.',
     'user.profits.no_bank_title' => 'Sin cuenta bancaria',
