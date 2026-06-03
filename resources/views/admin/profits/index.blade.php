@@ -89,6 +89,7 @@
                                 ['label' => 'ID', 'type' => 'number', 'sort_by' => 'id'],
                                 ['label' => __('messages.admin.user_label'), 'type' => 'string', 'sort_by' => 'user_name'],
                                 ['label' => __('messages.admin.profits.bank'), 'type' => 'string', 'sort_by' => 'bank_name'],
+                                ['label' => __('messages.admin.profits.reason'), 'type' => 'string', 'sort_by' => 'id'],
                                 ['label' => __('messages.admin.profits.amount'), 'type' => 'number', 'sort_by' => 'amount'],
                                 ['label' => __('messages.admin.profits.state'), 'type' => 'string', 'sort_by' => 'state'],
                                 ['label' => __('messages.admin.profits.created_at'), 'type' => 'string', 'sort_by' => 'created_at'],

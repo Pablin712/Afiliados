@@ -94,7 +94,7 @@ class ProfitsController extends Controller
 
         $query = Profit::query()
             ->select('profits.*')
-            ->with(['user', 'user.userBanks', 'userBank', 'transaction.bank', 'payer'])
+            ->with(['user', 'user.userBanks', 'userBank', 'transaction.bank', 'payer', 'sourceUser'])
             ->leftJoin('users', 'users.id', '=', 'profits.user_id')
             ->leftJoin('user_banks', 'user_banks.id', '=', 'profits.user_bank_id');
 

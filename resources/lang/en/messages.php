@@ -768,6 +768,14 @@ return [
     'user.profits.created_at' => 'Date',
     'user.profits.system_origin' => 'No linked affiliate',
     'user.profits.level_badge' => 'Level :level',
+    'user.profits.reason' => 'Reason',
+    'user.profits.reason_level' => 'Level :level Commission',
+    'user.profits.reason_new' => 'New activation',
+    'user.profits.reason_renewal' => 'Renewal',
+    'user.profits.reason_rank_promo' => 'Promotion Bonus',
+    'user.profits.reason_rank_maintenance' => 'Monthly Bonus',
+    'user.profits.reason_rank_label' => 'Rank: :rank',
+    'user.profits.reason_payment' => 'Payment #:id',
 
     'user.profits.request_payout_button' => 'Request payout',
     'user.profits.no_pending_title' => 'No pending earnings',
@@ -781,6 +789,7 @@ return [
     'user.profits.payout_requested' => 'Request sent. The administrator will review and process your payment.',
     'user.profits.payout_api_error' => 'Could not send notification to the administrator. Please try again.',
 
+    'admin.profits.reason' => 'Reason',
     'admin.profits.tab_individual' => 'Earnings per user',
     'admin.profits.tab_totals' => 'Totals per user',
     'admin.profits.user_column' => 'User',

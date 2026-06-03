@@ -97,6 +97,7 @@
                     ['label' => __('messages.user.profits.source_user'), 'type' => 'string', 'sort_by' => 'source_user_name'],
                     ['label' => __('messages.user.profits.source_payment'), 'type' => 'number', 'sort_by' => 'source_payment_id'],
                     ['label' => __('messages.user.profits.source_level'), 'type' => 'number', 'sort_by' => 'source_level'],
+                    ['label' => __('messages.user.profits.reason'), 'type' => 'string', 'sort_by' => 'id'],
                     ['label' => __('messages.user.profits.amount'), 'type' => 'number', 'sort_by' => 'amount'],
                     ['label' => __('messages.user.profits.state'), 'type' => 'string', 'sort_by' => 'state'],
                     ['label' => __('messages.user.profits.created_at'), 'type' => 'string', 'sort_by' => 'created_at'],

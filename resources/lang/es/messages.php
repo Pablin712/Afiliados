@@ -768,6 +768,14 @@ return [
     'user.profits.created_at' => 'Fecha',
     'user.profits.system_origin' => 'Sin afiliado asociado',
     'user.profits.level_badge' => 'Nivel :level',
+    'user.profits.reason' => 'Razón',
+    'user.profits.reason_level' => 'Comisión Nivel :level',
+    'user.profits.reason_new' => 'Activación nueva',
+    'user.profits.reason_renewal' => 'Renovación',
+    'user.profits.reason_rank_promo' => 'Bono de Promoción',
+    'user.profits.reason_rank_maintenance' => 'Bono Mensual',
+    'user.profits.reason_rank_label' => 'Rango: :rank',
+    'user.profits.reason_payment' => 'Pago #:id',
 
     'user.profits.request_payout_button' => 'Cobrar ganancias',
     'user.profits.no_pending_title' => 'Sin ganancias pendientes',
@@ -781,6 +789,7 @@ return [
     'user.profits.payout_requested' => 'Solicitud enviada correctamente. El administrador revisará y realizará el pago.',
     'user.profits.payout_api_error' => 'No se pudo enviar la notificación al administrador. Por favor intenta de nuevo.',
 
+    'admin.profits.reason' => 'Razón',
     'admin.profits.tab_individual' => 'Ganancias por usuario',
     'admin.profits.tab_totals' => 'Totales por usuario',
     'admin.profits.user_column' => 'Usuario',

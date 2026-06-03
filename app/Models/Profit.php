@@ -70,4 +70,29 @@ class Profit extends Model
     {
         return $this->belongsTo(User::class, 'source_user_id');
     }
+
+    /**
+     * @return array{type: string, level?: int, payment_type?: string, source_user_name?: string|null, source_payment_id?: int|null, kind?: string, rank_name?: string}
+     */
+    public function parsedReason(): array
+    {
+        $detail = (string) ($this->detail ?? '');
+
+        if (str_starts_with($detail, 'rank_bonus|')) {
+            $parts = explode('|', $detail, 4);
+            return [
+                'type'      => 'rank_bonus',
+                'kind'      => $parts[1] ?? '',
+                'rank_name' => $parts[2] ?? '',
+            ];
+        }
+
+        return [
+            'type'              => 'level_commission',
+            'level'             => (int) ($this->source_level ?? 0),
+            'payment_type'      => str_contains($detail, 'new activation') ? 'new' : 'renewal',
+            'source_user_name'  => $this->sourceUser?->name,
+            'source_payment_id' => $this->source_payment_id,
+        ];
+    }
 }
