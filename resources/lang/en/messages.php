@@ -805,5 +805,12 @@ return [
     'admin.profits.mark_all_modal_text' => 'You are about to mark all pending earnings as paid for:',
     'admin.profits.all_marked_as_paid' => 'All pending earnings have been marked as paid.',
     'admin.profits.no_grouped_records' => 'No pending earnings.',
+
+    'admin.message_templates.title' => 'Message templates',
+    'admin.message_templates.variables_hint' => 'You can use these variables in the message body and they will be replaced automatically:',
+    'admin.message_templates.columns.name' => 'Template name',
+    'admin.message_templates.columns.body' => 'Message body',
+    'admin.message_templates.forms.edit_title' => 'Edit message template',
+    'admin.message_templates.messages.updated' => 'Template updated successfully.',
 ];
 

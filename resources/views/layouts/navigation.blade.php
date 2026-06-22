@@ -133,6 +133,9 @@
                             <x-dropdown-link :href="route('admin.courses.index')">
                                 {{ __('messages.admin.courses.title') }}
                             </x-dropdown-link>
+                            <x-dropdown-link :href="route('admin.message-templates.index')">
+                                {{ __('messages.admin.message_templates.title') }}
+                            </x-dropdown-link>
                         @endrole
 
                         @can('report profits')
@@ -268,6 +271,9 @@
                 @role('admin')
                     <x-responsive-nav-link :href="route('admin.courses.index')">
                         {{ __('messages.admin.courses.title') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.message-templates.index')">
+                        {{ __('messages.admin.message_templates.title') }}
                     </x-responsive-nav-link>
                 @endrole
 

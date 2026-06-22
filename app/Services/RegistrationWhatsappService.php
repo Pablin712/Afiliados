@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\MessageTemplate;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -10,21 +11,13 @@ class RegistrationWhatsappService
 {
     public function send(User $user): void
     {
-        $welcomeMessage = "¡Bienvenido/a {$user->name} a AET Trader Academy! 👨🏻‍💻\n\n"
-            ."Desde este momento estaré acompañándote en tu proceso dentro del sistema.\n"
-            ."Soy Donna - asistente de AET Trader Academy.\n\n"
-            ."Si ya estás usando la versión gratuita, el siguiente paso es simple:\n"
-            ."entra ahora a nuestro canal de Telegram.\n\n"
-            ."https://t.me/aetsas\n\n"
-            ."Ahí vas a encontrar los enlaces gratuitos y todo el contenido para que empieces correctamente.\n\n"
-            ."Además, te recomendamos crearte tu cuenta a través de los enlaces que tienes en la página principal de AET, para que puedas operar y aprovechar correctamente todas las herramientas.\n\n"
-            ."Ahora, si realmente quieres resultados y no solo mirar, el plan premium de \$197 te desbloquea todo:\n"
-            ."Cuenta de 50 usd para tradear\n"
-            ."escáner, módulos educativos, señales y clases en vivo.\n\n"
-            ."No te quedes a medias. Avanza.\n\n"
-            ."Te recomiendo analizar en\n"
-            ."https://tradingview.deriv.com/\n\n"
-            ."Y trabajar con cuentas standar mt5 que podrás aperturar dentro de los links de nuestros brokers asociados.";
+        $fallback = 'Bienvenido/a {name} a AET Trader Academy.'
+            ."\n\nDesde este momento estare acompanandote en tu proceso dentro del sistema."
+            ."\n\nSi ya estas usando la version gratuita, entra ahora a nuestro canal de Telegram:"
+            ."\nhttps://t.me/aetsas";
+
+        $template = MessageTemplate::where('key', 'bienvenida')->first();
+        $welcomeMessage = $this->renderTemplate($template?->body ?? $fallback, $user);
 
         $payload = $this->buildStandardPayload(
             $user,
@@ -39,21 +32,12 @@ class RegistrationWhatsappService
 
     public function sendPostPago(User $user): void
     {
-        $message = "¡Bienvenido/a a AET Trader Academy! 👨🏻‍💻\n\n"
-            ."Desde este momento estaré acompañándote en tu proceso dentro del sistema.\n"
-            ."Soy Donna - asistente de AET Trader Academy.\n\n"
-            ."Acceso a la comunidad\n\n"
-            ."Canal oficial\n"
-            ."https://t.me/+tv9B-1V8eWdhMjIx\n\n"
-            ."Señales VIP\n"
-            ."https://t.me/+AoQTrGdNxhNlMWFh\n"
-            ."https://t.me/+tJuQIHiKP0JkYzYx\n\n"
-            ."Grupo Premium\n"
-            ."https://t.me/+jVdPcBcKNFAyYzZh\n\n\n"
-            ."Si también quieres generar ingresos recomendando el sistema, responde:\n\n"
-            ."“Quiero estar en el sistema de referidos”\n\n"
-            ."y agendamos un Zoom para explicarte cómo funciona.\n\n"
-            ."A partir de ahora estaré pendiente para ayudarte en tu proceso dentro de AET TRADER ACADEMY";
+        $fallback = 'Bienvenido/a a AET Trader Academy.'
+            ."\n\nAcceso a la comunidad:"
+            ."\nhttps://t.me/+tv9B-1V8eWdhMjIx";
+
+        $template = MessageTemplate::where('key', 'post_pago')->first();
+        $message = $this->renderTemplate($template?->body ?? $fallback, $user);
 
         $payload = $this->buildStandardPayload(
             $user,
@@ -157,6 +141,15 @@ class RegistrationWhatsappService
                 'error' => $exception->getMessage(),
             ]);
         }
+    }
+
+    private function renderTemplate(string $body, User $user): string
+    {
+        return str_replace(
+            ['{name}', '{email}', '{phone}'],
+            [(string) $user->name, (string) $user->email, (string) ($user->phone ?? '')],
+            $body
+        );
     }
 
     private function normalizePhoneToE164(string $phone): string

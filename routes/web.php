@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActionController;
 use App\Http\Controllers\Admin\BanksController;
+use App\Http\Controllers\Admin\MessageTemplatesController;
 use App\Http\Controllers\Admin\CourseCatalogController;
 use App\Http\Controllers\Auth\DeviceConflictController;
 use App\Http\Controllers\Admin\UsersAdminController;
@@ -205,6 +206,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/courses/import-existing', [CourseCatalogController::class, 'importExisting'])
         ->middleware(['verified', 'role:admin'])
         ->name('admin.courses.import-existing');
+
+    Route::get('/admin/message-templates', [MessageTemplatesController::class, 'index'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('admin.message-templates.index');
+
+    Route::put('/admin/message-templates/{messageTemplate}', [MessageTemplatesController::class, 'update'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('admin.message-templates.update');
 
     Route::post('/admin/banks', [BanksController::class, 'store'])
         ->middleware(['verified', 'permission:create banks'])

@@ -805,5 +805,12 @@ return [
     'admin.profits.mark_all_modal_text' => 'Vas a marcar como pagadas todas las ganancias pendientes de:',
     'admin.profits.all_marked_as_paid' => 'Todas las ganancias pendientes fueron marcadas como pagadas.',
     'admin.profits.no_grouped_records' => 'No hay ganancias pendientes.',
+
+    'admin.message_templates.title' => 'Plantillas de mensajes',
+    'admin.message_templates.variables_hint' => 'Puedes usar estas variables en el cuerpo del mensaje y serán reemplazadas automáticamente:',
+    'admin.message_templates.columns.name' => 'Nombre de la plantilla',
+    'admin.message_templates.columns.body' => 'Cuerpo del mensaje',
+    'admin.message_templates.forms.edit_title' => 'Editar plantilla de mensaje',
+    'admin.message_templates.messages.updated' => 'Plantilla actualizada correctamente.',
 ];
 
