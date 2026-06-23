@@ -15,6 +15,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @stack('styles')
         <script>
             (() => {
                 const savedTheme = localStorage.getItem('theme');
@@ -44,5 +45,6 @@
                 {{ $slot }}
             </div>
         </div>
+        @stack('scripts')
     </body>
 </html>

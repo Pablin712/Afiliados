@@ -185,8 +185,16 @@
                     </div>
 
                     <div>
-                        <x-input-label for="phone" :value="__('messages.auth.phone_label')" />
-                        <x-text-input id="phone" class="mt-1 block w-full" type="text" name="phone" x-model="phone" :value="old('phone')" required autocomplete="tel" pattern="[1-9][0-9]{7,14}" placeholder="593961778319" />
+                        <x-input-label for="phone-display" :value="__('messages.auth.phone_label')" />
+                        {{-- Hidden input: form submission + Alpine binding --}}
+                        <input type="hidden" id="phone-hidden" name="phone" x-model="phone">
+                        <input
+                            type="tel"
+                            id="phone-display"
+                            autocomplete="tel"
+                            required
+                            class="mt-1 block w-full border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:ring-brand-500 rounded-md shadow-sm dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100 dark:placeholder-graphite-500 dark:focus:border-brand-500 dark:focus:ring-brand-500"
+                        >
                         <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.auth.phone_hint') }}</p>
                         <x-input-error :messages="$errors->get('phone')" class="mt-2" />
                     </div>
@@ -291,7 +299,7 @@
 
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">
                         <p class="text-xs uppercase tracking-[0.25em] text-gray-500 dark:text-graphite-500">{{ __('messages.auth.phone_label') }}</p>
-                        <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100" x-text="phone"></p>
+                        <p class="mt-2 font-medium text-gray-900 dark:text-graphite-100" x-text="phone ? '+' + phone : ''"></p>
                     </div>
 
                     <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">
@@ -336,4 +344,67 @@
             </div>
         </div>
     </form>
+    @push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@24/build/css/intlTelInput.min.css">
+    <style>
+        .iti { display: block; }
+        .dark .iti__dropdown-content { background-color: #1e2025; border-color: #3a404b; }
+        .dark .iti__search-input { background-color: #2d3139; border-color: #3a404b; color: #e7e8eb; }
+        .dark .iti__country:hover, .dark .iti__country.iti__highlight { background-color: #2d3139; }
+        .dark .iti__country-name, .dark .iti__dial-code { color: #e7e8eb; }
+        .dark .iti__selected-country-primary { background-color: transparent; }
+        .dark .iti__arrow { border-top-color: #a8adb9; }
+        .dark .iti__arrow--up { border-bottom-color: #a8adb9; }
+    </style>
+    @endpush
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@24/build/js/intlTelInputWithUtils.js"></script>
+    <script>
+    (function () {
+        const phoneDisplay = document.getElementById('phone-display');
+        const phoneHidden  = document.getElementById('phone-hidden');
+        if (!phoneDisplay || !phoneHidden) return;
+
+        const invalidMsg = @js(__('messages.auth.phone_invalid'));
+
+        const iti = intlTelInput(phoneDisplay, {
+            initialCountry: 'ec',
+            separateDialCode: true,
+            autoPlaceholder: 'aggressive',
+        });
+
+        window.phoneIti = iti;
+
+        const oldPhone = phoneHidden.value;
+        if (oldPhone) {
+            iti.setNumber('+' + oldPhone);
+        }
+
+        function sync() {
+            const val = phoneDisplay.value.trim();
+            if (!val) {
+                phoneHidden.value = '';
+                phoneHidden.dispatchEvent(new Event('input', { bubbles: true }));
+                phoneDisplay.setCustomValidity('');
+                return;
+            }
+            if (iti.isValidNumber()) {
+                const digits = iti.getNumber().replace(/\D/g, '');
+                phoneHidden.value = digits;
+                phoneHidden.dispatchEvent(new Event('input', { bubbles: true }));
+                phoneDisplay.setCustomValidity('');
+            } else {
+                phoneHidden.value = '';
+                phoneHidden.dispatchEvent(new Event('input', { bubbles: true }));
+                phoneDisplay.setCustomValidity(invalidMsg);
+            }
+        }
+
+        phoneDisplay.addEventListener('input', sync);
+        phoneDisplay.addEventListener('countrychange', sync);
+        phoneDisplay.closest('form')?.addEventListener('submit', sync);
+    })();
+    </script>
+    @endpush
 </x-guest-layout>

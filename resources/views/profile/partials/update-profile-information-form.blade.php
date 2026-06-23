@@ -55,9 +55,15 @@
         </div>
 
         <div>
-            <x-input-label for="phone" :value="__('messages.profile.phone_label')" />
-            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" required autocomplete="tel" placeholder="12025550123" pattern="[1-9][0-9]{7,14}" />
-            <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.profile.phone_hint') }}</p>
+            <x-input-label for="phone-display" :value="__('messages.profile.phone_label')" />
+            <input type="hidden" id="phone-hidden" name="phone" value="{{ old('phone', $user->phone) }}">
+            <input
+                type="tel"
+                id="phone-display"
+                autocomplete="tel"
+                required
+                class="mt-1 block w-full border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-brand-500 focus:ring-brand-500 rounded-md shadow-sm dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100 dark:placeholder-graphite-500 dark:focus:border-brand-500 dark:focus:ring-brand-500"
+            >
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 
@@ -76,3 +82,68 @@
         </div>
     </form>
 </section>
+
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@24/build/css/intlTelInput.min.css">
+<style>
+    .iti { display: block; }
+    .dark .iti__dropdown-content { background-color: #1e2025; border-color: #3a404b; }
+    .dark .iti__search-input { background-color: #2d3139; border-color: #3a404b; color: #e7e8eb; }
+    .dark .iti__country:hover, .dark .iti__country.iti__highlight { background-color: #2d3139; }
+    .dark .iti__country-name, .dark .iti__dial-code { color: #e7e8eb; }
+    .dark .iti__selected-country-primary { background-color: transparent; }
+    .dark .iti__arrow { border-top-color: #a8adb9; }
+    .dark .iti__arrow--up { border-bottom-color: #a8adb9; }
+</style>
+@endpush
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@24/build/js/intlTelInputWithUtils.js" defer></script>
+<script>
+(function () {
+    function initPhoneInput() {
+        const phoneDisplay = document.getElementById('phone-display');
+        const phoneHidden  = document.getElementById('phone-hidden');
+        if (!phoneDisplay || !phoneHidden || typeof intlTelInput === 'undefined') return;
+
+        const invalidMsg = @js(__('messages.auth.phone_invalid'));
+
+        const iti = intlTelInput(phoneDisplay, {
+            initialCountry: 'ec',
+            separateDialCode: true,
+            autoPlaceholder: 'aggressive',
+            preferredCountries: ['ec', 'co', 'pe', 'mx', 'ar', 'cl', 've', 'us'],
+        });
+
+        const currentPhone = phoneHidden.value;
+        if (currentPhone) {
+            iti.setNumber('+' + currentPhone);
+        }
+
+        function sync() {
+            const val = phoneDisplay.value.trim();
+            if (!val) {
+                phoneHidden.value = '';
+                phoneDisplay.setCustomValidity('');
+                return;
+            }
+            if (iti.isValidNumber()) {
+                phoneHidden.value = iti.getNumber().replace(/\D/g, '');
+                phoneDisplay.setCustomValidity('');
+            } else {
+                phoneHidden.value = '';
+                phoneDisplay.setCustomValidity(invalidMsg);
+            }
+        }
+
+        phoneDisplay.addEventListener('input', sync);
+        phoneDisplay.addEventListener('countrychange', sync);
+        phoneDisplay.closest('form')?.addEventListener('submit', sync);
+    }
+
+    const t = setInterval(function () {
+        if (typeof intlTelInput !== 'undefined') { clearInterval(t); initPhoneInput(); }
+    }, 50);
+})();
+</script>
+@endpush
