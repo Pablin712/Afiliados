@@ -502,6 +502,32 @@ return [
     'plans.free_renew_success' => 'Renovación gratuita aplicada. Nueva fecha de vencimiento: :date.',
     'plans.program_created' => 'Programa creado correctamente.',
     'plans.program_updated' => 'Programa actualizado correctamente.',
+
+    // Datafast / pago con tarjeta
+    'plans.tab_bank_transfer'           => 'Transferencia bancaria',
+    'plans.tab_card_payment'            => 'Pagar con tarjeta',
+    'plans.card_pay_title'              => 'Pago con tarjeta de crédito/débito',
+    'plans.card_pay_description'        => 'Paga de forma segura con tu tarjeta. Serás redirigido al formulario de pago de Datafast.',
+    'plans.card_accepted_brands'        => 'Tarjetas aceptadas',
+    'plans.card_pay_button'             => 'Continuar al pago con tarjeta',
+    'plans.card_pay_secure_note'        => 'Pago seguro procesado por Datafast (PCI DSS). Tus datos de tarjeta nunca pasan por nuestros servidores.',
+    'plans.card_payment_disabled'       => 'El pago con tarjeta no está disponible en este momento.',
+    'plans.card_checkout_failed'        => 'No se pudo iniciar la sesión de pago con tarjeta. Intenta de nuevo o usa transferencia bancaria.',
+    'plans.card_session_invalid'        => 'La sesión de pago con tarjeta no es válida o ya expiró.',
+    'plans.card_return_invalid'         => 'No se pudo verificar el resultado del pago. Contacta al administrador si el problema persiste.',
+    'plans.card_verification_failed'    => 'No se pudo verificar el pago con Datafast. Contacta al administrador.',
+    'plans.card_payment_approved'       => '¡Pago aprobado! Tu membresía ha sido activada.',
+    'plans.card_payment_pending_bank'   => 'Tu pago está pendiente de confirmación por el banco. Te notificaremos cuando sea procesado.',
+    'plans.card_payment_rejected'       => 'El pago fue rechazado por la pasarela. Intenta de nuevo o usa otro método de pago.',
+    'plans.card_paid_pending_activation' => 'Tu pago fue procesado pero la activación de membresía está pendiente. El administrador la completará pronto.',
+
+    // Vista de widget de tarjeta
+    'plans.card_payment_title'          => 'Pago con tarjeta',
+    'plans.card_widget_title'           => 'Ingresa los datos de tu tarjeta',
+    'plans.card_widget_description'     => 'Completa el formulario de pago a continuación. El cargo se realizará de forma inmediata.',
+    'plans.card_widget_secure_note'     => 'Conexión segura con cifrado TLS. Certificado PCI DSS por Datafast.',
+    'plans.card_cancel_link'            => 'Cancelar y volver a planes',
+
     'nav.plans' => 'Planes',
 
     'admin.users_tree.title' => 'Usuarios en arbol',

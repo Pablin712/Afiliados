@@ -21,6 +21,8 @@ class Payment extends Model
         'photo',
         'amount',
         'state',
+        'payment_method',
+        'gateway_order_id',
         'reviewed_by',
         'reviewed_at',
     ];

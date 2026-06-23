@@ -8,19 +8,26 @@ use App\Models\Payment;
 use App\Models\Program;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\DatafastService;
 use App\Services\PaymentPendingWebhookService;
+use App\Services\PendingPaymentReviewService;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use RuntimeException;
 
 class PlansController extends Controller
 {
-    public function __construct(private readonly PaymentPendingWebhookService $paymentPendingWebhookService)
-    {
+    public function __construct(
+        private readonly PaymentPendingWebhookService $paymentPendingWebhookService,
+        private readonly PendingPaymentReviewService $pendingPaymentReviewService,
+        private readonly DatafastService $datafastService,
+    ) {
     }
 
     public function index(): View
@@ -50,10 +57,13 @@ class PlansController extends Controller
         $pendingPayment = null;
 
         if (! $isAdmin) {
+            // Only bank-transfer payments need admin review and show the "pending" UI.
+            // Card payments are either auto-approved, rejected, or cancelled on failure.
             $pendingPayment = Payment::query()
                 ->with('program')
                 ->where('user_id', $userId)
                 ->where('state', 'pending')
+                ->where('payment_method', 'bank_transfer')
                 ->first();
         }
 
@@ -156,6 +166,210 @@ class PlansController extends Controller
         $this->paymentPendingWebhookService->send($payment);
 
         return back()->with('status', __('messages.plans.payment_submitted'));
+    }
+
+    public function initiateCardCheckout(Request $request): RedirectResponse
+    {
+        if (! (bool) config('affiliates.datafast.enabled')) {
+            return back()->with('error', __('messages.plans.card_payment_disabled'));
+        }
+
+        $user = Auth::user();
+
+        if ($user instanceof User && $user->hasRole('admin')) {
+            return back()->with('error', __('messages.plans.admin_no_payment'));
+        }
+
+        $userId = Auth::id();
+
+        $membership = Membership::query()
+            ->with('membershipType')
+            ->where('user_id', $userId)
+            ->first();
+
+        $membershipTypeName = strtolower((string) ($membership?->membershipType?->name ?? 'free'));
+        $membershipStatus   = (string) ($membership?->status ?? 'free');
+
+        if (! $this->canSubmitPaidRenewal($membershipTypeName, $membershipStatus)) {
+            return back()->with('error', __('messages.plans.only_customer_or_free_can_pay'));
+        }
+
+        // Bank-transfer pending blocks the flow (awaits admin review).
+        if (Payment::query()->where('user_id', $userId)->where('state', 'pending')->where('payment_method', 'bank_transfer')->exists()) {
+            return back()->with('error', __('messages.plans.already_pending'));
+        }
+
+        // Cancel abandoned card sessions so the user can start a new one.
+        Payment::query()
+            ->where('user_id', $userId)
+            ->where('state', 'pending')
+            ->where('payment_method', 'card')
+            ->update(['state' => 'cancelled']);
+
+        $validated = $request->validate([
+            'program_id' => ['required', 'integer', Rule::exists('programs', 'id')->where('is_active', true)],
+        ]);
+
+        $program = Program::query()->findOrFail($validated['program_id']);
+
+        $isRenewalOrReactivation = $membershipStatus !== 'free'
+            && Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
+
+        $amount = $isRenewalOrReactivation
+            ? (float) $program->renewal_cost
+            : (float) $program->first_payment_cost;
+
+        $merchantTransactionId = 'AFL-' . $userId . '-' . now()->format('YmdHis');
+
+        // Datafast will append ?resourcePath=... to this URL after payment.
+        $shopperResultUrl = route('plans.card-return');
+
+        try {
+            $checkoutId = $this->datafastService->initiateCheckout(
+                $amount,
+                $user,
+                $shopperResultUrl,
+                $merchantTransactionId
+            );
+        } catch (RuntimeException $e) {
+            Log::error('Datafast checkout initiation error.', ['error' => $e->getMessage(), 'user_id' => $userId]);
+
+            return back()->with('error', __('messages.plans.card_checkout_failed'));
+        }
+
+        $payment = Payment::create([
+            'user_id'          => $userId,
+            'program_id'       => $program->id,
+            'transaction_id'   => null,
+            'number'           => $merchantTransactionId,
+            'photo'            => null,
+            'amount'           => $amount,
+            'state'            => 'pending',
+            'payment_method'   => 'card',
+            'gateway_order_id' => $checkoutId,
+        ]);
+
+        return redirect()->route('plans.card-payment', ['payment' => $payment->id]);
+    }
+
+    public function showCardPayment(Request $request, Payment $payment): View|RedirectResponse
+    {
+        if ($payment->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($payment->payment_method !== 'card' || $payment->state !== 'pending') {
+            return redirect()->route('plans.index')
+                ->with('error', __('messages.plans.card_session_invalid'));
+        }
+
+        $checkoutId = (string) $payment->gateway_order_id;
+
+        if ($checkoutId === '') {
+            return redirect()->route('plans.index')
+                ->with('error', __('messages.plans.card_session_invalid'));
+        }
+
+        $widgetUrl = rtrim((string) config('affiliates.datafast.base_url'), '/')
+            . '/v1/paymentWidgets.js?checkoutId=' . urlencode($checkoutId);
+
+        $brands = (string) config('affiliates.datafast.brands', 'VISA MASTER DINERS AMEX');
+
+        return view('plans.card-payment', compact('payment', 'checkoutId', 'widgetUrl', 'brands'));
+    }
+
+    public function cardPaymentReturn(Request $request): RedirectResponse
+    {
+        $resourcePath = trim((string) $request->input('resourcePath', ''));
+
+        if ($resourcePath === '') {
+            return redirect()->route('plans.index')
+                ->with('error', __('messages.plans.card_return_invalid'));
+        }
+
+        $checkoutId = $this->datafastService->extractCheckoutIdFromResourcePath($resourcePath);
+
+        if ($checkoutId === null) {
+            return redirect()->route('plans.index')
+                ->with('error', __('messages.plans.card_return_invalid'));
+        }
+
+        $payment = Payment::query()
+            ->where('gateway_order_id', $checkoutId)
+            ->where('payment_method', 'card')
+            ->where('state', 'pending')
+            ->first();
+
+        if ($payment === null) {
+            return redirect()->route('plans.index')
+                ->with('error', __('messages.plans.card_return_invalid'));
+        }
+
+        if ($payment->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Dev-only bypass: skip real verification and simulate approval for local Fase 1 testing.
+        if ((bool) config('affiliates.datafast.dev_bypass') && app()->isLocal()) {
+            Log::warning('Datafast: DEV BYPASS active — skipping real verification, simulating approval.', [
+                'payment_id'   => $payment->id,
+                'checkout_id'  => $checkoutId,
+            ]);
+            $resultCode = '000.000.000';
+            $gatewayId  = $checkoutId;
+        } else {
+            try {
+                $result     = $this->datafastService->verifyTransaction($resourcePath);
+                $resultCode = (string) ($result['result']['code'] ?? '');
+                $gatewayId  = (string) ($result['id'] ?? $checkoutId);
+            } catch (RuntimeException $e) {
+                Log::error('Datafast: verification error on return.', [
+                    'error'      => $e->getMessage(),
+                    'payment_id' => $payment->id,
+                ]);
+
+                $payment->state = 'cancelled';
+                $payment->save();
+
+                return redirect()->route('plans.index')
+                    ->with('error', __('messages.plans.card_verification_failed'));
+            }
+        }
+
+        if ($this->datafastService->isSuccessResult($resultCode)) {
+            $payment->number = $gatewayId;
+            $payment->save();
+
+            try {
+                $this->pendingPaymentReviewService->approve($payment, reviewedBy: null);
+            } catch (RuntimeException $e) {
+                Log::error('Datafast: auto-approve failed after successful payment.', [
+                    'payment_id' => $payment->id,
+                    'error'      => $e->getMessage(),
+                ]);
+
+                return redirect()->route('plans.index')
+                    ->with('status', __('messages.plans.card_paid_pending_activation'));
+            }
+
+            return redirect()->route('plans.index')
+                ->with('status', __('messages.plans.card_payment_approved'));
+        }
+
+        if ($this->datafastService->isPendingResult($resultCode)) {
+            $payment->number = $gatewayId;
+            $payment->save();
+
+            return redirect()->route('plans.index')
+                ->with('status', __('messages.plans.card_payment_pending_bank'));
+        }
+
+        $payment->state = 'rejected';
+        $payment->reviewed_at = now();
+        $payment->save();
+
+        return redirect()->route('plans.index')
+            ->with('error', __('messages.plans.card_payment_rejected'));
     }
 
     public function renewForFree(Request $request): RedirectResponse

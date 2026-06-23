@@ -105,6 +105,18 @@ Route::middleware('auth')->group(function () {
             ->with('error', __('messages.plans.invalid_payment_method'));
     })->middleware('verified');
 
+    Route::post('/plans/card-checkout', [PlansController::class, 'initiateCardCheckout'])
+        ->middleware('verified')
+        ->name('plans.card-checkout');
+
+    Route::get('/plans/card-payment/{payment}', [PlansController::class, 'showCardPayment'])
+        ->middleware('verified')
+        ->name('plans.card-payment');
+
+    Route::get('/plans/card-return', [PlansController::class, 'cardPaymentReturn'])
+        ->middleware('verified')
+        ->name('plans.card-return');
+
     Route::post('/plans/renew-free', [PlansController::class, 'renewForFree'])
         ->middleware('verified')
         ->name('plans.renew-free');

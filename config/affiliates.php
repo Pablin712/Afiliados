@@ -95,4 +95,32 @@ return [
     'registration_whatsapp_webhook_url' => env('REGISTRATION_WHATSAPP_WEBHOOK_URL'),
     'registration_whatsapp_webhook_token' => env('REGISTRATION_WHATSAPP_WEBHOOK_TOKEN'),
     'registration_whatsapp_default_country_code' => env('REGISTRATION_WHATSAPP_DEFAULT_COUNTRY_CODE', '593'),
+
+    // Datafast / Dataweb payment gateway (Botón de Pagos).
+    // Fase 1 test: base_url = https://eu-test.oppwa.com (no testMode needed)
+    // Fase 2 test: base_url = https://eu-test.oppwa.com + test_mode = EXTERNAL
+    // Production:  base_url = provided by Datafast, test_mode = null
+    'datafast' => [
+        'enabled'          => (bool) env('DATAFAST_ENABLED', false),
+        'base_url'         => env('DATAFAST_BASE_URL', 'https://eu-test.oppwa.com'),
+        'entity_id'        => env('DATAFAST_ENTITY_ID', ''),
+        'bearer_token'     => env('DATAFAST_BEARER_TOKEN', ''),
+        'shopper_mid'      => env('DATAFAST_SHOPPER_MID', ''),
+        'shopper_tid'      => env('DATAFAST_SHOPPER_TID', ''),
+        'shopper_eci'      => env('DATAFAST_SHOPPER_ECI', '0'),
+        'shopper_pserv'    => env('DATAFAST_SHOPPER_PSERV', '9999'),
+        'shopper_version'  => env('DATAFAST_SHOPPER_VERSIONDF', '2'),
+        'currency'         => env('DATAFAST_CURRENCY', 'USD'),
+        'payment_type'     => env('DATAFAST_PAYMENT_TYPE', 'DB'),
+        'brands'           => env('DATAFAST_BRANDS', 'VISA MASTER DINERS AMEX'),
+        // IVA rate used to split the amount for SRI declarations (e.g. 0.15 for 15%).
+        // Set 0 to send the full amount as BASE0 (zero-rated).
+        'iva_rate'         => (float) env('DATAFAST_IVA_RATE', 0.15),
+        // Fase 2 only: 'EXTERNAL'. Leave null in production.
+        'test_mode'        => env('DATAFAST_TEST_MODE'),
+        // Commerce name shown in risk parameters and widget.
+        'commerce_name'    => env('DATAFAST_COMMERCE_NAME', ''),
+        // Dev only: skip Datafast verification and simulate approval. NEVER true in production.
+        'dev_bypass'       => (bool) env('DATAFAST_DEV_BYPASS', false),
+    ],
 ];

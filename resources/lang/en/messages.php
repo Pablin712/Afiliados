@@ -502,6 +502,32 @@ return [
     'plans.free_renew_success' => 'Free renewal applied. New expiration date: :date.',
     'plans.program_created' => 'Program created successfully.',
     'plans.program_updated' => 'Program updated successfully.',
+
+    // Datafast / card payment
+    'plans.tab_bank_transfer'           => 'Bank transfer',
+    'plans.tab_card_payment'            => 'Pay with card',
+    'plans.card_pay_title'              => 'Credit / Debit card payment',
+    'plans.card_pay_description'        => 'Pay securely with your card. You will be redirected to the Datafast payment form.',
+    'plans.card_accepted_brands'        => 'Accepted cards',
+    'plans.card_pay_button'             => 'Continue to card payment',
+    'plans.card_pay_secure_note'        => 'Secure payment processed by Datafast (PCI DSS). Your card details never pass through our servers.',
+    'plans.card_payment_disabled'       => 'Card payment is not available at this time.',
+    'plans.card_checkout_failed'        => 'Could not start the card payment session. Please try again or use bank transfer.',
+    'plans.card_session_invalid'        => 'The card payment session is invalid or has already expired.',
+    'plans.card_return_invalid'         => 'Could not verify the payment result. Please contact the administrator if the problem persists.',
+    'plans.card_verification_failed'    => 'Could not verify the payment with Datafast. Please contact the administrator.',
+    'plans.card_payment_approved'       => 'Payment approved! Your membership has been activated.',
+    'plans.card_payment_pending_bank'   => 'Your payment is pending confirmation from the bank. We will notify you once it is processed.',
+    'plans.card_payment_rejected'       => 'The payment was declined by the gateway. Please try again or use another payment method.',
+    'plans.card_paid_pending_activation' => 'Your payment was processed but membership activation is pending. The administrator will complete it shortly.',
+
+    // Card widget view
+    'plans.card_payment_title'          => 'Card payment',
+    'plans.card_widget_title'           => 'Enter your card details',
+    'plans.card_widget_description'     => 'Complete the payment form below. The charge will be made immediately.',
+    'plans.card_widget_secure_note'     => 'Secure TLS-encrypted connection. PCI DSS certified by Datafast.',
+    'plans.card_cancel_link'            => 'Cancel and return to plans',
+
     'nav.plans' => 'Plans',
 
     'admin.users_tree.title' => 'Users tree',
