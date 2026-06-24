@@ -14,7 +14,8 @@
       "PowerShell(Head *)",
       "PowerShell(php --ini 2>&1)",
       "PowerShell(php -r \"echo 'upload_max_filesize=' . ini_get\\('upload_max_filesize'\\) . PHP_EOL; echo 'post_max_size=' . ini_get\\('post_max_size'\\) . PHP_EOL; echo 'max_execution_time=' . ini_get\\('max_execution_time'\\) . PHP_EOL;\")",
-      "Bash(xargs grep -l \"Payment.*Observer\\\\|Payment.*Listener\\\\|bootPayment\\\\|booted\")"
+      "Bash(xargs grep -l \"Payment.*Observer\\\\|Payment.*Listener\\\\|bootPayment\\\\|booted\")",
+      "Skill(update-config)"
     ]
   }
 }

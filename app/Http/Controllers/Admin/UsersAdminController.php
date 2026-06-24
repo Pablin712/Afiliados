@@ -11,15 +11,21 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UsersAdminController extends Controller
 {
-    public function index(Request $request): View|JsonResponse
+    public function index(Request $request): View|JsonResponse|StreamedResponse
     {
         $perPage   = max(5, min(100, (int) $request->integer('per_page', 15)));
         $search    = trim((string) $request->input('search', ''));
         $sortOrder = strtolower((string) $request->input('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
         $sortBy    = $this->resolveSortBy((string) $request->input('sort_by', 'id'));
+        $export    = $request->input('export');
 
         $query = User::query()
             ->select('users.*')
@@ -30,8 +36,14 @@ class UsersAdminController extends Controller
             $query->where(function (Builder $q) use ($search): void {
                 $q->where('users.name', 'like', "%{$search}%")
                   ->orWhere('users.email', 'like', "%{$search}%")
-                  ->orWhere('users.affiliate_code', 'like', "%{$search}%");
+                  ->orWhere('users.affiliate_code', 'like', "%{$search}%")
+                  ->orWhere('users.phone', 'like', "%{$search}%");
             });
+        }
+
+        if ($export === 'excel') {
+            $users = (clone $query)->with('userBanks')->get();
+            return $this->exportExcel($users);
         }
 
         $records = $query->paginate($perPage);
@@ -146,6 +158,64 @@ class UsersAdminController extends Controller
         return back()->with('status', __('messages.admin.users.sponsor_updated'));
     }
 
+    private function exportExcel(\Illuminate\Support\Collection $users): StreamedResponse
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Usuarios');
+
+        $headers = [
+            'ID', 'Nombre', 'Email', 'Teléfono', 'Código Afiliado',
+            'Patrocinador', 'Membresía', 'Registrado',
+            'Banco - Titular', 'Banco - Nombre', 'Banco - Tipo', 'Banco - Número', 'Banco - Identificación',
+        ];
+
+        $sheet->fromArray($headers, null, 'A1');
+
+        $sheet->getStyle('A1:M1')->applyFromArray([
+            'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2F4FFF']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
+        ]);
+
+        $row = 2;
+        foreach ($users as $user) {
+            $bank = $user->userBanks->firstWhere('is_default', true) ?? $user->userBanks->first();
+
+            $sheet->fromArray([
+                $user->id,
+                $user->name,
+                $user->email,
+                $user->phone ?? '',
+                $user->affiliate_code ?? '',
+                $user->sponsor?->name ?? '',
+                $user->membership?->membershipType?->name ?? $user->membership?->status ?? '',
+                $user->created_at?->format('Y-m-d') ?? '',
+                $bank?->owner ?? '',
+                $bank?->bank_name ?? '',
+                $bank?->type ?? '',
+                $bank?->number ?? '',
+                $bank?->identification ?? '',
+            ], null, "A{$row}");
+
+            $row++;
+        }
+
+        foreach (range('A', 'M') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'usuarios_' . now()->format('Y-m-d_His') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet): void {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
     /**
      * Check whether $candidateId is a descendant of $user in the affiliate tree.
      */
@@ -182,7 +252,7 @@ class UsersAdminController extends Controller
 
     protected function resolveSortBy(string $requested): string
     {
-        $allowed = ['id', 'name', 'email', 'created_at'];
+        $allowed = ['id', 'name', 'email', 'phone', 'created_at'];
 
         return in_array($requested, $allowed, true) ? $requested : 'id';
     }

@@ -401,6 +401,7 @@ return [
 
     'name' => 'Nombre',
     'email' => 'Correo Electrónico',
+    'phone' => 'Teléfono',
     'password' => 'Contraseña',
     'confirm_password' => 'Confirmar Contraseña',
     'remember_me' => 'Recuérdame',

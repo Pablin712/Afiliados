@@ -25,6 +25,7 @@
                     ['label' => 'ID',                                          'type' => 'number',  'sort_by' => 'id'],
                     ['label' => __('messages.name'),                           'type' => 'string',  'sort_by' => 'name'],
                     ['label' => __('messages.email'),                          'type' => 'string',  'sort_by' => 'email'],
+                    ['label' => __('messages.phone'),                          'type' => 'string',  'sort_by' => 'phone'],
                     ['label' => __('messages.admin.users.affiliate_code'),     'type' => 'string',  'sort_by' => 'affiliate_code'],
                     ['label' => __('messages.admin.users.sponsor'),            'type' => 'string',  'sort_by' => 'sponsor'],
                     ['label' => __('messages.admin.users.membership'),         'type' => 'string',  'sort_by' => 'membership'],
@@ -36,7 +37,7 @@
                 :totalRecords="$totalRecords"
                 :searchUrl="route('admin.users.index')"
                 :csv="false"
-                :excel="false"
+                :excel="true"
                 :json="false"
                 :pdf="false"
                 :print="false"

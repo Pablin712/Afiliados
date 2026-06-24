@@ -14,6 +14,7 @@
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-500 dark:text-graphite-400 font-mono">#{{ $user->id }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm font-medium text-gray-900 dark:text-graphite-100">{{ $user->name }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">{{ $user->email }}</td>
+        <td class="px-4 sm:px-6 py-3 text-sm text-gray-600 dark:text-graphite-400 font-mono whitespace-nowrap">{{ $user->phone ?? '—' }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm font-mono text-gray-600 dark:text-graphite-400">{{ $user->affiliate_code ?? '—' }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">
             @if ($user->sponsor)
@@ -65,7 +66,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
+        <td colspan="10" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
             {{ __('messages.admin.users.no_users') }}
         </td>
     </tr>

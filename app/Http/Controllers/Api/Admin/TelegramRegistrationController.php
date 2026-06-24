@@ -12,10 +12,12 @@ class TelegramRegistrationController extends Controller
 {
     public function __construct(private readonly TelegramService $telegramService) {}
 
+    
     /**
      * Register a Telegram chat_id for a user identified by their telegram_code.
      *
-     * Called by n8n when a user sends their unique code to the Telegram bot.
+     * Called b
+     * y n8n when a user sends their unique code to the Telegram bot.
      *
      * Responses:
      *   201 – code valid, chat_id registered, confirmation message sent to user
