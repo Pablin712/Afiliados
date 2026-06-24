@@ -352,11 +352,12 @@ Al ejecutar `POST /admin/memberships/recalculate-tiers`, la respuesta ahora incl
 ### Flujo I (registro de Telegram vía bot)
 Este flujo tiene **solo 2 nodos** — el bot hace todo el trabajo incluyendo responder al usuario.
 
-1. Webhook Trigger: `https://autobot.aaronsoft.es/webhook/aet-first-bot`
-   - Configurado en BotFather como webhook del bot `@aetfirstbot`
-2. HTTP POST: `POST /admin/telegram/register-chat-id`
+1. **Telegram Trigger** (n8n built-in) — escucha mensajes del bot `@aetfirstbot`
+2. **HTTP POST**: `POST /admin/telegram/register-chat-id`
    - Headers: `X-Internal-Token: {{$env.INTERNAL_API_TOKEN}}`
-   - Body: `{"chat_id": "{{$json.message.from.id}}", "code": "{{$json.message.text}}"}`
+   - Body:
+     - `chat_id`: `=$json.message.from.id`
+     - `code`: `=$json.message.text`
 
 **Respuestas posibles:**
 - `201 registered: true` — registrado exitosamente (el API ya mensajeó al usuario)

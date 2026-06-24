@@ -61,5 +61,5 @@ POST https://api.telegram.org/bot8295898924:AAFgQUPC26H7fyMQu3KsHwvsNym6z9I6EaQ/
 body:
 {
     "chat_id": "",
-    "text": ""
+    "code": ""
 }
