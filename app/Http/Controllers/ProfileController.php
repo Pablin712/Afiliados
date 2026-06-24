@@ -103,6 +103,14 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'other-bank-updated');
     }
 
+    public function deleteTelegramChatId(Request $request): RedirectResponse
+    {
+        $request->user()->telegram_chat_id = null;
+        $request->user()->save();
+
+        return Redirect::route('profile.edit')->with('status', 'telegram-chat-id-removed');
+    }
+
     /**
      * Delete the user's account.
      */

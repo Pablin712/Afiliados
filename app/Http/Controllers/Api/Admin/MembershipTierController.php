@@ -33,11 +33,13 @@ class MembershipTierController extends Controller
         return response()->json([
             'message' => 'Membership tiers recalculated successfully.',
             'meta' => [
-                'scope' => isset($validated['user_id']) ? 'single-user' : 'all-users',
-                'user_id' => isset($validated['user_id']) ? (int) $validated['user_id'] : null,
-                'dry_run' => (bool) ($validated['dry_run'] ?? false),
-                'processed' => $result['processed'],
-                'changed' => $result['changed'],
+                'scope'                    => isset($validated['user_id']) ? 'single-user' : 'all-users',
+                'user_id'                  => isset($validated['user_id']) ? (int) $validated['user_id'] : null,
+                'dry_run'                  => (bool) ($validated['dry_run'] ?? false),
+                'processed'                => $result['processed'],
+                'changed'                  => $result['changed'],
+                'whatsapp_group_removed'   => $result['whatsapp_group']['removed'] ?? 0,
+                'telegram_groups_banned'   => $result['telegram_groups']['banned'] ?? 0,
             ],
             'data' => $result,
         ]);

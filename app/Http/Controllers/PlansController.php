@@ -215,9 +215,15 @@ class PlansController extends Controller
         $isRenewalOrReactivation = $membershipStatus !== 'free'
             && Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
 
-        $amount = $isRenewalOrReactivation
-            ? (float) $program->renewal_cost
-            : (float) $program->first_payment_cost;
+        $cardAmount = $isRenewalOrReactivation
+            ? $program->card_renewal_cost
+            : $program->card_first_payment_cost;
+
+        if ($cardAmount === null) {
+            return back()->with('error', __('messages.plans.card_payment_disabled'));
+        }
+
+        $amount = (float) $cardAmount;
 
         $merchantTransactionId = 'AFL-' . $userId . '-' . now()->format('YmdHis');
 

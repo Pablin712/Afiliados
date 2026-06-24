@@ -58,9 +58,21 @@
                         </div>
 
                         <div>
+                            <x-input-label for="program_new_card_first_payment_cost" :value="__('messages.plans.field_card_first_payment_cost')" />
+                            <x-text-input id="program_new_card_first_payment_cost" type="number" step="0.01" min="0" name="card_first_payment_cost" class="mt-1 block w-full" :value="old('card_first_payment_cost')" />
+                            <x-input-error :messages="$errors->get('card_first_payment_cost')" class="mt-2" />
+                        </div>
+
+                        <div>
                             <x-input-label for="program_new_renewal_cost" :value="__('messages.plans.field_renewal_cost')" />
                             <x-text-input id="program_new_renewal_cost" type="number" step="0.01" min="0" name="renewal_cost" class="mt-1 block w-full" :value="old('renewal_cost')" required />
                             <x-input-error :messages="$errors->get('renewal_cost')" class="mt-2" />
+                        </div>
+
+                        <div>
+                            <x-input-label for="program_new_card_renewal_cost" :value="__('messages.plans.field_card_renewal_cost')" />
+                            <x-text-input id="program_new_card_renewal_cost" type="number" step="0.01" min="0" name="card_renewal_cost" class="mt-1 block w-full" :value="old('card_renewal_cost')" />
+                            <x-input-error :messages="$errors->get('card_renewal_cost')" class="mt-2" />
                         </div>
 
                         <div>
@@ -108,8 +120,18 @@
                             </div>
 
                             <div>
+                                <x-input-label for="program_{{ $program->id }}_card_first_payment_cost" :value="__('messages.plans.field_card_first_payment_cost')" />
+                                <x-text-input id="program_{{ $program->id }}_card_first_payment_cost" type="number" step="0.01" min="0" name="card_first_payment_cost" class="mt-1 block w-full" :value="old('card_first_payment_cost', $program->card_first_payment_cost !== null ? (float) $program->card_first_payment_cost : '')" />
+                            </div>
+
+                            <div>
                                 <x-input-label for="program_{{ $program->id }}_renewal_cost" :value="__('messages.plans.field_renewal_cost')" />
                                 <x-text-input id="program_{{ $program->id }}_renewal_cost" type="number" step="0.01" min="0" name="renewal_cost" class="mt-1 block w-full" :value="old('renewal_cost', (float) $program->renewal_cost)" required />
+                            </div>
+
+                            <div>
+                                <x-input-label for="program_{{ $program->id }}_card_renewal_cost" :value="__('messages.plans.field_card_renewal_cost')" />
+                                <x-text-input id="program_{{ $program->id }}_card_renewal_cost" type="number" step="0.01" min="0" name="card_renewal_cost" class="mt-1 block w-full" :value="old('card_renewal_cost', $program->card_renewal_cost !== null ? (float) $program->card_renewal_cost : '')" />
                             </div>
 
                             <div>
@@ -199,12 +221,20 @@
                     <div class="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-950/40 overflow-hidden">
 
                         {{-- Program header --}}
+                        @php
+                            $displayDurationMonths  = $hasApprovedPayment ? 1 : (int) $program->duration_months;
+                            $transferAmount         = $hasApprovedPayment ? (float) $program->renewal_cost             : (float) $program->first_payment_cost;
+                            $cardAmount             = $hasApprovedPayment ? (float) ($program->card_renewal_cost ?? 0)  : (float) ($program->card_first_payment_cost ?? 0);
+                            $programHasCardPrice    = $hasApprovedPayment ? $program->card_renewal_cost !== null         : $program->card_first_payment_cost !== null;
+                            $programContextDescription = $hasApprovedPayment
+                                ? __('messages.plans.program_context_customer_renewal')
+                                : __('messages.plans.program_context_first_payment');
+                            $savingsAmount = ($programHasCardPrice && $cardAmount > $transferAmount) ? $cardAmount - $transferAmount : 0;
+                            $savingsPct    = ($savingsAmount > 0 && $cardAmount > 0) ? (int) round($savingsAmount / $cardAmount * 100) : 0;
+                        @endphp
                         <div class="p-6 border-b border-gray-100 dark:border-graphite-800">
-                            <div class="flex flex-wrap items-start justify-between gap-4">
-                                <div>
-                                    @php($programContextDescription = $hasApprovedPayment
-                                        ? __('messages.plans.program_context_customer_renewal')
-                                        : __('messages.plans.program_context_first_payment'))
+                            <div class="flex flex-wrap items-start justify-between gap-6">
+                                <div class="flex-1 min-w-0">
                                     <p class="text-xs font-semibold uppercase tracking-[0.3em] text-brand-600 dark:text-brand-400">
                                         {{ __('messages.plans.program_badge') }}
                                     </p>
@@ -216,26 +246,40 @@
                                             {{ $program->description }}
                                         </p>
                                     @endif
-                                    <p class="mt-2 text-sm font-medium text-brand-700 dark:text-brand-300 max-w-xl">
+                                    <p class="mt-2 text-sm font-medium text-brand-700 dark:text-brand-300">
                                         {{ $programContextDescription }}
                                     </p>
                                 </div>
-                                <div class="text-right shrink-0">
-                                    @php($displayDurationMonths = $hasApprovedPayment ? 1 : (int) $program->duration_months)
-                                    <p class="text-xs text-gray-500 dark:text-graphite-400">
-                                        {{ $hasApprovedPayment ? __('messages.plans.price_renewal') : __('messages.plans.price_first') }}
-                                    </p>
-                                    <p class="text-3xl font-bold text-brand-600 dark:text-brand-400">
-                                        ${{ $hasApprovedPayment ? number_format((float) $program->renewal_cost, 2) : number_format((float) $program->first_payment_cost, 2) }}
-                                    </p>
-                                    <p class="text-xs text-gray-500 dark:text-graphite-400">
-                                        {{ __('messages.plans.duration_months', ['count' => $displayDurationMonths]) }}
-                                    </p>
-                                    @if (!$hasApprovedPayment)
-                                        <p class="mt-1 text-xs text-gray-400 dark:text-graphite-500">
-                                            {{ __('messages.plans.renewal_note', ['price' => number_format((float) $program->renewal_cost, 2)]) }}
-                                        </p>
+
+                                {{-- Dual pricing display --}}
+                                <div class="shrink-0 flex flex-col sm:flex-row items-end gap-3">
+                                    @if ($programHasCardPrice && (bool) config('affiliates.datafast.enabled'))
+                                        {{-- Card price: valor real --}}
+                                        <div class="rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-right dark:border-graphite-600 dark:bg-graphite-800 min-w-[9rem]">
+                                            <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-graphite-400 flex items-center justify-end gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 shrink-0"><path d="M2.5 4A1.5 1.5 0 0 0 1 5.5V6h18v-.5A1.5 1.5 0 0 0 17.5 4h-15ZM19 8.5H1v6A1.5 1.5 0 0 0 2.5 16h15a1.5 1.5 0 0 0 1.5-1.5v-6ZM3 13.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75Zm4.75-.75a.75.75 0 0 0 0 1.5h3.5a.75.75 0 0 0 0-1.5h-3.5Z"/></svg>
+                                                Valor real
+                                            </p>
+                                            <p class="mt-0.5 text-2xl font-bold text-gray-600 dark:text-graphite-200 line-through decoration-gray-400 dark:decoration-graphite-500">${{ number_format($cardAmount, 2) }}</p>
+                                            <p class="text-[11px] text-gray-400 dark:text-graphite-500">con tarjeta · {{ __('messages.plans.duration_months', ['count' => $displayDurationMonths]) }}</p>
+                                        </div>
                                     @endif
+
+                                    {{-- Transfer price: precio preferencial --}}
+                                    <div class="rounded-xl border border-brand-300 bg-brand-50 px-4 py-3 text-right dark:border-brand-700 dark:bg-brand-950/50 min-w-[9rem]">
+                                        @if ($savingsAmount > 0)
+                                            <p class="text-[11px] font-semibold text-green-600 dark:text-green-400 flex items-center justify-end gap-1 mb-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-3 h-3 shrink-0"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z" clip-rule="evenodd"/></svg>
+                                                Ahorras ${{ number_format($savingsAmount, 2) }} ({{ $savingsPct }}% off)
+                                            </p>
+                                        @endif
+                                        <p class="text-[11px] font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400 flex items-center justify-end gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 shrink-0"><path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 0 0 3 5.5v2.879a2.5 2.5 0 0 0 .732 1.767l6.5 6.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-6.5-6.5A2.5 2.5 0 0 0 8.38 3H5.5ZM6 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+                                            Precio preferencial
+                                        </p>
+                                        <p class="mt-0.5 text-2xl font-bold text-brand-600 dark:text-brand-300">${{ number_format($transferAmount, 2) }}</p>
+                                        <p class="text-[11px] text-brand-500 dark:text-brand-400">transferencia · {{ __('messages.plans.duration_months', ['count' => $displayDurationMonths]) }}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -268,14 +312,14 @@
                                 </div>
                             </div>
                         @elseif (!$pendingPayment)
-                            @php($datafastEnabled = (bool) config('affiliates.datafast.enabled'))
+                            @php($datafastEnabled = (bool) config('affiliates.datafast.enabled') && $programHasCardPrice)
                             @php($hasBanks = ! $banks->isEmpty())
                             @if (! $hasBanks && ! $datafastEnabled)
                                 <div class="p-6">
                                     <p class="text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.plans.no_banks') }}</p>
                                 </div>
                             @else
-                                @php($fixedAmount = $hasApprovedPayment ? (float) $program->renewal_cost : (float) $program->first_payment_cost)
+                                {{-- $transferAmount and $cardAmount are set in the program header @php block above --}}
                                 <div
                                     class="p-6"
                                     x-data="{
@@ -408,9 +452,9 @@
                                                             <x-input-label :value="__('messages.plans.amount_label')" />
                                                             <div class="mt-1 flex items-center justify-between rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 dark:border-brand-900/60 dark:bg-brand-900/20">
                                                                 <span class="text-sm text-gray-700 dark:text-graphite-300">{{ __('messages.plans.fixed_amount_note') }}</span>
-                                                                <span class="text-lg font-bold text-brand-700 dark:text-brand-300">${{ number_format($fixedAmount, 2) }}</span>
+                                                                <span class="text-lg font-bold text-brand-700 dark:text-brand-300">${{ number_format($transferAmount, 2) }}</span>
                                                             </div>
-                                                            <input type="hidden" name="amount" value="{{ number_format($fixedAmount, 2, '.', '') }}">
+                                                            <input type="hidden" name="amount" value="{{ number_format($transferAmount, 2, '.', '') }}">
                                                         </div>
 
                                                         <div>
@@ -454,9 +498,9 @@
                                                 {{ __('messages.plans.card_pay_description') }}
                                             </p>
 
-                                            <div class="mt-5 flex items-center justify-between rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 dark:border-brand-900/60 dark:bg-brand-900/20">
-                                                <span class="text-sm text-gray-700 dark:text-graphite-300">{{ __('messages.plans.fixed_amount_note') }}</span>
-                                                <span class="text-lg font-bold text-brand-700 dark:text-brand-300">${{ number_format($fixedAmount, 2) }}</span>
+                                            <div class="mt-5 flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-graphite-700 dark:bg-graphite-900/40">
+                                                <span class="text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.plans.fixed_amount_note') }}</span>
+                                                <span class="text-lg font-bold text-gray-700 dark:text-graphite-200">${{ number_format($cardAmount, 2) }}</span>
                                             </div>
 
                                             {{-- Accepted brands --}}

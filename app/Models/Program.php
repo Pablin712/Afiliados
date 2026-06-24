@@ -16,7 +16,9 @@ class Program extends Model
         'description',
         'membership_type_id',
         'first_payment_cost',
+        'card_first_payment_cost',
         'renewal_cost',
+        'card_renewal_cost',
         'duration_months',
         'is_active',
     ];
@@ -24,10 +26,12 @@ class Program extends Model
     protected function casts(): array
     {
         return [
-            'first_payment_cost' => 'decimal:2',
-            'renewal_cost'       => 'decimal:2',
-            'duration_months'    => 'integer',
-            'is_active'          => 'boolean',
+            'first_payment_cost'      => 'decimal:2',
+            'card_first_payment_cost' => 'decimal:2',
+            'renewal_cost'            => 'decimal:2',
+            'card_renewal_cost'       => 'decimal:2',
+            'duration_months'         => 'integer',
+            'is_active'               => 'boolean',
         ];
     }
 

@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/other-bank', [ProfileController::class, 'updateOtherBank'])->name('profile.other-bank.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('/profile/telegram-chat-id', [ProfileController::class, 'deleteTelegramChatId'])->name('profile.telegram-chat-id.destroy');
 
     Route::get('/plans', [PlansController::class, 'index'])
         ->middleware('verified')

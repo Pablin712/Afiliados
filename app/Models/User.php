@@ -27,6 +27,8 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
+        'telegram_chat_id',
+        'telegram_code',
         'affiliate_code',
         'identification',
         'password',
@@ -53,10 +55,26 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'approved_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at'  => 'datetime',
+            'approved_at'        => 'datetime',
+            'password'           => 'hashed',
+            'telegram_chat_id'   => 'integer',
         ];
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (self $user): void {
+            if (empty($user->telegram_code)) {
+                do {
+                    $code = strtoupper(Str::random(10));
+                } while (self::query()->where('telegram_code', $code)->exists());
+
+                $user->telegram_code = $code;
+            }
+        });
     }
 
     public static function resolveAffiliateCode(?string $affiliateCode): ?self

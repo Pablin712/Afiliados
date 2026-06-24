@@ -16,22 +16,26 @@ class ProgramController extends Controller
             ->firstOrFail();
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:150'],
-            'description' => ['nullable', 'string'],
-            'first_payment_cost' => ['required', 'numeric', 'min:0'],
-            'renewal_cost' => ['required', 'numeric', 'min:0'],
-            'duration_months' => ['required', 'integer', 'min:1', 'max:24'],
-            'is_active' => ['nullable', 'boolean'],
+            'name'                    => ['required', 'string', 'max:150'],
+            'description'             => ['nullable', 'string'],
+            'first_payment_cost'      => ['required', 'numeric', 'min:0'],
+            'card_first_payment_cost' => ['nullable', 'numeric', 'min:0'],
+            'renewal_cost'            => ['required', 'numeric', 'min:0'],
+            'card_renewal_cost'       => ['nullable', 'numeric', 'min:0'],
+            'duration_months'         => ['required', 'integer', 'min:1', 'max:24'],
+            'is_active'               => ['nullable', 'boolean'],
         ]);
 
         Program::create([
-            'name' => $validated['name'],
-            'description' => $validated['description'] ?? null,
-            'membership_type_id' => $customerType->id,
-            'first_payment_cost' => $validated['first_payment_cost'],
-            'renewal_cost' => $validated['renewal_cost'],
-            'duration_months' => $validated['duration_months'],
-            'is_active' => $request->boolean('is_active'),
+            'name'                    => $validated['name'],
+            'description'             => $validated['description'] ?? null,
+            'membership_type_id'      => $customerType->id,
+            'first_payment_cost'      => $validated['first_payment_cost'],
+            'card_first_payment_cost' => $validated['card_first_payment_cost'] ?? null,
+            'renewal_cost'            => $validated['renewal_cost'],
+            'card_renewal_cost'       => $validated['card_renewal_cost'] ?? null,
+            'duration_months'         => $validated['duration_months'],
+            'is_active'               => $request->boolean('is_active'),
         ]);
 
         return back()->with('status', __('messages.plans.program_created'));
@@ -44,22 +48,26 @@ class ProgramController extends Controller
             ->firstOrFail();
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:150'],
-            'description' => ['nullable', 'string'],
-            'first_payment_cost' => ['required', 'numeric', 'min:0'],
-            'renewal_cost' => ['required', 'numeric', 'min:0'],
-            'duration_months' => ['required', 'integer', 'min:1', 'max:24'],
-            'is_active' => ['nullable', 'boolean'],
+            'name'                    => ['required', 'string', 'max:150'],
+            'description'             => ['nullable', 'string'],
+            'first_payment_cost'      => ['required', 'numeric', 'min:0'],
+            'card_first_payment_cost' => ['nullable', 'numeric', 'min:0'],
+            'renewal_cost'            => ['required', 'numeric', 'min:0'],
+            'card_renewal_cost'       => ['nullable', 'numeric', 'min:0'],
+            'duration_months'         => ['required', 'integer', 'min:1', 'max:24'],
+            'is_active'               => ['nullable', 'boolean'],
         ]);
 
         $program->update([
-            'name' => $validated['name'],
-            'description' => $validated['description'] ?? null,
-            'membership_type_id' => $customerType->id,
-            'first_payment_cost' => $validated['first_payment_cost'],
-            'renewal_cost' => $validated['renewal_cost'],
-            'duration_months' => $validated['duration_months'],
-            'is_active' => $request->boolean('is_active'),
+            'name'                    => $validated['name'],
+            'description'             => $validated['description'] ?? null,
+            'membership_type_id'      => $customerType->id,
+            'first_payment_cost'      => $validated['first_payment_cost'],
+            'card_first_payment_cost' => $validated['card_first_payment_cost'] ?? null,
+            'renewal_cost'            => $validated['renewal_cost'],
+            'card_renewal_cost'       => $validated['card_renewal_cost'] ?? null,
+            'duration_months'         => $validated['duration_months'],
+            'is_active'               => $request->boolean('is_active'),
         ]);
 
         return back()->with('status', __('messages.plans.program_updated'));

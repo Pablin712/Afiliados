@@ -19,6 +19,12 @@
                 </div>
             </div>
 
+            <div id="telegram-section" class="p-4 sm:p-8 bg-white dark:bg-graphite-900 border border-gray-200 dark:border-graphite-800 shadow sm:rounded-lg">
+                <div class="max-w-xl">
+                    @include('profile.partials.telegram-chat-id-card')
+                </div>
+            </div>
+
             <div id="bank-section" class="p-4 sm:p-8 bg-white dark:bg-graphite-900 border border-gray-200 dark:border-graphite-800 shadow sm:rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.update-user-bank-form')

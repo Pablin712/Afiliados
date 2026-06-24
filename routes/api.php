@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\Admin\AffiliateTreeController;
 use App\Http\Controllers\Api\Admin\FinancialStatsController;
+use App\Http\Controllers\Api\Admin\GroupController;
 use App\Http\Controllers\Api\Admin\MembershipTierController;
+use App\Http\Controllers\Api\Admin\TelegramRegistrationController;
 use App\Http\Controllers\Api\Admin\PaymentVerificationController;
 use App\Http\Controllers\Api\Admin\UserLifecycleController;
 use App\Http\Controllers\Api\MembershipVerificationController;
@@ -36,6 +38,15 @@ Route::prefix('admin')
 
         Route::post('/users/prune-inactive', [UserLifecycleController::class, 'pruneInactive'])
             ->name('api.admin.users.prune-inactive');
+
+        Route::post('/groups/whatsapp/remove-free', [GroupController::class, 'removeFreeMembersWhatsapp'])
+            ->name('api.admin.groups.whatsapp.remove-free');
+
+        Route::post('/groups/telegram/remove-free', [GroupController::class, 'removeFreeMembersTelegram'])
+            ->name('api.admin.groups.telegram.remove-free');
+
+        Route::post('/telegram/register-chat-id', [TelegramRegistrationController::class, 'registerChatId'])
+            ->name('api.admin.telegram.register-chat-id');
 
         Route::get('/payments/pending', [PaymentVerificationController::class, 'pending'])
             ->name('api.admin.payments.pending.list');

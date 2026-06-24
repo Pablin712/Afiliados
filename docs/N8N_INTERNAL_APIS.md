@@ -293,14 +293,86 @@ curl -X POST "$API_BASE/admin/v2/payments/n8n/recargas/ID/rechazar" \
 3. Iterar `data[]` y enviar mensaje por WhatsApp/SMS usando `phone`, `name` y `reminder.message_es` (recordatorio de un dia antes)
 4. Guardar auditoria (`user_id`, canal, estado de envio)
 
+### Flujo H (expulsión de grupos – limpieza inicial o de emergencia)
+**Nota:** La expulsión ocurre **automáticamente** en el Flujo D (recalculo semanal de membresías).
+Este flujo solo se usa para limpiezas manuales o la carga inicial.
+
+1. Trigger manual (o cron puntual)
+2. HTTP Request `POST /admin/groups/whatsapp/remove-free` con body `{"dry_run": true}`
+3. Revisar `meta.candidates` y `data.users` para validar la lista
+4. Si es correcto, ejecutar `POST /admin/groups/whatsapp/remove-free` con `dry_run=false`
+5. Guardar `meta.removed` para auditoría
+
+**Respuesta:**
+```json
+{
+  "message": "Free members removal from WhatsApp group processed.",
+  "meta": {
+    "dry_run": false,
+    "candidates": 5,
+    "removed": 5,
+    "success": true
+  },
+  "data": {
+    "users": [{ "id": 12, "name": "Juan", "phone": "+593961778319" }],
+    "phones_normalized": ["593961778319"]
+  }
+}
+```
+
+**Comportamiento automático del Flujo D:**
+Al ejecutar `POST /admin/memberships/recalculate-tiers`, la respuesta ahora incluye expulsión de los 4 grupos:
+```json
+{
+  "meta": {
+    "whatsapp_group_removed": 2,
+    "telegram_groups_banned": 2
+  },
+  "data": {
+    "whatsapp_group": {
+      "phones_queued": ["593961778319"],
+      "removed": 2,
+      "success": true
+    },
+    "telegram_groups": {
+      "users_queued": [123456789],
+      "banned": 2,
+      "results": {
+        "123456789": {
+          "aet_premium": true,
+          "aet_vip_deriv": true,
+          "aet_vip_weltrade": true
+        }
+      }
+    }
+  }
+}
+```
+
+### Flujo I (registro de Telegram vía bot)
+Este flujo tiene **solo 2 nodos** — el bot hace todo el trabajo incluyendo responder al usuario.
+
+1. Webhook Trigger: `https://autobot.aaronsoft.es/webhook/aet-first-bot`
+   - Configurado en BotFather como webhook del bot `@aetfirstbot`
+2. HTTP POST: `POST /admin/telegram/register-chat-id`
+   - Headers: `X-Internal-Token: {{$env.INTERNAL_API_TOKEN}}`
+   - Body: `{"chat_id": "{{$json.message.from.id}}", "code": "{{$json.message.text}}"}`
+
+**Respuestas posibles:**
+- `201 registered: true` — registrado exitosamente (el API ya mensajeó al usuario)
+- `200 registered: false` — ya estaba registrado (el API ya mensajeó al usuario)
+- `400` — código inválido (no se mensajea al usuario — el mensaje puede usarse para otros flujos)
+
 ## APIs sugeridas para cron job
 1. `POST /admin/financial-stats/register-today`
 2. `POST /admin/financial-stats/register-yesterday`
 3. `POST /admin/financial-stats/register-range` (solo recuperación histórica/manual)
-4. `POST /admin/memberships/recalculate-tiers`
+4. `POST /admin/memberships/recalculate-tiers` ← ahora expulsa de los 4 grupos automáticamente
 5. `GET /admin/payments/pending` (verificador cada 5 minutos)
 6. `POST /admin/users/prune-inactive` (mensual)
 7. `GET /admin/memberships/expired-today` (recordatorio diario para vencimientos de manana)
+8. `POST /admin/groups/whatsapp/remove-free` (limpieza manual WhatsApp; la automática corre en el punto 4)
+9. `POST /admin/groups/telegram/remove-free` (limpieza manual Telegram; la automática corre en el punto 4)
 
 ## Plantilla de nodo HTTP (n8n)
 - Method: `POST`

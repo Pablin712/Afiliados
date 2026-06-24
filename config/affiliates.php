@@ -96,6 +96,25 @@ return [
     'registration_whatsapp_webhook_token' => env('REGISTRATION_WHATSAPP_WEBHOOK_TOKEN'),
     'registration_whatsapp_default_country_code' => env('REGISTRATION_WHATSAPP_DEFAULT_COUNTRY_CODE', '593'),
 
+    // Telegram group management via Bot API.
+    // Group chat IDs are negative integers for supergroups.
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN', ''),
+        'groups' => [
+            'aet_premium'       => env('TELEGRAM_GROUP_AET_PREMIUM', '-5279685071'),
+            'aet_vip_deriv'     => env('TELEGRAM_GROUP_AET_VIP_DERIV', '-1003633952853'),
+            'aet_vip_weltrade'  => env('TELEGRAM_GROUP_AET_VIP_WELTRADE', '-1003742317642'),
+        ],
+    ],
+
+    // WhatsApp group management via Evolution API.
+    // The URL and group_jid are fixed for AET-SAS; only the apikey is a secret.
+    'whatsapp_group' => [
+        'url'       => env('WHATSAPP_GROUP_URL', 'https://evoapi.abigailsoft.com/group/updateParticipant/AET-SAS'),
+        'group_jid' => env('WHATSAPP_GROUP_JID', '120363425909738995@g.us'),
+        'apikey'    => env('WHATSAPP_GROUP_APIKEY', ''),
+    ],
+
     // Datafast / Dataweb payment gateway (Botón de Pagos).
     // Fase 1 test: base_url = https://eu-test.oppwa.com (no testMode needed)
     // Fase 2 test: base_url = https://eu-test.oppwa.com + test_mode = EXTERNAL

@@ -11,6 +11,11 @@ use Illuminate\Support\Str;
 
 class MembershipTierService
 {
+    public function __construct(
+        private readonly WhatsappGroupService $whatsappGroupService,
+        private readonly TelegramService $telegramService,
+    ) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -53,6 +58,8 @@ class MembershipTierService
         $processed = 0;
         $changed = 0;
         $details = [];
+        $phonesToRemoveFromGroup = [];
+        $telegramUserIdsToBan = [];
 
         foreach ($memberships as $membership) {
             $user = $membership->user;
@@ -120,17 +127,61 @@ class MembershipTierService
             ];
 
             if (! $dryRun) {
+                $prevStatus = (string) $membership->status;
+
                 $membership->membership_type_id = (int) $targetType->id;
                 $membership->status = $targetStatus;
                 $membership->save();
+
+                // Collect phones/telegram IDs of users downgraded to free for batch group removal.
+                if ($targetStatus === 'free' && $prevStatus !== 'free') {
+                    $phone = trim((string) ($membership->user?->phone ?? ''));
+                    if ($phone !== '') {
+                        $phonesToRemoveFromGroup[] = $phone;
+                    }
+
+                    $telegramChatId = $membership->user?->telegram_chat_id;
+                    if ($telegramChatId !== null) {
+                        $telegramUserIdsToBan[] = (int) $telegramChatId;
+                    }
+                }
+            }
+        }
+
+        $whatsappResult = ['removed' => 0, 'phones' => [], 'success' => false];
+
+        if (! $dryRun && $phonesToRemoveFromGroup !== []) {
+            $whatsappResult = $this->whatsappGroupService->removeParticipants($phonesToRemoveFromGroup);
+        }
+
+        $telegramBanned = 0;
+        $telegramResults = [];
+
+        if (! $dryRun && $telegramUserIdsToBan !== []) {
+            foreach ($telegramUserIdsToBan as $telegramUserId) {
+                $groupResults = $this->telegramService->banFromAllGroups($telegramUserId);
+                $telegramResults[$telegramUserId] = $groupResults;
+                if (in_array(true, array_values($groupResults), true)) {
+                    $telegramBanned++;
+                }
             }
         }
 
         return [
-            'processed' => $processed,
-            'changed' => $changed,
-            'dry_run' => $dryRun,
-            'details' => $details,
+            'processed'      => $processed,
+            'changed'        => $changed,
+            'dry_run'        => $dryRun,
+            'details'        => $details,
+            'whatsapp_group' => [
+                'phones_queued' => $phonesToRemoveFromGroup,
+                'removed'       => $whatsappResult['removed'],
+                'success'       => $whatsappResult['success'],
+            ],
+            'telegram_groups' => [
+                'users_queued' => $telegramUserIdsToBan,
+                'banned'       => $telegramBanned,
+                'results'      => $telegramResults,
+            ],
         ];
     }
 
