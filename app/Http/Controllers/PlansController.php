@@ -77,7 +77,6 @@ class PlansController extends Controller
 
         // Renewals/reactivations use renewal cost for users with previous approved payments.
         $hasApprovedPayment = ! $isAdmin
-            && $membershipStatus !== 'free'
             && Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
 
         return view('plans.index', compact(
@@ -131,8 +130,7 @@ class PlansController extends Controller
 
         $program = Program::query()->findOrFail($validated['program_id']);
 
-        $isRenewalOrReactivation = $membershipStatus !== 'free'
-            && Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
+        $isRenewalOrReactivation = Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
 
         $calculatedAmount = $isRenewalOrReactivation
             ? (float) $program->renewal_cost
@@ -212,8 +210,7 @@ class PlansController extends Controller
 
         $program = Program::query()->findOrFail($validated['program_id']);
 
-        $isRenewalOrReactivation = $membershipStatus !== 'free'
-            && Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
+        $isRenewalOrReactivation = Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
 
         $cardAmount = $isRenewalOrReactivation
             ? $program->card_renewal_cost

@@ -74,12 +74,19 @@ class PendingPaymentReviewService
                 ->where('user_id', $user->id)
                 ->first();
 
-            $isFreeMembership = (string) ($currentMembership?->status ?? 'free') === 'free'
-                || strtolower((string) ($currentMembership?->membershipType?->name ?? 'free')) === 'free';
+            // First-ever payment gets 2 months; all reactivations get 1 month.
+            // We check payment history rather than current membership status so that users
+            // who were downgraded to free due to expiry are still treated as reactivations.
+            $hasPriorApprovedPayment = Payment::query()
+                ->where('user_id', $user->id)
+                ->where('state', 'approved')
+                ->where('id', '!=', $payment->id)
+                ->exists();
 
+            $isFirstPayment = ! $hasPriorApprovedPayment;
             $isCustomerTargetMembership = strtolower((string) $membershipType->name) === 'customer';
 
-            $durationMonths = $isFreeMembership ? 2 : 1;
+            $durationMonths = $isFirstPayment ? 2 : 1;
 
             Membership::updateOrCreate(
                 ['user_id' => $user->id],
@@ -92,7 +99,7 @@ class PendingPaymentReviewService
                 ]
             );
 
-            if ($isFreeMembership && $isCustomerTargetMembership) {
+            if ($isFirstPayment && $isCustomerTargetMembership) {
                 $this->registrationWhatsappService->sendPostPago($user);
             }
 
