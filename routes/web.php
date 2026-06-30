@@ -17,6 +17,7 @@ use App\Http\Controllers\PendingRegistrationController;
 use App\Http\Controllers\PlansController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\User\ScannerDownloadController;
 use App\Http\Controllers\User\AffiliateNetworkController;
 use App\Http\Controllers\User\MyProfitsController;
@@ -259,6 +260,32 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/profits/users/{user}/mark-all-as-paid', [ProfitsController::class, 'markAllAsPaid'])
         ->middleware(['verified', 'permission:manage profits'])
         ->name('admin.profits.mark-all-as-paid');
+
+    // Schedules (Horarios)
+    Route::get('/horarios', [ScheduleController::class, 'index'])
+        ->middleware('verified')
+        ->name('schedules.index');
+
+    Route::get('/horarios/events', [ScheduleController::class, 'events'])
+        ->middleware('verified')
+        ->name('schedules.events');
+
+    Route::post('/horarios', [ScheduleController::class, 'store'])
+        ->middleware(['verified', 'role:teacher|admin'])
+        ->name('schedules.store');
+
+    Route::put('/horarios/{schedule}', [ScheduleController::class, 'update'])
+        ->middleware(['verified', 'role:teacher|admin'])
+        ->name('schedules.update');
+
+    Route::delete('/horarios/{schedule}', [ScheduleController::class, 'destroy'])
+        ->middleware(['verified', 'role:teacher|admin'])
+        ->name('schedules.destroy');
+
+    // Admin: toggle teacher role
+    Route::post('/admin/users/{user}/role', [UsersAdminController::class, 'updateRole'])
+        ->middleware(['verified', 'permission:edit users'])
+        ->name('admin.users.update-role');
 
     Route::post('/membership-types', [MembershipTypeController::class, 'store'])
         ->middleware(['verified', 'permission:create membership_types'])

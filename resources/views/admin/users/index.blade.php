@@ -93,6 +93,94 @@
                 </div>
             </x-modal>
             @endcan
+
+            {{-- Role change confirmation modal --}}
+            @can('edit users')
+            <div
+                x-data="{
+                    visible: false,
+                    userId: null,
+                    action: '',
+                    userName: '',
+                    pendingBtn: null,
+                    open(d) {
+                        this.userId = d.userId;
+                        this.action = d.action;
+                        this.userName = d.userName;
+                        this.pendingBtn = d.btn;
+                        this.visible = true;
+                    },
+                    close() {
+                        this.visible = false;
+                        if (this.pendingBtn) { this.pendingBtn.disabled = false; this.pendingBtn = null; }
+                    },
+                    confirm() {
+                        this.visible = false;
+                        window._doRoleChange(this.userId, this.action);
+                    }
+                }"
+                @open-role-confirm.window="open($event.detail)"
+                @keydown.escape.window="close()"
+            >
+                <div
+                    x-show="visible"
+                    x-transition:enter="ease-out duration-200"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="ease-in duration-150"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style="display: none;"
+                >
+                    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="close()"></div>
+
+                    <div
+                        x-show="visible"
+                        x-transition:enter="ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="ease-in duration-150"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="relative bg-white dark:bg-graphite-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-graphite-700 z-10"
+                        style="width: 100%; max-width: 380px;"
+                    >
+                        <div class="h-1 w-full bg-purple-500 rounded-t-2xl"></div>
+                        <div class="p-5 space-y-4">
+                            <div class="flex items-start gap-3">
+                                <div class="flex-shrink-0 w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center mt-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-600 dark:text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100" x-text="action === 'make_teacher' ? 'Asignar rol Teacher' : 'Quitar rol Teacher'"></p>
+                                    <p class="text-sm text-gray-500 dark:text-graphite-400 mt-0.5 truncate">
+                                        Usuario: <span class="font-medium text-gray-700 dark:text-graphite-300" x-text="userName"></span>
+                                    </p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-graphite-400" x-text="action === 'make_teacher' ? 'El usuario podrá programar y gestionar sus propias clases.' : 'El usuario perderá acceso a programar clases.'"></p>
+                            <div class="flex items-center justify-end gap-2 pt-1">
+                                <button
+                                    type="button"
+                                    @click="close()"
+                                    class="px-4 py-2 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 dark:text-graphite-300 dark:bg-graphite-800 dark:hover:bg-graphite-700 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="confirm()"
+                                    class="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-purple-600 hover:bg-purple-500 transition-colors"
+                                >
+                                    Confirmar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endcan
         </div>
     </div>
 
@@ -100,8 +188,41 @@
         @push('scripts')
             <script>
                 (function () {
-                    const updatePatternUrl = @json(route('admin.users.update-sponsor', ['user' => '__UID__']));
-                    const sponsorSelect    = document.getElementById('sponsor-select');
+                    const updatePatternUrl     = @json(route('admin.users.update-sponsor', ['user' => '__UID__']));
+                    const updateRolePatternUrl = @json(route('admin.users.update-role', ['user' => '__UID__']));
+                    const csrfToken            = document.querySelector('meta[name="csrf-token"]').content;
+                    const sponsorSelect        = document.getElementById('sponsor-select');
+
+                    window.toggleTeacherRole = function (userId, action, btn) {
+                        btn.disabled = true;
+                        const userName = btn.closest('tr')?.querySelector('td:nth-child(2) span:first-child')?.textContent?.trim() ?? '';
+                        window.dispatchEvent(new CustomEvent('open-role-confirm', {
+                            detail: { userId, action, userName, btn }
+                        }));
+                    };
+
+                    window._doRoleChange = function (userId, action) {
+                        fetch(updateRolePatternUrl.replace('__UID__', String(userId)), {
+                            method:  'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept':       'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                            },
+                            body: JSON.stringify({ action }),
+                        })
+                        .then(async r => {
+                            const data = await r.json();
+                            if (!r.ok) {
+                                window.dispatchEvent(new CustomEvent('open-role-confirm', {
+                                    detail: { userId, action, userName: '', btn: null }
+                                }));
+                                return;
+                            }
+                            window.location.reload();
+                        })
+                        .catch(() => window.location.reload());
+                    };
 
                     window.openChangeSponsorModal = function (payload) {
                         if (!payload || !payload.id) return;

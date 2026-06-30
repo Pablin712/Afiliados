@@ -12,7 +12,17 @@
     @endphp
     <tr class="hover:bg-gray-50 dark:hover:bg-graphite-800/60 transition-colors duration-150">
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-500 dark:text-graphite-400 font-mono">#{{ $user->id }}</td>
-        <td class="px-4 sm:px-6 py-3 text-sm font-medium text-gray-900 dark:text-graphite-100">{{ $user->name }}</td>
+        <td class="px-4 sm:px-6 py-3 text-sm font-medium text-gray-900 dark:text-graphite-100">
+            <div class="flex items-center gap-2">
+                <span>{{ $user->name }}</span>
+                @if ($user->hasRole('teacher'))
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 uppercase tracking-wide">Teacher</span>
+                @endif
+                @if ($user->hasRole('admin'))
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 uppercase tracking-wide">Admin</span>
+                @endif
+            </div>
+        </td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">{{ $user->email }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-600 dark:text-graphite-400 font-mono whitespace-nowrap">{{ $user->phone ?? '—' }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm font-mono text-gray-600 dark:text-graphite-400">{{ $user->affiliate_code ?? '—' }}</td>
@@ -54,14 +64,37 @@
             @endif
         </td>
         <td class="px-4 sm:px-6 py-3 text-sm">
-            @can('edit users')
-                <x-action-icon-button
-                    variant="edit"
-                    icon="edit"
-                    :title="__('messages.admin.users.change_sponsor')"
-                    :onclick="$changeOnclick"
-                />
-            @endcan
+            <div class="flex items-center gap-1">
+                @can('edit users')
+                    <x-action-icon-button
+                        variant="edit"
+                        icon="edit"
+                        :title="__('messages.admin.users.change_sponsor')"
+                        :onclick="$changeOnclick"
+                    />
+                    @if (! $user->hasRole('admin'))
+                        @if ($user->hasRole('teacher'))
+                            <button
+                                type="button"
+                                title="Quitar rol Teacher"
+                                onclick="window.toggleTeacherRole({{ $user->id }}, 'remove_teacher', this)"
+                                class="inline-flex items-center justify-center w-8 h-8 rounded-md text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/30 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                            </button>
+                        @else
+                            <button
+                                type="button"
+                                title="Hacer Teacher"
+                                onclick="window.toggleTeacherRole({{ $user->id }}, 'make_teacher', this)"
+                                class="inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:text-purple-400 dark:hover:bg-purple-900/30 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                            </button>
+                        @endif
+                    @endif
+                @endcan
+            </div>
         </td>
     </tr>
 @empty

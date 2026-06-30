@@ -74,6 +74,7 @@ return [
     'nav.my_network' => 'My network',
     'nav.my_profits' => 'My profits',
     'nav.courses' => 'Courses',
+    'nav.schedules' => 'Schedule',
     'nav.main_site' => 'Main site',
     'nav.login' => 'Login',
 

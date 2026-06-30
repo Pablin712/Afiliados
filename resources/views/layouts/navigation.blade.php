@@ -37,6 +37,9 @@
                             {{ __('messages.nav.courses') }}
                         </x-nav-link>
                     @endif
+                    <x-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
+                        {{ __('messages.nav.schedules') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                         {{ __('messages.nav.plans') }}
                     </x-nav-link>
@@ -189,6 +192,9 @@
                     {{ __('messages.nav.courses') }}
                 </x-responsive-nav-link>
             @endif
+            <x-responsive-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
+                {{ __('messages.nav.schedules') }}
+            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                 {{ __('messages.nav.plans') }}
             </x-responsive-nav-link>

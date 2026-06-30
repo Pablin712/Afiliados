@@ -50,6 +50,11 @@ class RoleAndPermissionSeeder extends Seeder
             'guard_name' => 'web',
         ]);
 
+        Role::firstOrCreate([
+            'name' => 'teacher',
+            'guard_name' => 'web',
+        ]);
+
         $adminRole->syncPermissions(Permission::all());
     }
 }

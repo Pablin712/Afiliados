@@ -29,7 +29,7 @@ class UsersAdminController extends Controller
 
         $query = User::query()
             ->select('users.*')
-            ->with(['sponsor', 'membership.membershipType'])
+            ->with(['sponsor', 'membership.membershipType', 'roles'])
             ->orderBy($sortBy, $sortOrder);
 
         if ($search !== '') {
@@ -133,6 +133,28 @@ class UsersAdminController extends Controller
                     'text' => $u->name.' ('.$affiliateCode.') — '.$u->email,
                 ];
             }),
+        ]);
+    }
+
+    public function updateRole(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'action' => ['required', 'in:make_teacher,remove_teacher'],
+        ]);
+
+        if ($user->hasRole('admin')) {
+            return response()->json(['message' => 'No se puede modificar el rol de un administrador.'], 422);
+        }
+
+        if ($validated['action'] === 'make_teacher') {
+            $user->assignRole('teacher');
+        } else {
+            $user->removeRole('teacher');
+        }
+
+        return response()->json([
+            'success'    => true,
+            'is_teacher' => $user->hasRole('teacher'),
         ]);
     }
 

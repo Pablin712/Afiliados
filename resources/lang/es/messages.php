@@ -74,6 +74,7 @@ return [
     'nav.my_network' => 'Mi red',
     'nav.my_profits' => 'Mis ganancias',
     'nav.courses' => 'Cursos',
+    'nav.schedules' => 'Horarios',
     'nav.main_site' => 'Página principal',
     'nav.login' => 'Entrar',
 
