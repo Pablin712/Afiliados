@@ -14,11 +14,13 @@ class ClassSchedule extends Model
         'meeting_link',
         'start_time',
         'end_time',
+        'is_exclusive',
     ];
 
     protected $casts = [
-        'start_time' => 'datetime',
-        'end_time'   => 'datetime',
+        'start_time'   => 'datetime',
+        'end_time'     => 'datetime',
+        'is_exclusive' => 'boolean',
     ];
 
     public function teacher(): BelongsTo
@@ -51,6 +53,7 @@ class ClassSchedule extends Model
                 'teacher_name' => $this->teacher?->name ?? '—',
                 'description'  => $this->description,
                 'meeting_link' => $this->meeting_link,
+                'is_exclusive' => $this->is_exclusive,
             ],
         ];
     }

@@ -5,6 +5,10 @@
                 ->where('for_free', true)
                 ->whereHas('videos', fn ($q) => $q->where('is_active', true))
                 ->exists());
+
+    $canAccessSchedules = Auth::user()?->hasRole('admin')
+        || Auth::user()?->hasRole('teacher')
+        || strtolower((string) (Auth::user()?->membership?->membershipType?->name ?? 'free')) !== 'free';
 @endphp
 
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-200 dark:bg-graphite-900 dark:border-graphite-800">

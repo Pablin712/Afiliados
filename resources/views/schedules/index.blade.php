@@ -220,6 +220,21 @@
                                 x-text="currentEvent?.meeting_link"
                             ></a>
                         </div>
+                        {{-- Access badge --}}
+                        <div class="flex items-center gap-2">
+                            <template x-if="currentEvent?.is_exclusive">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    Solo miembros activos
+                                </span>
+                            </template>
+                            <template x-if="!currentEvent?.is_exclusive">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                    Para todos
+                                </span>
+                            </template>
+                        </div>
                         {{-- Actions for teacher (own) or admin --}}
                         <div x-show="canEdit()" class="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-graphite-800">
                             <button
@@ -334,6 +349,17 @@
                                 class="w-full rounded-lg border border-gray-300 dark:border-graphite-700 bg-white dark:bg-graphite-800 text-gray-900 dark:text-graphite-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder-gray-400 dark:placeholder-graphite-500 resize-none"
                             ></textarea>
                         </div>
+                        {{-- Access restriction --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-graphite-200 mb-1">Acceso</label>
+                            <select
+                                x-model="form.is_exclusive"
+                                class="w-full rounded-lg border border-gray-300 dark:border-graphite-700 bg-white dark:bg-graphite-800 text-gray-900 dark:text-graphite-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                            >
+                                <option value="0">Para todos</option>
+                                <option value="1">Solo miembros activos</option>
+                            </select>
+                        </div>
                         {{-- Error message --}}
                         <template x-if="formError">
                             <p class="text-sm text-red-600 dark:text-red-400" x-text="formError"></p>
@@ -384,7 +410,7 @@
                 showModal:    false,
                 modalMode:    'view', // 'view' | 'create' | 'edit'
                 currentEvent: null,
-                form:         { title: '', description: '', meeting_link: '', start_time: '', end_time: '' },
+                form:         { title: '', description: '', meeting_link: '', start_time: '', end_time: '', is_exclusive: '0' },
                 formError:    '',
                 loading:      false,
                 calendar:     null,
@@ -458,6 +484,7 @@
                         teacher_name: fcEvent.extendedProps.teacher_name,
                         description:  fcEvent.extendedProps.description,
                         meeting_link: fcEvent.extendedProps.meeting_link,
+                        is_exclusive: fcEvent.extendedProps.is_exclusive,
                     };
                     this.formError = '';
                     this.loading   = false;
@@ -468,7 +495,7 @@
                 openCreateModal(dateStr, startTime, endTime) {
                     const startDt = dateStr.length === 10 ? `${dateStr}T${startTime}` : dateStr.slice(0, 16);
                     const endDt   = dateStr.length === 10 ? `${dateStr}T${endTime}`   : dateStr.slice(0, 16);
-                    this.form      = { title: '', description: '', meeting_link: '', start_time: startDt, end_time: endDt };
+                    this.form      = { title: '', description: '', meeting_link: '', start_time: startDt, end_time: endDt, is_exclusive: '0' };
                     this.formError = '';
                     this.modalMode = 'create';
                     this.showModal = true;
@@ -482,11 +509,12 @@
                         return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
                     };
                     this.form = {
-                        title:        this.currentEvent.title  || '',
+                        title:        this.currentEvent.title        || '',
                         description:  this.currentEvent.description  || '',
                         meeting_link: this.currentEvent.meeting_link || '',
                         start_time:   fmt(this.currentEvent.start),
                         end_time:     fmt(this.currentEvent.end),
+                        is_exclusive: this.currentEvent.is_exclusive ? '1' : '0',
                     };
                     this.formError = '';
                     this.modalMode = 'edit';

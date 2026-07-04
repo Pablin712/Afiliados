@@ -11,6 +11,17 @@ use Illuminate\View\View;
 
 class ScheduleController extends Controller
 {
+    private function isFreeUser(): bool
+    {
+        $user = Auth::user();
+
+        if ($user->hasRole('admin') || $user->hasRole('teacher')) {
+            return false;
+        }
+
+        return strtolower((string) ($user->membership?->membershipType?->name ?? 'free')) === 'free';
+    }
+
     public function index(): View
     {
         $teachers = User::role(['teacher', 'admin'])->select('id', 'name')->orderBy('name')->get()
@@ -25,12 +36,14 @@ class ScheduleController extends Controller
 
     public function events(Request $request): JsonResponse
     {
-        $start = $request->input('start');
-        $end   = $request->input('end');
+        $start    = $request->input('start');
+        $end      = $request->input('end');
+        $freeUser = $this->isFreeUser();
 
         $events = ClassSchedule::with('teacher')
             ->when($start, fn ($q) => $q->where('end_time', '>=', $start))
             ->when($end, fn ($q) => $q->where('start_time', '<=', $end))
+            ->when($freeUser, fn ($q) => $q->where('is_exclusive', false))
             ->orderBy('start_time')
             ->get()
             ->map(fn (ClassSchedule $s) => $s->toCalendarEvent());
@@ -46,6 +59,7 @@ class ScheduleController extends Controller
             'meeting_link' => ['required', 'url', 'max:500'],
             'start_time'   => ['required', 'date'],
             'end_time'     => ['required', 'date', 'after:start_time'],
+            'is_exclusive' => ['required', 'boolean'],
         ]);
 
         $schedule = ClassSchedule::create([
@@ -72,6 +86,7 @@ class ScheduleController extends Controller
             'meeting_link' => ['required', 'url', 'max:500'],
             'start_time'   => ['required', 'date'],
             'end_time'     => ['required', 'date', 'after:start_time'],
+            'is_exclusive' => ['required', 'boolean'],
         ]);
 
         $schedule->update($validated);
