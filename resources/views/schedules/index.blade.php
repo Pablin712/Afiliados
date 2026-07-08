@@ -550,6 +550,7 @@
                                 meeting_link: this.form.meeting_link,
                                 start_time:   localToUtc(this.form.start_time),
                                 end_time:     localToUtc(this.form.end_time),
+                                is_exclusive: this.form.is_exclusive,
                             }),
                         });
 
