@@ -178,6 +178,10 @@ class PlansController extends Controller
             return back()->with('error', __('messages.plans.admin_no_payment'));
         }
 
+        if ($user instanceof User && (trim((string) $user->address) === '' || trim((string) $user->identification) === '')) {
+            return redirect()->route('profile.edit')->with('address_required', __('messages.profile.address_required'));
+        }
+
         $userId = Auth::id();
 
         $membership = Membership::query()

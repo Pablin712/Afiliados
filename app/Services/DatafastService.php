@@ -50,10 +50,14 @@ class DatafastService
             'currency'              => (string) config('affiliates.datafast.currency', 'USD'),
             'paymentType'           => (string) config('affiliates.datafast.payment_type', 'DB'),
             'merchantTransactionId' => $merchantTransactionId,
+            'customer.merchantCustomerId' => (string) $user->id,
             'customer.givenName'    => $this->extractGivenName($user->name),
             'customer.surname'      => $this->extractSurname($user->name),
             'customer.email'        => (string) $user->email,
             'customer.phone'        => (string) ($user->phone ?? ''),
+            'customer.identificationDocType' => 'IDCARD',
+            'customer.identificationDocId'   => $this->normalizeIdentificationDocId((string) $user->identification),
+            'billing.street1'       => (string) ($user->address ?? ''),
         ];
 
         if ($isFase2) {
@@ -61,14 +65,14 @@ class DatafastService
         }
 
         if ($useShopper) {
-            $payload['SHOPPER_MID']        = $shopperMid;
-            $payload['SHOPPER_TID']        = (string) config('affiliates.datafast.shopper_tid', '');
-            $payload['SHOPPER_ECI']        = (string) config('affiliates.datafast.shopper_eci', '0');
-            $payload['SHOPPER_PSERV']      = (string) config('affiliates.datafast.shopper_pserv', '9999');
-            $payload['SHOPPER_VERSIONDF']  = (string) config('affiliates.datafast.shopper_version', '2');
-            $payload['SHOPPER_VAL_BASE0']  = number_format($base0, 2, '.', '');
-            $payload['SHOPPER_VAL_BASEIMP']= number_format($baseImp, 2, '.', '');
-            $payload['SHOPPER_VAL_IVA']    = number_format($iva, 2, '.', '');
+            $payload['customParameters[SHOPPER_MID]']        = $shopperMid;
+            $payload['customParameters[SHOPPER_TID]']        = (string) config('affiliates.datafast.shopper_tid', '');
+            $payload['customParameters[SHOPPER_ECI]']        = (string) config('affiliates.datafast.shopper_eci', '0');
+            $payload['customParameters[SHOPPER_PSERV]']      = (string) config('affiliates.datafast.shopper_pserv', '9999');
+            $payload['customParameters[SHOPPER_VERSIONDF]']  = (string) config('affiliates.datafast.shopper_version', '2');
+            $payload['customParameters[SHOPPER_VAL_BASE0]']  = number_format($base0, 2, '.', '');
+            $payload['customParameters[SHOPPER_VAL_BASEIMP]']= number_format($baseImp, 2, '.', '');
+            $payload['customParameters[SHOPPER_VAL_IVA]']    = number_format($iva, 2, '.', '');
         }
 
         if ($commerceName !== '') {
@@ -79,6 +83,7 @@ class DatafastService
             'merchant_tx_id' => $merchantTransactionId,
             'amount'         => $amount,
             'user_id'        => $user->id,
+            'payload'        => $payload,
         ]);
 
         $response = Http::withToken($this->bearerToken)
@@ -212,5 +217,20 @@ class DatafastService
         $parts = explode(' ', trim($fullName), 2);
 
         return $parts[1] ?? '';
+    }
+
+    /**
+     * Datafast requires identificationDocId to be exactly 10 characters:
+     * truncated if longer (e.g. RUC), left-padded with zeros if shorter.
+     */
+    private function normalizeIdentificationDocId(string $identification): string
+    {
+        $identification = trim($identification);
+
+        if (strlen($identification) > 10) {
+            return substr($identification, 0, 10);
+        }
+
+        return str_pad($identification, 10, '0', STR_PAD_LEFT);
     }
 }

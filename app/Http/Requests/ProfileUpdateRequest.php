@@ -49,6 +49,7 @@ class ProfileUpdateRequest extends FormRequest
                 'max:30',
                 Rule::unique(User::class, 'phone')->ignore($this->user()->id),
             ],
+            'address' => ['nullable', 'string', 'max:100'],
             'binance_account_id' => [
                 'nullable',
                 'string',

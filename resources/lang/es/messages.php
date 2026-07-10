@@ -227,6 +227,8 @@ return [
     'profile.phone_label' => 'Teléfono',
     'profile.phone_hint' => 'Selecciona tu país con la bandera e ingresa tu número local.',
     'profile.phone_required' => 'Para continuar debes registrar tu telefono con codigo de pais internacional.',
+    'profile.address_label' => 'Dirección',
+    'profile.address_required' => 'Para pagar con tarjeta debes registrar tu dirección.',
     'profile.current_password' => 'Contraseña Actual',
     'profile.new_password' => 'Nueva Contraseña',
     'profile.referral_title' => 'Enlace de Afiliación',

@@ -27,6 +27,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/politica-privacidad', function () {
+    return view('legal.privacy');
+})->name('legal.privacy');
+
+Route::get('/terminos-y-condiciones', function () {
+    return view('legal.terms');
+})->name('legal.terms');
+
 // Language switcher route
 Route::get('/locale/{locale}', function ($locale) {
     $availableLocales = ['en', 'es'];

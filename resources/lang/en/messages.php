@@ -227,6 +227,8 @@ return [
     'profile.phone_label' => 'Phone number',
     'profile.phone_hint' => 'Select your country flag and enter your local phone number.',
     'profile.phone_required' => 'To continue you must register your phone with an international country code.',
+    'profile.address_label' => 'Address',
+    'profile.address_required' => 'To pay by card you must register your address.',
     'profile.current_password' => 'Current Password',
     'profile.new_password' => 'New Password',
     'profile.referral_title' => 'Affiliate Link',

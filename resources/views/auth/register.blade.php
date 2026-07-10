@@ -206,6 +206,12 @@
                         <x-input-error :messages="$errors->get('identification')" class="mt-2" />
                     </div>
 
+                    <div>
+                        <x-input-label for="address" :value="__('messages.profile.address_label')" />
+                        <x-text-input id="address" class="mt-1 block w-full" type="text" name="address" :value="old('address')" required autocomplete="street-address" />
+                        <x-input-error :messages="$errors->get('address')" class="mt-2" />
+                    </div>
+
                     <div class="md:col-span-2">
                         <x-input-label for="email" :value="__('messages.email')" />
                         <x-text-input id="email" class="mt-1 block w-full" type="email" name="email" x-model="email" x-ref="emailInput" x-on:input="emailAvailabilityError = ''; gmailOnlyError = ''; $refs.emailInput.setCustomValidity('');" :value="old('email')" required autocomplete="username" placeholder="tunombre@gmail.com" />

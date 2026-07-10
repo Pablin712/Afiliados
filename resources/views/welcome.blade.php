@@ -559,6 +559,19 @@
                     </div>
                 </section>
             </main>
+
+            <footer class="border-t border-gray-200 bg-white dark:bg-graphite-900 dark:border-graphite-800">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-graphite-400">
+                    <p>&copy; {{ date('Y') }} AET Trader Academy. Todos los derechos reservados.</p>
+
+                    <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+                        <a href="{{ route('legal.privacy') }}" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.link.privacy_policy') }}</a>
+                        <a href="{{ route('legal.terms') }}" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.link.terms_and_conditions') }}</a>
+                        <a href="mailto:Aetsas01@gmail.com" class="hover:text-brand-600 dark:hover:text-brand-400">Aetsas01@gmail.com</a>
+                        <a href="https://wa.me/593978855098" class="hover:text-brand-600 dark:hover:text-brand-400">+593 97 885 5098</a>
+                    </nav>
+                </div>
+            </footer>
         </div>
     </body>
 </html>

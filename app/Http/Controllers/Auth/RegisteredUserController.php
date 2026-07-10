@@ -135,6 +135,7 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'ends_with:@gmail.com', 'max:255', 'unique:'.User::class],
             'phone' => $phoneRules,
             'identification' => ['required', 'string', 'max:50', 'unique:'.User::class.',identification'],
+            'address' => ['required', 'string', 'max:100'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'sponsor_id' => ['required', 'integer', 'exists:users,id'],
         ]);
@@ -145,6 +146,7 @@ class RegisteredUserController extends Controller
                     'name' => $request->name,
                     'email' => $request->email,
                     'identification' => $request->string('identification')->toString(),
+                    'address' => $request->string('address')->toString(),
                     'password' => Hash::make($request->password),
                     'sponsor_id' => (int) $validated['sponsor_id'],
                     'approved_at' => now(),

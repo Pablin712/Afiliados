@@ -15,12 +15,14 @@ class ClassSchedule extends Model
         'start_time',
         'end_time',
         'is_exclusive',
+        'reminder_sent_at',
     ];
 
     protected $casts = [
-        'start_time'   => 'datetime',
-        'end_time'     => 'datetime',
-        'is_exclusive' => 'boolean',
+        'start_time'       => 'datetime',
+        'end_time'         => 'datetime',
+        'is_exclusive'     => 'boolean',
+        'reminder_sent_at' => 'datetime',
     ];
 
     public function teacher(): BelongsTo

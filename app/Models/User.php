@@ -31,6 +31,7 @@ class User extends Authenticatable
         'telegram_code',
         'affiliate_code',
         'identification',
+        'address',
         'password',
         'sponsor_id',
         'commission_balance',

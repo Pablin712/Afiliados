@@ -78,7 +78,14 @@
 
         .dark .wpwl-has-error .wpwl-control { border-color: #f87171; }
 
-        .dark .wpwl-hint {
+        .wpwl-hint,
+        .wpwl-hint-cardHolderError {
+            color: #dc2626;              /* red-600 */
+            font-size: .75rem;
+            margin-top: .25rem;
+        }
+        .dark .wpwl-hint,
+        .dark .wpwl-hint-cardHolderError {
             color: #f87171;              /* red-400 */
             font-size: .75rem;
         }
@@ -125,6 +132,25 @@
                         + 'style="display:block;margin:0 auto;width:100%;" alt="Datafast">';
                     var btn = document.querySelector('form.wpwl-form-card .wpwl-button');
                     if (btn) { btn.insertAdjacentHTML('beforebegin', dfImg); }
+                },
+                onBeforeSubmitCard: function () {
+                    var cardHolderInput = document.querySelector('.wpwl-control-cardHolder');
+                    if (cardHolderInput && cardHolderInput.value.trim() === '') {
+                        cardHolderInput.classList.add('wpwl-has-error');
+                        if (!document.querySelector('.wpwl-hint-cardHolderError')) {
+                            cardHolderInput.insertAdjacentHTML(
+                                'afterend',
+                                '<div class="wpwl-hint-cardHolderError">Campo requerido</div>'
+                            );
+                        }
+                        var payButton = document.querySelector('.wpwl-button-pay');
+                        if (payButton) {
+                            payButton.classList.add('wpwl-button-error');
+                            payButton.setAttribute('disabled', 'disabled');
+                        }
+                        return false;
+                    }
+                    return true;
                 }
             };
         </script>
