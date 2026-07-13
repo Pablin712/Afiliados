@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ClassSchedule;
 use App\Models\User;
+use App\Services\ClassScheduleReminderService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -107,6 +108,20 @@ class ScheduleController extends Controller
         $schedule->delete();
 
         return response()->json(['message' => 'Clase eliminada.']);
+    }
+
+    /**
+     * Endpoint for n8n (2-node flow): finds due classes, sends Telegram
+     * messages to the group, marks them as sent, and returns a summary.
+     *
+     * Auth: X-Internal-Token header (or Bearer token).
+     */
+    public function sendReminders(Request $request, ClassScheduleReminderService $reminderService): JsonResponse
+    {
+        $group = $request->input('group', 'aet_premium');
+        $result = $reminderService->sendDueReminders($group);
+
+        return response()->json($result);
     }
 
     /**

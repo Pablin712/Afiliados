@@ -309,6 +309,10 @@ Route::middleware('auth')->group(function () {
 });
 
 // Internal API for n8n automations (no session required)
+Route::post('/api/horarios/enviar-recordatorios', [ScheduleController::class, 'sendReminders'])
+    ->middleware('internal_api_token')
+    ->name('api.schedules.send-reminders');
+
 Route::get('/api/horarios/recordatorio', [ScheduleController::class, 'upcomingForReminder'])
     ->middleware('internal_api_token')
     ->name('api.schedules.reminder');
