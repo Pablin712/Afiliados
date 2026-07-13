@@ -63,16 +63,18 @@ class ClassScheduleReminderService
 
     private function notifyChannelsForSchedule(ClassSchedule $schedule): bool
     {
-        $purpose = $schedule->is_exclusive
-            ? Channel::PURPOSE_CLASS_REMINDER_PREMIUM
-            : Channel::PURPOSE_CLASS_REMINDER_ALL;
+        // The premium/exclusive channel always gets every reminder (general and
+        // exclusive); the "all members" channel only gets the non-exclusive ones.
+        $purposes = $schedule->is_exclusive
+            ? [Channel::PURPOSE_CLASS_REMINDER_PREMIUM]
+            : [Channel::PURPOSE_CLASS_REMINDER_PREMIUM, Channel::PURPOSE_CLASS_REMINDER_ALL];
 
-        $channels = Channel::query()->active()->purpose($purpose)->get();
+        $channels = Channel::query()->active()->whereIn('purpose', $purposes)->get();
 
         if ($channels->isEmpty()) {
             Log::warning('Class reminder: no active channel configured for purpose.', [
                 'schedule_id' => $schedule->id,
-                'purpose'     => $purpose,
+                'purposes'    => $purposes,
             ]);
 
             return false;

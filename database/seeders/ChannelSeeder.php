@@ -11,11 +11,9 @@ class ChannelSeeder extends Seeder
      * Seeds the channels already in use by the app/n8n so nothing breaks
      * after switching to DB-driven channel administration.
      *
-     * aet_premium serves both class-reminder audiences: it always gets the
-     * exclusive reminders, and it also gets the "everyone" reminders (which
-     * are additionally broadcast to the AET SAS 2k26 channel). Since a
-     * Channel row maps to a single purpose, aet_premium's chat_id is
-     * registered under two rows so both purposes reach it.
+     * aet_premium (purpose = class_reminder_premium) always gets every class
+     * reminder, general and exclusive — ClassScheduleReminderService queries
+     * both purposes for non-exclusive classes. No duplicate row is needed.
      */
     public function run(): void
     {
@@ -29,18 +27,7 @@ class ChannelSeeder extends Seeder
                 'is_active' => true,
                 'chat_id'   => $aetPremiumChatId,
                 'bot_token' => $botToken,
-                'notes'     => 'Grupo Telegram AET Premium (exclusivo). También recibe recordatorios "para todos" vía el canal aet_premium_recordatorios_todos, y participa en la expulsión semanal de miembros free.',
-            ]
-        );
-
-        Channel::query()->updateOrCreate(
-            ['type' => Channel::TYPE_TELEGRAM, 'name' => 'aet_premium_recordatorios_todos'],
-            [
-                'purpose'   => Channel::PURPOSE_CLASS_REMINDER_ALL,
-                'is_active' => true,
-                'chat_id'   => $aetPremiumChatId,
-                'bot_token' => $botToken,
-                'notes'     => 'Mismo grupo que aet_premium; registrado aparte para que también reciba los recordatorios "para todos".',
+                'notes'     => 'Grupo Telegram AET Premium (exclusivo). Recibe todos los recordatorios de clase (generales y exclusivos), y participa en la expulsión semanal de miembros free.',
             ]
         );
 
