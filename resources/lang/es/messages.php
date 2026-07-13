@@ -888,6 +888,8 @@ return [
 
     'admin.message_templates.title' => 'Plantillas de mensajes',
     'admin.message_templates.variables_hint' => 'Puedes usar variables entre llaves en el cuerpo del mensaje y serán reemplazadas automáticamente. Revisa la descripción de cada plantilla para ver cuáles variables aplican.',
+    'admin.message_templates.search_placeholder' => 'Buscar plantilla por nombre, clave o descripción…',
+    'admin.message_templates.no_matches' => 'Ninguna plantilla coincide con tu búsqueda.',
     'admin.message_templates.columns.name' => 'Nombre de la plantilla',
     'admin.message_templates.columns.body' => 'Cuerpo del mensaje',
     'admin.message_templates.forms.edit_title' => 'Editar plantilla de mensaje',
