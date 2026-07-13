@@ -308,4 +308,9 @@ Route::middleware('auth')->group(function () {
         ->name('membership-types.destroy');
 });
 
+// Internal API for n8n automations (no session required)
+Route::get('/api/horarios/recordatorio', [ScheduleController::class, 'upcomingForReminder'])
+    ->middleware('internal_api_token')
+    ->name('api.schedules.reminder');
+
 require __DIR__.'/auth.php';

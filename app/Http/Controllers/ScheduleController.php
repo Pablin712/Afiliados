@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ClassSchedule;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -106,5 +107,60 @@ class ScheduleController extends Controller
         $schedule->delete();
 
         return response()->json(['message' => 'Clase eliminada.']);
+    }
+
+    /**
+     * Endpoint for n8n: returns classes starting in ~30 minutes that haven't
+     * had their reminder sent yet. Marks each one as sent atomically so
+     * concurrent runs don't double-notify.
+     *
+     * Auth: X-Internal-Token header (or Bearer token).
+     */
+    public function upcomingForReminder(): JsonResponse
+    {
+        $now  = Carbon::now('UTC');
+        $from = $now->copy()->addMinutes(28)->format('Y-m-d H:i:s');
+        $to   = $now->copy()->addMinutes(33)->format('Y-m-d H:i:s');
+
+        $schedules = ClassSchedule::with('teacher')
+            ->whereBetween('start_time', [$from, $to])
+            ->whereNull('reminder_sent_at')
+            ->get();
+
+        // Mark as sent before returning so n8n retries don't double-notify
+        $schedules->each(fn (ClassSchedule $s) => $s->update(['reminder_sent_at' => $now]));
+
+        return response()->json($schedules->map(function (ClassSchedule $s) {
+            $start = Carbon::createFromFormat('Y-m-d H:i:s', $s->getRawOriginal('start_time'), 'UTC');
+            $end   = Carbon::createFromFormat('Y-m-d H:i:s', $s->getRawOriginal('end_time'), 'UTC');
+
+            $recipientQuery = User::whereNotNull('telegram_chat_id');
+
+            if ($s->is_exclusive) {
+                $recipientQuery->whereHas('membership', fn ($q) =>
+                    $q->whereHas('membershipType', fn ($q2) =>
+                        $q2->whereRaw('LOWER(name) != ?', ['free'])
+                    )
+                );
+            }
+
+            $chatIds = $recipientQuery->pluck('telegram_chat_id')->filter()->values()->all();
+
+            // Always notify the teacher regardless of membership
+            if ($s->teacher?->telegram_chat_id && ! in_array($s->teacher->telegram_chat_id, $chatIds, true)) {
+                $chatIds[] = $s->teacher->telegram_chat_id;
+            }
+
+            return [
+                'id'           => $s->id,
+                'title'        => $s->title,
+                'teacher_name' => $s->teacher?->name ?? '—',
+                'meeting_link' => $s->meeting_link,
+                'is_exclusive' => $s->is_exclusive,
+                'start_iso'    => $start->toIso8601String(),
+                'end_iso'      => $end->toIso8601String(),
+                'chat_ids'     => $chatIds,
+            ];
+        }));
     }
 }
