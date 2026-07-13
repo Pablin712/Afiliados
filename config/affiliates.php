@@ -101,7 +101,9 @@ return [
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN', ''),
         'groups' => [
-            'aet_premium'       => env('TELEGRAM_GROUP_AET_PREMIUM', '-5279685071'),
+            // Migrated from the legacy basic-group id (-5279685071) when Telegram
+            // upgraded it to a supergroup; the old id no longer resolves.
+            'aet_premium'       => env('TELEGRAM_GROUP_AET_PREMIUM', '-1004446170651'),
             'aet_vip_deriv'     => env('TELEGRAM_GROUP_AET_VIP_DERIV', '-1003633952853'),
             'aet_vip_weltrade'  => env('TELEGRAM_GROUP_AET_VIP_WELTRADE', '-1003742317642'),
         ],
