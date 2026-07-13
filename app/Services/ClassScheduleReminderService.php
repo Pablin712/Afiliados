@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Channel;
 use App\Models\ClassSchedule;
 use Illuminate\Support\Facades\Log;
 
@@ -14,17 +15,17 @@ class ClassScheduleReminderService
     private const WINDOW_MINUTES_BEFORE_MIN = 20;
     private const WINDOW_MINUTES_BEFORE_MAX = 40;
 
-    public function __construct(private readonly TelegramService $telegramService)
-    {
+    public function __construct(
+        private readonly TelegramService $telegramService,
+        private readonly WhatsappGroupService $whatsappGroupService,
+    ) {
     }
 
     /**
-     * @return array{group:string,chat_id:string,due:int,sent:int,failed:int,schedule_ids:list<int>}
+     * @return array{due:int,sent:int,failed:int,schedule_ids:list<int>}
      */
-    public function sendDueReminders(string $group = 'aet_premium'): array
+    public function sendDueReminders(): array
     {
-        $chatId = (string) config("affiliates.telegram.groups.{$group}", '');
-
         $windowStart = now()->addMinutes(self::WINDOW_MINUTES_BEFORE_MIN);
         $windowEnd = now()->addMinutes(self::WINDOW_MINUTES_BEFORE_MAX);
 
@@ -41,29 +42,84 @@ class ClassScheduleReminderService
         foreach ($dueSchedules as $schedule) {
             $scheduleIds[] = $schedule->id;
 
-            $success = $chatId !== '' && $this->telegramService->sendMessage($chatId, $this->buildMessage($schedule));
+            $success = $this->notifyChannelsForSchedule($schedule);
 
             if ($success) {
                 $sent++;
             } else {
                 $failed++;
-                Log::warning('Class reminder: failed to send Telegram message.', [
-                    'schedule_id' => $schedule->id,
-                    'group' => $group,
-                ]);
             }
 
             $schedule->update(['reminder_sent_at' => now()]);
         }
 
         return [
-            'group' => $group,
-            'chat_id' => $chatId,
-            'due' => $dueSchedules->count(),
-            'sent' => $sent,
-            'failed' => $failed,
+            'due'          => $dueSchedules->count(),
+            'sent'         => $sent,
+            'failed'       => $failed,
             'schedule_ids' => $scheduleIds,
         ];
+    }
+
+    private function notifyChannelsForSchedule(ClassSchedule $schedule): bool
+    {
+        $purpose = $schedule->is_exclusive
+            ? Channel::PURPOSE_CLASS_REMINDER_PREMIUM
+            : Channel::PURPOSE_CLASS_REMINDER_ALL;
+
+        $channels = Channel::query()->active()->purpose($purpose)->get();
+
+        if ($channels->isEmpty()) {
+            Log::warning('Class reminder: no active channel configured for purpose.', [
+                'schedule_id' => $schedule->id,
+                'purpose'     => $purpose,
+            ]);
+
+            return false;
+        }
+
+        $message = $this->buildMessage($schedule);
+        $anySuccess = false;
+
+        foreach ($channels as $channel) {
+            $success = $this->sendToChannel($channel, $message);
+
+            if ($success) {
+                $anySuccess = true;
+            } else {
+                Log::warning('Class reminder: failed to send message through channel.', [
+                    'schedule_id' => $schedule->id,
+                    'channel_id'  => $channel->id,
+                    'channel'     => $channel->name,
+                    'type'        => $channel->type,
+                ]);
+            }
+        }
+
+        return $anySuccess;
+    }
+
+    private function sendToChannel(Channel $channel, string $message): bool
+    {
+        if ($channel->chat_id === null || $channel->chat_id === '') {
+            return false;
+        }
+
+        return match ($channel->type) {
+            Channel::TYPE_TELEGRAM => $this->telegramService->sendMessage(
+                $channel->chat_id,
+                $message,
+                $channel->bot_token,
+            ),
+            Channel::TYPE_WHATSAPP => $this->whatsappGroupService->sendText(
+                (string) $channel->server_url,
+                (string) $channel->instance_name,
+                (string) $channel->api_key,
+                $channel->chat_id,
+                $message,
+            ),
+            default => false,
+        };
     }
 
     private function buildMessage(ClassSchedule $schedule): string

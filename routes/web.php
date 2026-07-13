@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActionController;
 use App\Http\Controllers\Admin\BanksController;
+use App\Http\Controllers\Admin\ChannelsController;
 use App\Http\Controllers\Admin\MessageTemplatesController;
 use App\Http\Controllers\Admin\CourseCatalogController;
 use App\Http\Controllers\Auth\DeviceConflictController;
@@ -249,6 +250,22 @@ Route::middleware('auth')->group(function () {
         ->middleware(['verified', 'permission:delete banks'])
         ->name('admin.banks.destroy');
 
+    Route::get('/admin/channels', [ChannelsController::class, 'index'])
+        ->middleware(['verified', 'permission:view channels'])
+        ->name('admin.channels.index');
+
+    Route::post('/admin/channels', [ChannelsController::class, 'store'])
+        ->middleware(['verified', 'permission:create channels'])
+        ->name('admin.channels.store');
+
+    Route::put('/admin/channels/{channel}', [ChannelsController::class, 'update'])
+        ->middleware(['verified', 'permission:edit channels'])
+        ->name('admin.channels.update');
+
+    Route::delete('/admin/channels/{channel}', [ChannelsController::class, 'destroy'])
+        ->middleware(['verified', 'permission:delete channels'])
+        ->name('admin.channels.destroy');
+
     Route::post('/admin/financial-dashboard/register-today', [FinancialDashboardController::class, 'registerToday'])
         ->middleware(['verified', 'permission:manage profits'])
         ->name('admin.financial-dashboard.register-today');
@@ -312,9 +329,5 @@ Route::middleware('auth')->group(function () {
 Route::post('/api/horarios/enviar-recordatorios', [ScheduleController::class, 'sendReminders'])
     ->middleware('internal_api_token')
     ->name('api.schedules.send-reminders');
-
-Route::get('/api/horarios/recordatorio', [ScheduleController::class, 'upcomingForReminder'])
-    ->middleware('internal_api_token')
-    ->name('api.schedules.reminder');
 
 require __DIR__.'/auth.php';

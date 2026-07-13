@@ -82,6 +82,56 @@ class WhatsappGroupService
         return $this->removeParticipants([$phone])['success'];
     }
 
+    /**
+     * Send a text message via Evolution API to a phone number or group JID.
+     */
+    public function sendText(string $serverUrl, string $instanceName, string $apiKey, string $number, string $text): bool
+    {
+        $serverUrl = rtrim(trim($serverUrl), '/');
+        $instanceName = trim($instanceName);
+        $apiKey = trim($apiKey);
+        $number = trim($number);
+
+        if ($serverUrl === '' || $instanceName === '' || $apiKey === '' || $number === '') {
+            Log::warning('WhatsApp sendText: incomplete channel config, skipping.', [
+                'instance' => $instanceName,
+                'number'   => $number,
+            ]);
+
+            return false;
+        }
+
+        try {
+            $response = Http::timeout(15)
+                ->withHeaders(['apiKey' => $apiKey])
+                ->post("{$serverUrl}/message/sendText/{$instanceName}", [
+                    'number' => $number,
+                    'text'   => $text,
+                ]);
+
+            $success = $response->successful();
+
+            if (! $success) {
+                Log::warning('WhatsApp sendText returned non-success status.', [
+                    'instance' => $instanceName,
+                    'number'   => $number,
+                    'status'   => $response->status(),
+                    'body'     => $response->body(),
+                ]);
+            }
+
+            return $success;
+        } catch (\Throwable $e) {
+            Log::warning('WhatsApp sendText request failed.', [
+                'instance' => $instanceName,
+                'number'   => $number,
+                'error'    => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
     private function normalizePhone(string $phone): string
     {
         $phone = trim($phone);

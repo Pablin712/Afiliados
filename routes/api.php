@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AffiliateTreeController;
-use App\Http\Controllers\Api\Admin\ClassReminderController;
 use App\Http\Controllers\Api\Admin\FinancialStatsController;
 use App\Http\Controllers\Api\Admin\GroupController;
 use App\Http\Controllers\Api\Admin\MembershipTierController;
@@ -39,9 +38,6 @@ Route::prefix('admin')
 
         Route::post('/users/prune-inactive', [UserLifecycleController::class, 'pruneInactive'])
             ->name('api.admin.users.prune-inactive');
-
-        Route::post('/class-schedules/send-due-reminders', [ClassReminderController::class, 'sendDue'])
-            ->name('api.admin.class-schedules.send-due-reminders');
 
         Route::post('/groups/whatsapp/remove-free', [GroupController::class, 'removeFreeMembersWhatsapp'])
             ->name('api.admin.groups.whatsapp.remove-free');

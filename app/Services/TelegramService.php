@@ -77,16 +77,24 @@ class TelegramService
         }
     }
 
-    public function sendMessage(int|string $chatId, string $text): bool
+    /**
+     * @param  string|null  $botToken  Overrides the globally configured bot token
+     *                                 (e.g. when sending through a per-channel bot).
+     */
+    public function sendMessage(int|string $chatId, string $text, ?string $botToken = null): bool
     {
-        if ($this->apiBase === 'https://api.telegram.org/bot') {
+        $apiBase = $botToken !== null && trim($botToken) !== ''
+            ? 'https://api.telegram.org/bot'.trim($botToken)
+            : $this->apiBase;
+
+        if ($apiBase === 'https://api.telegram.org/bot') {
             Log::warning('Telegram bot token not configured, skipping sendMessage.');
 
             return false;
         }
 
         try {
-            $response = Http::timeout(10)->post("{$this->apiBase}/sendMessage", [
+            $response = Http::timeout(10)->post("{$apiBase}/sendMessage", [
                 'chat_id' => (string) $chatId,
                 'text'    => $text,
             ]);

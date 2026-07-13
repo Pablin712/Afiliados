@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             BankSeeder::class,
             ProgramSeeder::class,
+            ChannelSeeder::class,
             //ComprehensiveTestScenarioSeeder::class,
         ]);
     }

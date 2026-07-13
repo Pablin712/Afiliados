@@ -136,6 +136,12 @@
                             </x-dropdown-link>
                         @endcan
 
+                        @can('view channels')
+                            <x-dropdown-link :href="route('admin.channels.index')">
+                                {{ __('messages.admin.channels.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         @role('admin')
                             <x-dropdown-link :href="route('admin.courses.index')">
                                 {{ __('messages.admin.courses.title') }}
@@ -275,6 +281,12 @@
                 @can('view banks')
                     <x-responsive-nav-link :href="route('admin.banks.index')">
                         {{ __('messages.admin.banks.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view channels')
+                    <x-responsive-nav-link :href="route('admin.channels.index')">
+                        {{ __('messages.admin.channels.title') }}
                     </x-responsive-nav-link>
                 @endcan
 
