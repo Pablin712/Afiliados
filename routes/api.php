@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Admin\TelegramRegistrationController;
 use App\Http\Controllers\Api\Admin\PaymentVerificationController;
 use App\Http\Controllers\Api\Admin\UserLifecycleController;
 use App\Http\Controllers\Api\MembershipVerificationController;
+use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/public/payments/{payment}/receipt', [PaymentVerificationController::class, 'publicReceipt'])
@@ -16,6 +17,11 @@ Route::get('/public/payments/{payment}/receipt', [PaymentVerificationController:
 
 Route::get('/verify-membership', [MembershipVerificationController::class, 'verify'])
     ->name('api.verify-membership');
+
+// Internal API for n8n automations (no session/CSRF — the api middleware group is stateless).
+Route::post('/horarios/enviar-recordatorios', [ScheduleController::class, 'sendReminders'])
+    ->middleware('internal_api_token')
+    ->name('api.schedules.send-reminders');
 
 Route::prefix('admin')
     ->middleware(['internal_api_token'])
