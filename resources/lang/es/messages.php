@@ -887,7 +887,7 @@ return [
     'admin.profits.no_grouped_records' => 'No hay ganancias pendientes.',
 
     'admin.message_templates.title' => 'Plantillas de mensajes',
-    'admin.message_templates.variables_hint' => 'Puedes usar estas variables en el cuerpo del mensaje y serán reemplazadas automáticamente:',
+    'admin.message_templates.variables_hint' => 'Puedes usar variables entre llaves en el cuerpo del mensaje y serán reemplazadas automáticamente. Revisa la descripción de cada plantilla para ver cuáles variables aplican.',
     'admin.message_templates.columns.name' => 'Nombre de la plantilla',
     'admin.message_templates.columns.body' => 'Cuerpo del mensaje',
     'admin.message_templates.forms.edit_title' => 'Editar plantilla de mensaje',

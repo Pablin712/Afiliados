@@ -22,9 +22,6 @@
 
             <div class="rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
                 {{ __('messages.admin.message_templates.variables_hint') }}
-                <code class="font-mono font-bold">{name}</code>,
-                <code class="font-mono font-bold">{email}</code>,
-                <code class="font-mono font-bold">{phone}</code>
             </div>
 
             <div class="space-y-4">

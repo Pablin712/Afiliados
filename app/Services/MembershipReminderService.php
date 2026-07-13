@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\MessageTemplate;
 use App\Models\User;
 use Carbon\CarbonInterface;
 
@@ -27,7 +28,12 @@ class MembershipReminderService
             ->limit($limit)
             ->get();
 
-        return $users->map(function (User $user) use ($date): array {
+        $reminderMessageEs = MessageTemplate::bodyFor(
+            'membership_expiring',
+            'Tu membresía vence mañana. Por favor reactiva para mantener tus beneficios.'
+        );
+
+        return $users->map(function (User $user) use ($date, $reminderMessageEs): array {
             $membership = $user->membership;
 
             return [
@@ -51,7 +57,7 @@ class MembershipReminderService
                 ],
                 'reminder' => [
                     'event' => 'membership.expiring_soon',
-                    'message_es' => 'Tu membresía vence mañana. Por favor reactiva para mantener tus beneficios.',
+                    'message_es' => $reminderMessageEs,
                     'message_en' => 'Your membership expires tomorrow. Please reactivate to keep your benefits.',
                 ],
             ];

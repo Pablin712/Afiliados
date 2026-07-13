@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Channel;
 use App\Models\ClassSchedule;
+use App\Models\MessageTemplate;
 use Illuminate\Support\Facades\Log;
 
 class ClassScheduleReminderService
@@ -130,17 +131,20 @@ class ClassScheduleReminderService
         $startTime = $schedule->start_time->timezone(config('app.timezone'))->format('H:i');
         $teacherName = $schedule->teacher?->name ?? '—';
 
-        $lines = [
-            "\u{1F514} Recordatorio de clase en {$minutesUntilStart} minutos",
-            "\u{1F4DA} {$schedule->title}",
-            "\u{1F468}\u{200D}\u{1F3EB} Profesor: {$teacherName}",
-            "\u{1F550} Hora: {$startTime}",
-        ];
+        $fallback = "\u{1F514} Recordatorio de clase en {minutes} minutos\n"
+            ."\u{1F4DA} {title}\n"
+            ."\u{1F468}\u{200D}\u{1F3EB} Profesor: {teacher_name}\n"
+            ."\u{1F550} Hora: {start_time}\n"
+            ."\u{1F517} Enlace: {meeting_link}";
 
-        if (! empty($schedule->meeting_link)) {
-            $lines[] = "\u{1F517} Enlace: {$schedule->meeting_link}";
-        }
+        $body = MessageTemplate::bodyFor('class_reminder', $fallback);
 
-        return implode("\n", $lines);
+        return strtr($body, [
+            '{minutes}' => (string) $minutesUntilStart,
+            '{title}' => (string) $schedule->title,
+            '{teacher_name}' => $teacherName,
+            '{start_time}' => $startTime,
+            '{meeting_link}' => (string) $schedule->meeting_link,
+        ]);
     }
 }

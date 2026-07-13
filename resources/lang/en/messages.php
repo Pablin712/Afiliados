@@ -887,7 +887,7 @@ return [
     'admin.profits.no_grouped_records' => 'No pending earnings.',
 
     'admin.message_templates.title' => 'Message templates',
-    'admin.message_templates.variables_hint' => 'You can use these variables in the message body and they will be replaced automatically:',
+    'admin.message_templates.variables_hint' => 'You can use variables in curly braces in the message body and they will be replaced automatically. Check each template\'s description to see which variables apply.',
     'admin.message_templates.columns.name' => 'Template name',
     'admin.message_templates.columns.body' => 'Message body',
     'admin.message_templates.forms.edit_title' => 'Edit message template',

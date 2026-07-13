@@ -28,9 +28,6 @@
                 </label>
                 <p class="text-xs text-gray-500 dark:text-graphite-400 mb-1">
                     {{ __('messages.admin.message_templates.variables_hint') }}
-                    <code class="font-mono font-bold">{name}</code>,
-                    <code class="font-mono font-bold">{email}</code>,
-                    <code class="font-mono font-bold">{phone}</code>
                 </p>
                 <textarea
                     id="template-edit-body"
