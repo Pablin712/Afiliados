@@ -23,22 +23,24 @@ class ChannelSeeder extends Seeder
         Channel::query()->updateOrCreate(
             ['type' => Channel::TYPE_TELEGRAM, 'name' => 'aet_premium'],
             [
-                'purpose'   => Channel::PURPOSE_CLASS_REMINDER_PREMIUM,
-                'is_active' => true,
-                'chat_id'   => $aetPremiumChatId,
-                'bot_token' => $botToken,
-                'notes'     => 'Grupo Telegram AET Premium (exclusivo). Recibe todos los recordatorios de clase (generales y exclusivos), y participa en la expulsión semanal de miembros free.',
+                'purpose'      => Channel::PURPOSE_CLASS_REMINDER_PREMIUM,
+                'is_active'    => true,
+                'is_exclusive' => true,
+                'chat_id'      => $aetPremiumChatId,
+                'bot_token'    => $botToken,
+                'notes'        => 'Grupo Telegram AET Premium (exclusivo). Recibe todos los recordatorios de clase (generales y exclusivos), y participa en la expulsión semanal de miembros free.',
             ]
         );
 
         Channel::query()->updateOrCreate(
             ['type' => Channel::TYPE_TELEGRAM, 'name' => 'aet_sas_2k26'],
             [
-                'purpose'   => Channel::PURPOSE_CLASS_REMINDER_ALL,
-                'is_active' => true,
-                'chat_id'   => '-1003511484723',
-                'bot_token' => $botToken,
-                'notes'     => 'Canal Telegram "AET SAS 2k26" (@aetsas) — recordatorios de clases para todos los miembros.',
+                'purpose'      => Channel::PURPOSE_CLASS_REMINDER_ALL,
+                'is_active'    => true,
+                'is_exclusive' => false,
+                'chat_id'      => '-1003511484723',
+                'bot_token'    => $botToken,
+                'notes'        => 'Canal Telegram "AET SAS 2k26" (@aetsas) — recordatorios de clases para todos los miembros. Abierto a todos, nunca participa en la expulsión.',
             ]
         );
 
@@ -51,11 +53,12 @@ class ChannelSeeder extends Seeder
             Channel::query()->updateOrCreate(
                 ['type' => Channel::TYPE_TELEGRAM, 'name' => $key],
                 [
-                    'purpose'    => Channel::PURPOSE_GENERAL,
-                    'is_active'  => true,
-                    'chat_id'    => $chatId,
-                    'bot_token'  => $botToken,
-                    'notes'      => 'Importado automáticamente desde config/affiliates.php. Usado también para la expulsión semanal de miembros free.',
+                    'purpose'      => Channel::PURPOSE_GENERAL,
+                    'is_active'    => true,
+                    'is_exclusive' => true,
+                    'chat_id'      => $chatId,
+                    'bot_token'    => $botToken,
+                    'notes'        => 'Importado automáticamente desde config/affiliates.php. Participa en la expulsión semanal de miembros free.',
                 ]
             );
         }
@@ -65,11 +68,12 @@ class ChannelSeeder extends Seeder
             [
                 'purpose'       => Channel::PURPOSE_GENERAL,
                 'is_active'     => true,
+                'is_exclusive'  => true,
                 'chat_id'       => (string) config('affiliates.whatsapp_group.group_jid', ''),
                 'instance_name' => 'AET-SAS',
                 'server_url'    => 'https://evoapi.abigailsoft.com',
                 'api_key'       => (string) config('affiliates.whatsapp_group.apikey', ''),
-                'notes'         => 'Importado automáticamente desde config/affiliates.php.',
+                'notes'         => 'Importado automáticamente desde config/affiliates.php. Participa en la expulsión semanal de miembros free.',
             ]
         );
     }

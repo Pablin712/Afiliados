@@ -2,31 +2,21 @@
 
 namespace App\Services;
 
+use App\Models\Channel;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WhatsappGroupService
 {
     /**
-     * Remove one or more participants from the WhatsApp group.
+     * Remove one or more participants from every active, exclusive WhatsApp
+     * group (i.e. groups free members shouldn't be part of).
      *
      * @param  string[]  $phones  Raw phone numbers (any common format)
-     * @return array{removed: int, phones: string[], success: bool}
+     * @return array{removed: int, phones: string[], success: bool, channels: array<string, bool>}
      */
     public function removeParticipants(array $phones): array
     {
-        $url      = trim((string) config('affiliates.whatsapp_group.url', ''));
-        $groupJid = trim((string) config('affiliates.whatsapp_group.group_jid', ''));
-        $apikey   = trim((string) config('affiliates.whatsapp_group.apikey', ''));
-
-        if ($url === '' || $groupJid === '' || $apikey === '') {
-            Log::warning('WhatsApp group config incomplete, skipping participant removal.', [
-                'phones_count' => count($phones),
-            ]);
-
-            return ['removed' => 0, 'phones' => [], 'success' => false];
-        }
-
         $normalized = array_values(array_filter(
             array_map(fn (string $p): string => $this->normalizePhone($p), $phones)
         ));
@@ -36,50 +26,99 @@ class WhatsappGroupService
                 'raw_phones' => $phones,
             ]);
 
-            return ['removed' => 0, 'phones' => [], 'success' => false];
+            return ['removed' => 0, 'phones' => [], 'success' => false, 'channels' => []];
         }
+
+        $channels = Channel::query()->type(Channel::TYPE_WHATSAPP)->exclusive()->active()->get();
+
+        if ($channels->isEmpty()) {
+            Log::warning('WhatsApp group: no active exclusive channel configured, skipping participant removal.', [
+                'phones_count' => count($normalized),
+            ]);
+
+            return ['removed' => 0, 'phones' => $normalized, 'success' => false, 'channels' => []];
+        }
+
+        $channelResults = [];
+        $anySuccess = false;
+
+        foreach ($channels as $channel) {
+            $success = $this->removeParticipantsFromChannel($channel, $normalized);
+            $channelResults[$channel->name] = $success;
+
+            if ($success) {
+                $anySuccess = true;
+            }
+        }
+
+        return [
+            'removed'  => $anySuccess ? count($normalized) : 0,
+            'phones'   => $normalized,
+            'success'  => $anySuccess,
+            'channels' => $channelResults,
+        ];
+    }
+
+    public function removeParticipant(string $phone): bool
+    {
+        return $this->removeParticipants([$phone])['success'];
+    }
+
+    /**
+     * @param  string[]  $normalizedPhones
+     */
+    private function removeParticipantsFromChannel(Channel $channel, array $normalizedPhones): bool
+    {
+        $serverUrl = rtrim(trim((string) $channel->server_url), '/');
+        $instanceName = trim((string) $channel->instance_name);
+        $groupJid = trim((string) $channel->chat_id);
+        $apikey = trim((string) $channel->api_key);
+
+        if ($serverUrl === '' || $instanceName === '' || $groupJid === '' || $apikey === '') {
+            Log::warning('WhatsApp channel config incomplete, skipping participant removal.', [
+                'channel_id' => $channel->id,
+                'channel'    => $channel->name,
+            ]);
+
+            return false;
+        }
+
+        $url = "{$serverUrl}/group/updateParticipant/{$instanceName}";
 
         try {
             $response = Http::timeout(15)
                 ->withHeaders(['apikey' => $apikey])
                 ->post($url.'?groupJid='.urlencode($groupJid), [
                     'action'       => 'remove',
-                    'participants' => $normalized,
+                    'participants' => $normalizedPhones,
                 ]);
 
             $success = $response->successful();
 
             Log::info('WhatsApp group remove participants.', [
-                'participants' => $normalized,
+                'channel'      => $channel->name,
+                'participants' => $normalizedPhones,
                 'status'       => $response->status(),
                 'success'      => $success,
             ]);
 
             if (! $success) {
                 Log::warning('WhatsApp group API returned non-success status.', [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
+                    'channel' => $channel->name,
+                    'status'  => $response->status(),
+                    'body'    => $response->body(),
                 ]);
             }
 
-            return [
-                'removed' => $success ? count($normalized) : 0,
-                'phones'  => $normalized,
-                'success' => $success,
-            ];
+            return $success;
         } catch (\Throwable $e) {
             Log::warning('WhatsApp group remove participants failed.', [
-                'error'        => $e->getMessage(),
-                'participants' => $normalized,
+                'channel' => $channel->name,
+                'error'   => $e->getMessage(),
             ]);
 
-            return ['removed' => 0, 'phones' => $normalized, 'success' => false];
+            return false;
         }
-    }
-
-    public function removeParticipant(string $phone): bool
-    {
-        return $this->removeParticipants([$phone])['success'];
     }
 
     /**

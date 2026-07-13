@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Channel;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -16,24 +17,37 @@ class TelegramService
     }
 
     /**
-     * Ban a Telegram user from all configured groups.
-     * @return array<string, bool> Group name => success
+     * Ban a Telegram user from every active, exclusive Telegram channel
+     * (i.e. groups free members shouldn't be part of).
+     * @return array<string, bool> Channel name => success
      */
     public function banFromAllGroups(int $telegramUserId): array
     {
-        $groups = (array) config('affiliates.telegram.groups', []);
+        $channels = Channel::query()->type(Channel::TYPE_TELEGRAM)->exclusive()->active()->get();
         $results = [];
 
-        foreach ($groups as $name => $chatId) {
-            $results[(string) $name] = $this->banFromGroup((string) $chatId, $telegramUserId);
+        foreach ($channels as $channel) {
+            if ($channel->chat_id === null || $channel->chat_id === '') {
+                continue;
+            }
+
+            $results[$channel->name] = $this->banFromGroup($channel->chat_id, $telegramUserId, $channel->bot_token);
         }
 
         return $results;
     }
 
-    public function banFromGroup(string $groupChatId, int $telegramUserId): bool
+    /**
+     * @param  string|null  $botToken  Overrides the globally configured bot token
+     *                                 (e.g. when banning through a per-channel bot).
+     */
+    public function banFromGroup(string $groupChatId, int $telegramUserId, ?string $botToken = null): bool
     {
-        if ($this->apiBase === 'https://api.telegram.org/bot') {
+        $apiBase = $botToken !== null && trim($botToken) !== ''
+            ? 'https://api.telegram.org/bot'.trim($botToken)
+            : $this->apiBase;
+
+        if ($apiBase === 'https://api.telegram.org/bot') {
             Log::warning('Telegram bot token not configured, skipping ban.', [
                 'user_id'  => $telegramUserId,
                 'group'    => $groupChatId,
@@ -43,7 +57,7 @@ class TelegramService
         }
 
         try {
-            $response = Http::timeout(10)->post("{$this->apiBase}/banChatMember", [
+            $response = Http::timeout(10)->post("{$apiBase}/banChatMember", [
                 'chat_id' => $groupChatId,
                 'user_id' => $telegramUserId,
             ]);

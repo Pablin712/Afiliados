@@ -27,6 +27,7 @@
                     ['label' => __('messages.admin.channels.columns.type'), 'type' => 'string', 'sort_by' => 'type'],
                     ['label' => __('messages.admin.channels.columns.purpose'), 'type' => 'string', 'sort_by' => 'purpose'],
                     ['label' => __('messages.admin.channels.columns.chat_id'), 'type' => 'string', 'sort_by' => 'chat_id'],
+                    ['label' => __('messages.admin.channels.columns.is_exclusive'), 'type' => 'string', 'sort_by' => 'is_exclusive'],
                     ['label' => __('messages.admin.channels.columns.is_active'), 'type' => 'string', 'sort_by' => 'is_active'],
                     ['label' => __('messages.admin.channels.columns.actions'), 'type' => 'actions', 'sort_by' => 'id'],
                 ]"
@@ -77,6 +78,7 @@
                         document.getElementById('channel-edit-name').value = payload.name ?? '';
                         document.getElementById('channel-edit-purpose').value = payload.purpose ?? 'general';
                         document.getElementById('channel-edit-is-active').checked = !!payload.is_active;
+                        document.getElementById('channel-edit-is-exclusive').checked = !!payload.is_exclusive;
                         document.getElementById('channel-edit-chat-id').value = payload.chat_id ?? '';
                         document.getElementById('channel-edit-bot-token').value = payload.bot_token ?? '';
                         document.getElementById('channel-edit-instance-name').value = payload.instance_name ?? '';

@@ -51,6 +51,7 @@ class GroupController extends Controller
                 'candidates' => count($phones),
                 'removed'    => $result['removed'],
                 'success'    => $result['success'],
+                'channels'   => $result['channels'] ?? [],
             ],
             'data' => [
                 'users' => $users->map(fn (User $u) => [

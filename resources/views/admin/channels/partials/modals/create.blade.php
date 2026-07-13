@@ -99,6 +99,14 @@
                 <label for="channel-create-is-active" class="text-sm text-gray-700 dark:text-graphite-300">{{ __('messages.admin.channels.columns.is_active') }}</label>
             </div>
 
+            <div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="channel-create-is-exclusive" name="is_exclusive" value="1" @checked(old('is_exclusive', false)) class="rounded border-gray-300 dark:border-graphite-700">
+                    <label for="channel-create-is-exclusive" class="text-sm text-gray-700 dark:text-graphite-300">{{ __('messages.admin.channels.columns.is_exclusive') }}</label>
+                </div>
+                <p class="mt-1 text-xs text-gray-400">{{ __('messages.admin.channels.hints.is_exclusive') }}</p>
+            </div>
+
             <div class="flex justify-end gap-2 pt-2">
                 <x-secondary-button x-on:click.prevent="$dispatch('close-modal', 'channel-create-modal')">{{ __('messages.admin.channels.buttons.cancel') }}</x-secondary-button>
                 <x-primary-button>{{ __('messages.admin.channels.buttons.create') }}</x-primary-button>

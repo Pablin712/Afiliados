@@ -42,6 +42,7 @@ class ChannelsController extends Controller
     {
         $payload = $request->validated();
         $payload['is_active'] = $request->boolean('is_active', true);
+        $payload['is_exclusive'] = $request->boolean('is_exclusive', false);
 
         Channel::query()->create($payload);
 
@@ -54,6 +55,7 @@ class ChannelsController extends Controller
     {
         $payload = $request->validated();
         $payload['is_active'] = $request->boolean('is_active', true);
+        $payload['is_exclusive'] = $request->boolean('is_exclusive', false);
 
         $channel->update($payload);
 

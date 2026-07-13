@@ -6,6 +6,7 @@
             'name' => $channel->name,
             'purpose' => $channel->purpose,
             'is_active' => (bool) $channel->is_active,
+            'is_exclusive' => (bool) $channel->is_exclusive,
             'chat_id' => $channel->chat_id,
             'bot_token' => $channel->bot_token,
             'instance_name' => $channel->instance_name,
@@ -28,6 +29,13 @@
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">{{ $typeLabels[$channel->type] ?? $channel->type }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">{{ $purposeLabels[$channel->purpose] ?? $channel->purpose }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200 font-mono">{{ $channel->chat_id }}</td>
+        <td class="px-4 sm:px-6 py-3 text-sm">
+            @if ($channel->is_exclusive)
+                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">{{ __('messages.admin.channels.status.exclusive') }}</span>
+            @else
+                <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-graphite-800 dark:text-graphite-300">{{ __('messages.admin.channels.status.open') }}</span>
+            @endif
+        </td>
         <td class="px-4 sm:px-6 py-3 text-sm">
             @if ($channel->is_active)
                 <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">{{ __('messages.admin.channels.status.active') }}</span>
@@ -59,7 +67,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
+        <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
             {{ __('messages.admin.channels.messages.empty') }}
         </td>
     </tr>

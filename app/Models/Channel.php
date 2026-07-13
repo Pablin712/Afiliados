@@ -22,6 +22,7 @@ class Channel extends Model
         'name',
         'purpose',
         'is_active',
+        'is_exclusive',
         'chat_id',
         'bot_token',
         'instance_name',
@@ -31,9 +32,10 @@ class Channel extends Model
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'bot_token' => 'encrypted',
-        'api_key'   => 'encrypted',
+        'is_active'    => 'boolean',
+        'is_exclusive' => 'boolean',
+        'bot_token'    => 'encrypted',
+        'api_key'      => 'encrypted',
     ];
 
     /**
@@ -72,5 +74,10 @@ class Channel extends Model
     public function scopeType(Builder $query, string $type): Builder
     {
         return $query->where('type', $type);
+    }
+
+    public function scopeExclusive(Builder $query): Builder
+    {
+        return $query->where('is_exclusive', true);
     }
 }
