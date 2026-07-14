@@ -27,11 +27,15 @@
             <div
                 x-data="{
                     search: '',
-                    templates: @json($templates->map(fn ($t) => ['id' => $t->id, 'searchable' => strtolower($t->name.' '.$t->key.' '.$t->description)])),
-                    get visibleIds() {
+                    templates: {{ json_encode($templates->map(fn ($t) => ['id' => $t->id, 'searchable' => strtolower($t->name.' '.$t->key.' '.$t->description)])) }},
+                    isVisible(id) {
                         const q = this.search.trim().toLowerCase();
-                        if (q === '') { return this.templates.map(t => t.id); }
-                        return this.templates.filter(t => t.searchable.includes(q)).map(t => t.id);
+                        if (q === '') { return true; }
+                        const t = this.templates.find(t => t.id === id);
+                        return t ? t.searchable.includes(q) : false;
+                    },
+                    hasVisible() {
+                        return this.templates.some(t => this.isVisible(t.id));
                     },
                 }"
                 class="space-y-4"
@@ -50,7 +54,7 @@
                     </div>
                 </div>
 
-                <p x-show="visibleIds.length === 0" x-cloak class="rounded-md border border-dashed border-gray-300 dark:border-graphite-700 px-4 py-6 text-center text-sm text-gray-500 dark:text-graphite-400">
+                <p x-show="! hasVisible()" x-cloak class="rounded-md border border-dashed border-gray-300 dark:border-graphite-700 px-4 py-6 text-center text-sm text-gray-500 dark:text-graphite-400">
                     {{ __('messages.admin.message_templates.no_matches') }}
                 </p>
 
@@ -58,7 +62,7 @@
                     @foreach ($templates as $template)
                         <div
                             x-data="{ open: false }"
-                            x-show="visibleIds.includes({{ $template->id }})"
+                            x-show="isVisible({{ $template->id }})"
                             class="bg-white dark:bg-graphite-900 rounded-lg shadow border border-gray-200 dark:border-graphite-700 overflow-hidden"
                         >
                             <div
