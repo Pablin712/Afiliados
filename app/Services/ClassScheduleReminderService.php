@@ -27,8 +27,11 @@ class ClassScheduleReminderService
      */
     public function sendDueReminders(): array
     {
-        $windowStart = now()->addMinutes(self::WINDOW_MINUTES_BEFORE_MIN);
-        $windowEnd = now()->addMinutes(self::WINDOW_MINUTES_BEFORE_MAX);
+        // start_time is stored as a plain UTC string (no offset); whereBetween
+        // compares it as a raw string, so the bounds must also be UTC or every
+        // comparison is off by the app timezone's offset (5h for Guayaquil).
+        $windowStart = now('UTC')->addMinutes(self::WINDOW_MINUTES_BEFORE_MIN);
+        $windowEnd = now('UTC')->addMinutes(self::WINDOW_MINUTES_BEFORE_MAX);
 
         $dueSchedules = ClassSchedule::query()
             ->with('teacher')

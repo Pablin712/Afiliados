@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use App\Casts\UtcDateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,8 +20,8 @@ class ClassSchedule extends Model
     ];
 
     protected $casts = [
-        'start_time'       => 'datetime',
-        'end_time'         => 'datetime',
+        'start_time'       => UtcDateTime::class,
+        'end_time'         => UtcDateTime::class,
         'is_exclusive'     => 'boolean',
         'reminder_sent_at' => 'datetime',
     ];
@@ -41,23 +41,13 @@ class ClassSchedule extends Model
         return $palette[$teacherId % count($palette)];
     }
 
-    /**
-     * Read raw DB strings as UTC to bypass app-timezone misinterpretation.
-     * Eloquent's datetime cast applies the app timezone when creating Carbon
-     * instances; since we store UTC datetimes in a DATETIME column, we must
-     * parse the raw value explicitly in UTC so FullCalendar receives a correct
-     * ISO-8601 string with +00:00 and can convert to browser local time.
-     */
     public function toCalendarEvent(): array
     {
-        $start = Carbon::createFromFormat('Y-m-d H:i:s', $this->getRawOriginal('start_time'), 'UTC');
-        $end   = Carbon::createFromFormat('Y-m-d H:i:s', $this->getRawOriginal('end_time'), 'UTC');
-
         return [
             'id'              => $this->id,
             'title'           => $this->title,
-            'start'           => $start->toIso8601String(),
-            'end'             => $end->toIso8601String(),
+            'start'           => $this->start_time->toIso8601String(),
+            'end'             => $this->end_time->toIso8601String(),
             'backgroundColor' => self::teacherColor($this->teacher_id),
             'borderColor'     => self::teacherColor($this->teacher_id),
             'textColor'       => '#ffffff',

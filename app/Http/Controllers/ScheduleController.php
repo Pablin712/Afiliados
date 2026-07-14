@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ClassSchedule;
 use App\Models\User;
 use App\Services\ClassScheduleReminderService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,8 +38,11 @@ class ScheduleController extends Controller
 
     public function events(Request $request): JsonResponse
     {
-        $start    = $request->input('start');
-        $end      = $request->input('end');
+        // FullCalendar sends these with an explicit UTC offset (timeZone: 'local');
+        // start_time/end_time are stored as plain UTC strings, so the bounds must
+        // be normalized to UTC before comparing against the raw column.
+        $start    = $request->input('start') ? Carbon::parse($request->input('start'))->utc()->format('Y-m-d H:i:s') : null;
+        $end      = $request->input('end') ? Carbon::parse($request->input('end'))->utc()->format('Y-m-d H:i:s') : null;
         $freeUser = $this->isFreeUser();
 
         $events = ClassSchedule::with('teacher')
