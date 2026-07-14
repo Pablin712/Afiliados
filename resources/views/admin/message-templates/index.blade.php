@@ -82,13 +82,7 @@
                                     >
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                                     </svg>
-                                    <div class="min-w-0">
-                                        <p class="text-base font-semibold text-gray-800 dark:text-graphite-100">{{ $template->name }}</p>
-                                        <p class="mt-0.5 text-xs font-mono text-gray-400 dark:text-graphite-500">{{ $template->key }}</p>
-                                        @if ($template->description)
-                                            <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ $template->description }}</p>
-                                        @endif
-                                    </div>
+                                    <p class="text-base font-semibold text-gray-800 dark:text-graphite-100">{{ $template->name }}</p>
                                 </div>
 
                                 <x-primary-button
@@ -102,7 +96,11 @@
 
                             <div class="grid transition-[grid-template-rows] duration-300 ease-in-out" :class="open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'">
                                 <div class="overflow-hidden">
-                                    <div class="border-t border-gray-100 dark:border-graphite-800 px-5 py-4 bg-gray-50 dark:bg-graphite-950">
+                                    <div class="border-t border-gray-100 dark:border-graphite-800 px-5 py-4 bg-gray-50 dark:bg-graphite-950 space-y-2">
+                                        <p class="text-xs font-mono text-gray-400 dark:text-graphite-500">{{ $template->key }}</p>
+                                        @if ($template->description)
+                                            <p class="text-xs text-gray-500 dark:text-graphite-400">{{ $template->description }}</p>
+                                        @endif
                                         <pre class="max-h-96 overflow-y-auto whitespace-pre-wrap text-sm text-gray-700 dark:text-graphite-300 font-sans leading-relaxed">{{ $template->body }}</pre>
                                     </div>
                                 </div>
