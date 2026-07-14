@@ -25,8 +25,8 @@ class MessageTemplateSeeder extends Seeder
             [
                 'key'         => 'class_reminder',
                 'name'        => 'Recordatorio de clase (Telegram/WhatsApp)',
-                'description' => 'Se envía a los canales de Telegram/WhatsApp minutos antes de una clase. Variables disponibles: {minutes}, {title}, {teacher_name}, {start_time}, {meeting_link}',
-                'body'        => "🔔 Recordatorio de clase en {minutes} minutos\n📚 {title}\n👨‍🏫 Profesor: {teacher_name}\n🕐 Hora: {start_time}\n🔗 Enlace: {meeting_link}",
+                'description' => 'Se envía a los canales de Telegram/WhatsApp minutos antes de una clase. Variables disponibles: {minutes}, {title}, {teacher_name}, {start_time}, {description}, {meeting_link}',
+                'body'        => "🔔 Recordatorio de clase en {minutes} minutos\n📚 {title}\n👨‍🏫 Profesor: {teacher_name}\n🕐 Hora: {start_time}\n📝 {description}\n🔗 Enlace: {meeting_link}",
             ],
             [
                 'key'         => 'membership_expiring',

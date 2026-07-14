@@ -138,6 +138,7 @@ class ClassScheduleReminderService
             ."\u{1F4DA} {title}\n"
             ."\u{1F468}\u{200D}\u{1F3EB} Profesor: {teacher_name}\n"
             ."\u{1F550} Hora: {start_time}\n"
+            ."\u{1F4DD} {description}\n"
             ."\u{1F517} Enlace: {meeting_link}";
 
         $body = MessageTemplate::bodyFor('class_reminder', $fallback);
@@ -147,6 +148,7 @@ class ClassScheduleReminderService
             '{title}' => (string) $schedule->title,
             '{teacher_name}' => $teacherName,
             '{start_time}' => $startTime,
+            '{description}' => (string) $schedule->description,
             '{meeting_link}' => (string) $schedule->meeting_link,
         ]);
     }
