@@ -5,6 +5,9 @@ return [
     'subtitle' => 'Resumen de usuarios y membresias en el periodo seleccionado.',
     'apply' => 'Aplicar rango',
     'export_pdf' => 'Exportar PDF',
+    'export_csv' => 'Exportar CSV',
+    'export_excel' => 'Exportar Excel',
+    'export_json' => 'Exportar JSON',
     'segment_label' => 'Segmento',
     'segments' => [
         'all' => 'Resumen general',
@@ -37,6 +40,7 @@ return [
         'email' => 'Email',
         'membership_type' => 'Tipo de membresia',
         'started_at' => 'Inicio',
+        'expires_at' => 'Vencimiento',
         'previous_type' => 'Tipo anterior',
         'downgraded_at' => 'Fecha de baja',
         'joined_at' => 'Fecha de registro',

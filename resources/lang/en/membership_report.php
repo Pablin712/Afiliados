@@ -5,6 +5,9 @@ return [
     'subtitle' => 'Summary of users and memberships for the selected period.',
     'apply' => 'Apply range',
     'export_pdf' => 'Export PDF',
+    'export_csv' => 'Export CSV',
+    'export_excel' => 'Export Excel',
+    'export_json' => 'Export JSON',
     'segment_label' => 'Segment',
     'segments' => [
         'all' => 'General overview',
@@ -37,6 +40,7 @@ return [
         'email' => 'Email',
         'membership_type' => 'Membership type',
         'started_at' => 'Started',
+        'expires_at' => 'Expires at',
         'previous_type' => 'Previous type',
         'downgraded_at' => 'Downgraded at',
         'joined_at' => 'Joined at',

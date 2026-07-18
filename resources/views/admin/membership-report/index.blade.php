@@ -15,6 +15,20 @@
                 <input type="date" name="from" value="{{ $from }}" class="rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
                 <input type="date" name="to" value="{{ $to }}" class="rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
                 <x-secondary-button type="submit">{{ __('membership_report.apply') }}</x-secondary-button>
+                @if ($segment !== 'all')
+                    <a href="{{ route('admin.membership-report.index', ['from' => $from, 'to' => $to, 'segment' => $segment, 'export' => 'csv']) }}"
+                       class="inline-flex items-center px-3 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition">
+                        {{ __('membership_report.export_csv') }}
+                    </a>
+                    <a href="{{ route('admin.membership-report.index', ['from' => $from, 'to' => $to, 'segment' => $segment, 'export' => 'excel']) }}"
+                       class="inline-flex items-center px-3 py-2 bg-emerald-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition">
+                        {{ __('membership_report.export_excel') }}
+                    </a>
+                    <a href="{{ route('admin.membership-report.index', ['from' => $from, 'to' => $to, 'segment' => $segment, 'export' => 'json']) }}"
+                       class="inline-flex items-center px-3 py-2 bg-amber-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition">
+                        {{ __('membership_report.export_json') }}
+                    </a>
+                @endif
                 <a href="{{ route('admin.membership-report.index', ['from' => $from, 'to' => $to, 'segment' => $segment, 'export' => 'pdf']) }}"
                    class="inline-flex items-center px-4 py-2 bg-brand-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition">
                     {{ __('membership_report.export_pdf') }}
