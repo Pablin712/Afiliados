@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\UsersAdminController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\FinancialDashboardController;
+use App\Http\Controllers\Admin\MembershipReportController;
 use App\Http\Controllers\Admin\ProfitsController;
 use App\Http\Controllers\Admin\UsersTreeController;
 use App\Http\Controllers\MembershipsController;
@@ -197,6 +198,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/financial-dashboard', [FinancialDashboardController::class, 'index'])
         ->middleware(['verified', 'permission:report profits'])
         ->name('admin.financial-dashboard.index');
+
+    Route::get('/admin/membership-report', [MembershipReportController::class, 'index'])
+        ->middleware(['verified', 'permission:report memberships'])
+        ->name('admin.membership-report.index');
 
     Route::get('/admin/banks', [BanksController::class, 'index'])
         ->middleware(['verified', 'permission:view banks'])

@@ -157,6 +157,12 @@
                             </x-dropdown-link>
                         @endcan
 
+                        @can('report memberships')
+                            <x-dropdown-link :href="route('admin.membership-report.index')">
+                                {{ __('membership_report.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -302,6 +308,12 @@
                 @can('report profits')
                     <x-responsive-nav-link :href="route('admin.financial-dashboard.index')">
                         {{ __('messages.admin.financial_dashboard.title') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('report memberships')
+                    <x-responsive-nav-link :href="route('admin.membership-report.index')">
+                        {{ __('membership_report.title') }}
                     </x-responsive-nav-link>
                 @endcan
 
