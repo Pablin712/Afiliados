@@ -5,6 +5,15 @@ return [
     'subtitle' => 'Summary of users and memberships for the selected period.',
     'apply' => 'Apply range',
     'export_pdf' => 'Export PDF',
+    'segment_label' => 'Segment',
+    'segments' => [
+        'all' => 'General overview',
+        'free' => 'Free users',
+        'active' => 'Active (paying) users',
+        'expired' => 'Expired memberships',
+        'pending_payment' => 'Pending payment',
+        'non_renewed' => 'Did not renew (were paying, now free)',
+    ],
     'cards' => [
         'total_users' => 'Total users (to date)',
         'new_users' => 'New users in period',
@@ -30,6 +39,12 @@ return [
         'started_at' => 'Started',
         'previous_type' => 'Previous type',
         'downgraded_at' => 'Downgraded at',
+        'joined_at' => 'Joined at',
+        'previously_paid' => 'Had a paid plan',
+    ],
+    'booleans' => [
+        'yes' => 'Yes',
+        'no' => 'No',
     ],
     'statuses' => [
         'active' => 'Active',
@@ -41,6 +56,7 @@ return [
         'empty' => 'No records for this period.',
         'report_generated_at' => 'Generated at',
         'non_renewed_hint' => 'Detected from the audit trail: users whose membership moved to free status during the period.',
+        'non_renewed_segment_hint' => 'Full list (no date limit): users currently on the free plan who previously held a paid membership, detected from the audit trail or their stored expiration date.',
         'permission_key' => 'report memberships',
     ],
 ];

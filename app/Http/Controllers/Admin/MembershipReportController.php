@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -22,6 +23,7 @@ class MembershipReportController extends Controller
         $validated = $request->validate([
             'from' => ['nullable', 'date_format:Y-m-d'],
             'to' => ['nullable', 'date_format:Y-m-d'],
+            'segment' => ['nullable', Rule::in(MembershipReportService::SEGMENTS)],
         ]);
 
         $to = isset($validated['to'])
@@ -36,20 +38,25 @@ class MembershipReportController extends Controller
             [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
         }
 
+        $segment = (string) ($validated['segment'] ?? 'all');
+
         $report = $this->membershipReportService->build($from, $to);
+        $segmentData = $segment !== 'all' ? $this->membershipReportService->segmentUsers($segment) : null;
 
         if ($request->filled('export')) {
-            return $this->export($request, $report);
+            return $this->export($request, $report, $segment, $segmentData);
         }
 
         return view('admin.membership-report.index', [
             'report' => $report,
+            'segment' => $segment,
+            'segmentData' => $segmentData,
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
         ]);
     }
 
-    protected function export(Request $request, array $report): Response
+    protected function export(Request $request, array $report, string $segment, ?array $segmentData): Response
     {
         if (! ($request->user()?->can('report memberships') ?? false)) {
             throw new HttpException(403, 'No tienes permiso para generar reportes de membresias.');
@@ -62,6 +69,16 @@ class MembershipReportController extends Controller
         }
 
         $timestamp = Carbon::now()->format('Ymd_His');
+
+        if ($segment !== 'all' && $segmentData !== null) {
+            $pdf = Pdf::loadView('admin.membership-report.exports.segment-pdf', [
+                'segment' => $segment,
+                'segmentData' => $segmentData,
+                'generatedAt' => now(),
+            ])->setPaper('a4', 'portrait');
+
+            return $pdf->download("reporte_membresias_{$segment}_{$timestamp}.pdf");
+        }
 
         $pdf = Pdf::loadView('admin.membership-report.exports.pdf', [
             'report' => $report,

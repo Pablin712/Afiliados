@@ -7,10 +7,14 @@ use App\Models\Membership;
 use App\Models\MembershipType;
 use App\Models\User;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class MembershipReportService
 {
+    public const SEGMENTS = ['all', 'free', 'active', 'expired', 'pending_payment', 'non_renewed'];
+
     /**
      * @return array<string, mixed>
      */
@@ -52,6 +56,26 @@ class MembershipReportService
             'status_breakdown' => $statusBreakdown,
             'upgrades' => $upgrades,
             'non_renewed' => $nonRenewed,
+        ];
+    }
+
+    /**
+     * Full, point-in-time list of users for a given segment, independent of the report's date range.
+     *
+     * @return array{total:int,records:list<array<string,mixed>>}
+     */
+    public function segmentUsers(string $segment): array
+    {
+        $records = match ($segment) {
+            'free' => $this->listFreeUsers(),
+            'non_renewed' => collect($this->listFreeUsers())->filter(fn (array $row) => $row['previously_paid'])->values()->all(),
+            'active', 'expired', 'pending_payment' => $this->listByStatus($segment),
+            default => [],
+        };
+
+        return [
+            'total' => count($records),
+            'records' => $records,
         ];
     }
 
@@ -134,44 +158,25 @@ class MembershipReportService
     }
 
     /**
-     * Users whose membership dropped to "free" within the period, detected from the
-     * audit trail (actions table logs every Membership update via App\Providers\AppServiceProvider).
+     * Users whose membership dropped to "free" within the period (for the period-bound overview).
      *
      * @return array{total:int,by_previous_type:list<array{name:string,total:int}>,records:list<array<string,mixed>>}
      */
     protected function nonRenewedInPeriod(CarbonInterface $from, CarbonInterface $to): array
     {
-        $typeNamesById = MembershipType::query()->pluck('name', 'id');
+        $downgrades = $this->downgradeHistory($from, $to);
+        $usersById = User::query()->whereIn('id', $downgrades->keys())->get()->keyBy('id');
 
-        $actions = Action::query()
-            ->where('module', 'memberships')
-            ->where('action', 'update')
-            ->whereBetween('created_at', [$from, $to])
-            ->orderByDesc('created_at')
-            ->get();
-
-        $downgrades = $actions->filter(function (Action $action): bool {
-            $newValues = $action->new_values ?? [];
-            $oldValues = $action->old_values ?? [];
-
-            return ($newValues['status'] ?? null) === 'free' && ($oldValues['status'] ?? null) !== 'free';
-        });
-
-        $userIds = $downgrades->pluck('user_id')->filter()->unique()->values();
-        $usersById = User::query()->whereIn('id', $userIds)->get()->keyBy('id');
-
-        $records = $downgrades->map(function (Action $action) use ($typeNamesById, $usersById): array {
-            $oldValues = $action->old_values ?? [];
-            $previousTypeId = $oldValues['membership_type_id'] ?? null;
-            $user = $action->user_id ? $usersById->get($action->user_id) : null;
+        $records = $downgrades->map(function (array $history, int $userId) use ($usersById): array {
+            $user = $usersById->get($userId);
 
             return [
                 'user_name' => $user?->name ?? '—',
                 'user_email' => $user?->email ?? '—',
-                'previous_type' => $previousTypeId !== null ? (string) ($typeNamesById[$previousTypeId] ?? '—') : '—',
-                'downgraded_at' => $action->created_at?->toDateTimeString(),
+                'previous_type' => $history['previous_type'],
+                'downgraded_at' => optional($history['downgraded_at'])->toDateTimeString(),
             ];
-        })->values();
+        })->sortByDesc('downgraded_at')->values();
 
         $byPreviousType = $records->groupBy('previous_type')
             ->map(fn ($group, $name) => ['name' => (string) $name, 'total' => $group->count()])
@@ -185,5 +190,111 @@ class MembershipReportService
             'by_previous_type' => $byPreviousType,
             'records' => $records->take(500)->all(),
         ];
+    }
+
+    /**
+     * @return list<array<string,mixed>>
+     */
+    protected function listByStatus(string $status): array
+    {
+        $rows = Membership::query()
+            ->select('memberships.*')
+            ->addSelect([
+                'users.name as user_name',
+                'users.email as user_email',
+                'users.created_at as user_joined_at',
+                'membership_types.name as membership_type_name',
+            ])
+            ->join('users', 'users.id', '=', 'memberships.user_id')
+            ->join('membership_types', 'membership_types.id', '=', 'memberships.membership_type_id')
+            ->where('memberships.status', $status)
+            ->orderByDesc('memberships.updated_at')
+            ->limit(5000)
+            ->get();
+
+        return $rows->map(fn (Membership $row): array => [
+            'user_name' => $row->user_name,
+            'user_email' => $row->user_email,
+            'membership_type_name' => $row->membership_type_name,
+            'joined_at' => $row->user_joined_at ? Carbon::parse($row->user_joined_at)->toDateTimeString() : null,
+            'started_at' => optional($row->started_at)->toDateTimeString(),
+            'expires_at' => optional($row->expires_at)->toDateTimeString(),
+        ])->values()->all();
+    }
+
+    /**
+     * All users currently on the free plan, flagged with whether they previously held a paid plan
+     * (detected from a stored past expiration date or a status-downgrade event in the audit trail).
+     *
+     * @return list<array<string,mixed>>
+     */
+    protected function listFreeUsers(): array
+    {
+        $downgrades = $this->downgradeHistory();
+
+        $rows = Membership::query()
+            ->select('memberships.*')
+            ->addSelect(['users.name as user_name', 'users.email as user_email', 'users.created_at as user_joined_at'])
+            ->join('users', 'users.id', '=', 'memberships.user_id')
+            ->where('memberships.status', 'free')
+            ->orderByDesc('users.created_at')
+            ->limit(5000)
+            ->get();
+
+        return $rows->map(function (Membership $row) use ($downgrades): array {
+            $history = $downgrades->get($row->user_id);
+            $previouslyPaid = $row->expires_at !== null || $history !== null;
+
+            return [
+                'user_name' => $row->user_name,
+                'user_email' => $row->user_email,
+                'joined_at' => $row->user_joined_at ? Carbon::parse($row->user_joined_at)->toDateTimeString() : null,
+                'previously_paid' => $previouslyPaid,
+                'previous_type' => $history['previous_type'] ?? ($previouslyPaid ? '—' : null),
+                'downgraded_at' => $history ? optional($history['downgraded_at'])->toDateTimeString() : null,
+            ];
+        })->values()->all();
+    }
+
+    /**
+     * Most recent free-downgrade event per user, read from the audit trail (the `actions` table
+     * logs every Membership update via App\Providers\AppServiceProvider). Optionally scoped to a
+     * date range; unscoped when called with no arguments.
+     *
+     * @return Collection<int, array{downgraded_at: CarbonInterface|null, previous_type: string}>
+     */
+    protected function downgradeHistory(?CarbonInterface $from = null, ?CarbonInterface $to = null): Collection
+    {
+        $typeNamesById = MembershipType::query()->pluck('name', 'id');
+
+        $query = Action::query()
+            ->where('module', 'memberships')
+            ->where('action', 'update');
+
+        if ($from !== null && $to !== null) {
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        $actions = $query->orderBy('created_at')->get();
+
+        $history = [];
+
+        foreach ($actions as $action) {
+            $newValues = $action->new_values ?? [];
+            $oldValues = $action->old_values ?? [];
+
+            if (($newValues['status'] ?? null) !== 'free' || ($oldValues['status'] ?? null) === 'free' || ! $action->user_id) {
+                continue;
+            }
+
+            $previousTypeId = $oldValues['membership_type_id'] ?? null;
+
+            $history[$action->user_id] = [
+                'downgraded_at' => $action->created_at,
+                'previous_type' => $previousTypeId !== null ? (string) ($typeNamesById[$previousTypeId] ?? '—') : '—',
+            ];
+        }
+
+        return collect($history);
     }
 }

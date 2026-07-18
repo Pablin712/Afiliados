@@ -5,6 +5,15 @@ return [
     'subtitle' => 'Resumen de usuarios y membresias en el periodo seleccionado.',
     'apply' => 'Aplicar rango',
     'export_pdf' => 'Exportar PDF',
+    'segment_label' => 'Segmento',
+    'segments' => [
+        'all' => 'Resumen general',
+        'free' => 'Usuarios free',
+        'active' => 'Usuarios activos (de pago)',
+        'expired' => 'Membresias vencidas',
+        'pending_payment' => 'Pago pendiente',
+        'non_renewed' => 'No renovaron (eran de pago y pasaron a free)',
+    ],
     'cards' => [
         'total_users' => 'Usuarios totales (a la fecha)',
         'new_users' => 'Usuarios nuevos en el periodo',
@@ -30,6 +39,12 @@ return [
         'started_at' => 'Inicio',
         'previous_type' => 'Tipo anterior',
         'downgraded_at' => 'Fecha de baja',
+        'joined_at' => 'Fecha de registro',
+        'previously_paid' => 'Tuvo plan de pago',
+    ],
+    'booleans' => [
+        'yes' => 'Si',
+        'no' => 'No',
     ],
     'statuses' => [
         'active' => 'Activa',
@@ -41,6 +56,7 @@ return [
         'empty' => 'No hay registros en este periodo.',
         'report_generated_at' => 'Generado en',
         'non_renewed_hint' => 'Detectado a partir del historial de auditoria: usuarios cuya membresia paso a estado free en el periodo.',
+        'non_renewed_segment_hint' => 'Listado completo (sin limite de fechas): usuarios que actualmente estan en free y que antes tuvieron una membresia de pago, segun el historial de auditoria o su fecha de vencimiento registrada.',
         'permission_key' => 'report memberships',
     ],
 ];
