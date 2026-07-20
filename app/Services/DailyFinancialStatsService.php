@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Schema;
 
 class DailyFinancialStatsService
 {
+    public function __construct(private readonly MembershipReportService $membershipReportService)
+    {
+    }
+
     public function hasStatsTable(): bool
     {
         return Schema::hasTable('daily_financial_stats');
@@ -99,6 +103,21 @@ class DailyFinancialStatsService
         $fromDay = Carbon::parse($from)->startOfDay();
         $toDay = Carbon::parse($to)->endOfDay();
 
+        $summary = $this->buildDashboardSummary($fromDay, $toDay);
+        $expiryTotals = $this->membershipExpiryRunTotals($fromDay, $toDay);
+
+        $summary['totals']['free_renewals_count'] = $expiryTotals['free_renewals'];
+        $summary['totals']['downgraded_count'] = $expiryTotals['downgraded'];
+        $summary['totals']['non_renewed_total_now'] = $this->nonRenewedTotalNow();
+
+        return $summary;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function buildDashboardSummary(CarbonInterface $fromDay, CarbonInterface $toDay): array
+    {
         if (! $this->hasStatsTable()) {
             return $this->liveSummary($fromDay, $toDay, true);
         }
@@ -141,6 +160,35 @@ class DailyFinancialStatsService
             'stats_table_missing' => false,
             'is_live_fallback' => false,
         ];
+    }
+
+    /**
+     * @return array{free_renewals: int, downgraded: int}
+     */
+    protected function membershipExpiryRunTotals(CarbonInterface $fromDay, CarbonInterface $toDay): array
+    {
+        if (! Schema::hasTable('membership_expiry_runs')) {
+            return ['free_renewals' => 0, 'downgraded' => 0];
+        }
+
+        $row = DB::table('membership_expiry_runs')
+            ->whereBetween('run_at', [$fromDay, $toDay])
+            ->selectRaw('COALESCE(SUM(free_renewals), 0) as free_renewals, COALESCE(SUM(downgraded), 0) as downgraded')
+            ->first();
+
+        return [
+            'free_renewals' => (int) ($row->free_renewals ?? 0),
+            'downgraded' => (int) ($row->downgraded ?? 0),
+        ];
+    }
+
+    /**
+     * Live snapshot (not date-bound): users currently on the free plan who previously held a
+     * paid membership, i.e. the current "no renovaron" count.
+     */
+    protected function nonRenewedTotalNow(): int
+    {
+        return $this->membershipReportService->segmentUsers('non_renewed')['total'];
     }
 
     /**

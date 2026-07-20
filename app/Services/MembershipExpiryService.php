@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Membership;
+use App\Models\MembershipExpiryRun;
 use App\Models\MembershipType;
 
 class MembershipExpiryService
@@ -35,7 +36,7 @@ class MembershipExpiryService
             ->get();
 
         if ($expired->isEmpty()) {
-            return [
+            $result = [
                 'processed' => 0,
                 'downgraded' => 0,
                 'free_renewals' => 0,
@@ -45,6 +46,10 @@ class MembershipExpiryService
                 'whatsapp_group_removed' => 0,
                 'telegram_banned' => 0,
             ];
+
+            $this->recordRun($result, $dryRun);
+
+            return $result;
         }
 
         $phonesToRemove = [];
@@ -110,7 +115,7 @@ class MembershipExpiryService
             }
         }
 
-        return [
+        $result = [
             'processed' => $expired->count(),
             'downgraded' => count($downgradedUserIds),
             'free_renewals' => count($freeRenewalUserIds),
@@ -120,5 +125,33 @@ class MembershipExpiryService
             'whatsapp_group_removed' => $whatsappRemoved,
             'telegram_banned' => $telegramBanned,
         ];
+
+        $this->recordRun($result, $dryRun);
+
+        return $result;
+    }
+
+    /**
+     * Persist a history row for real (non-dry-run) executions, so the admin dashboard can
+     * show free-renewal/downgrade counts over a date range instead of only a live snapshot.
+     *
+     * @param array<string, mixed> $result
+     */
+    private function recordRun(array $result, bool $dryRun): void
+    {
+        if ($dryRun) {
+            return;
+        }
+
+        MembershipExpiryRun::query()->create([
+            'run_at' => now(),
+            'processed' => $result['processed'],
+            'downgraded' => $result['downgraded'],
+            'free_renewals' => $result['free_renewals'],
+            'downgraded_user_ids' => $result['downgraded_user_ids'],
+            'free_renewal_user_ids' => $result['free_renewal_user_ids'],
+            'whatsapp_group_removed' => $result['whatsapp_group_removed'],
+            'telegram_banned' => $result['telegram_banned'],
+        ]);
     }
 }

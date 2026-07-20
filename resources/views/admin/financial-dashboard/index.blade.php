@@ -57,6 +57,25 @@
                 </div>
             </div>
 
+            <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.admin.financial_dashboard.memberships_activity_title') }}</h3>
+                <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.financial_dashboard.memberships_activity_hint') }}</p>
+                <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-graphite-800 dark:bg-graphite-800">
+                        <p class="text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.financial_dashboard.cards.free_renewals') }}</p>
+                        <p class="mt-1 text-xl font-semibold text-emerald-600">{{ number_format($summary['totals']['free_renewals_count'] ?? 0) }}</p>
+                    </div>
+                    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-graphite-800 dark:bg-graphite-800">
+                        <p class="text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.financial_dashboard.cards.downgraded') }}</p>
+                        <p class="mt-1 text-xl font-semibold text-rose-600">{{ number_format($summary['totals']['downgraded_count'] ?? 0) }}</p>
+                    </div>
+                    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-graphite-800 dark:bg-graphite-800">
+                        <p class="text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.financial_dashboard.cards.non_renewed_now') }}</p>
+                        <p class="mt-1 text-xl font-semibold text-gray-700 dark:text-graphite-200">{{ number_format($summary['totals']['non_renewed_total_now'] ?? 0) }}</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid gap-4 lg:grid-cols-3">
                 <div class="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.admin.financial_dashboard.line_chart_title') }}</h3>
