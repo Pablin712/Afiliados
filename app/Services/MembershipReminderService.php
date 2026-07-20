@@ -8,6 +8,11 @@ use Carbon\CarbonInterface;
 
 class MembershipReminderService
 {
+    public function __construct(
+        private readonly MembershipFreeRenewalService $membershipFreeRenewalService,
+    ) {
+    }
+
     /**
      * @return list<array<string, mixed>>
      */
@@ -27,6 +32,15 @@ class MembershipReminderService
             ->orderBy('id')
             ->limit($limit)
             ->get();
+
+        // Users who already earned a free renewal for this period get auto-renewed by
+        // memberships:downgrade-expired instead of being downgraded, so they shouldn't
+        // receive a "reactivate to keep your benefits" reminder.
+        $users = $users->reject(function (User $user): bool {
+            $membership = $user->membership;
+
+            return $membership !== null && $this->membershipFreeRenewalService->qualifies($membership);
+        })->values();
 
         $reminderMessageEs = MessageTemplate::bodyFor(
             'membership_expiring',

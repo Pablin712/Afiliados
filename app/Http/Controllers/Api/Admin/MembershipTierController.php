@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\MembershipExpiryService;
 use App\Services\MembershipReminderService;
 use App\Services\MembershipTierService;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +15,8 @@ class MembershipTierController extends Controller
 {
     public function __construct(
         private readonly MembershipTierService $membershipTierService,
-        private readonly MembershipReminderService $membershipReminderService
+        private readonly MembershipReminderService $membershipReminderService,
+        private readonly MembershipExpiryService $membershipExpiryService
     ) {
     }
 
@@ -80,6 +82,21 @@ class MembershipTierController extends Controller
                 'limit' => $limit,
             ],
             'data' => $users,
+        ]);
+    }
+
+    public function downgradeExpired(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'dry_run' => ['nullable', 'boolean'],
+        ]);
+
+        $result = $this->membershipExpiryService->processExpired((bool) ($validated['dry_run'] ?? false));
+
+        return response()->json([
+            'message' => 'Expired memberships processed successfully.',
+            'meta' => $result,
+            'data' => $result,
         ]);
     }
 }

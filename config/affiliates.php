@@ -84,6 +84,13 @@ return [
         ],
     ],
 
+    // Free renewal benefit: a sponsor whose direct affiliates include at least this many
+    // NEW customers (first-ever approved payment, reactivations don't count) inside the
+    // sponsor's own current billing period gets their next renewal for free.
+    'free_renewal' => [
+        'required_new_customers' => (int) env('AFFILIATE_FREE_RENEWAL_NEW_CUSTOMERS', 3),
+    ],
+
     // Used by n8n or internal automations.
     'internal_api_token' => env('INTERNAL_API_TOKEN'),
 

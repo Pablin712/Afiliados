@@ -50,6 +50,26 @@ class RegistrationWhatsappService
         $this->sendPayload($user, $payload);
     }
 
+    public function sendFreeRenewal(User $user): void
+    {
+        $fallback = 'Hola {name} 🎉'
+            ."\n\nTu membresía se renovó automáticamente sin costo, por cumplir el beneficio de gratuidad (3 nuevos referidos customer en el periodo)."
+            ."\n\nSigue así para mantener este beneficio el próximo mes.";
+
+        $template = MessageTemplate::where('key', 'membership_free_renewal')->first();
+        $message = $this->renderTemplate($template?->body ?? $fallback, $user);
+
+        $payload = $this->buildStandardPayload(
+            $user,
+            tipo: 'renovacion_gratis',
+            event: 'membership.free_renewal',
+            mensajeEs: $message,
+            mensajeEn: 'Your membership was automatically renewed for free because you met the referral benefit (3 new paying referrals this period).'
+        );
+
+        $this->sendPayload($user, $payload);
+    }
+
     /**
      * @return array<string, mixed>
      */

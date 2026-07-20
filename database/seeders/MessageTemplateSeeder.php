@@ -34,6 +34,12 @@ class MessageTemplateSeeder extends Seeder
                 'description' => 'Texto reenviado por n8n junto con el saludo y la fecha de vencimiento cuando la membresía de un usuario vence. No usa variables propias.',
                 'body'        => 'Tu membresía vence mañana. Por favor reactiva para mantener tus beneficios.',
             ],
+            [
+                'key'         => 'membership_free_renewal',
+                'name'        => 'Renovación gratuita por beneficio de referidos',
+                'description' => 'Se envía cuando memberships:downgrade-expired renueva una membresía sin costo porque el usuario cumplió el beneficio de gratuidad (nuevos referidos customer en el periodo). Variables disponibles: {name}, {email}, {phone}',
+                'body'        => "Hola {name} 🎉\n\nTu membresía se renovó automáticamente sin costo, por cumplir el beneficio de gratuidad (3 nuevos referidos customer en el periodo).\n\nSigue así para mantener este beneficio el próximo mes.",
+            ],
         ];
 
         foreach ($templates as $data) {

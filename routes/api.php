@@ -41,6 +41,8 @@ Route::prefix('admin')
         Route::get('/memberships/recalculate-tiers/{user}', [MembershipTierController::class, 'show']);
         Route::get('/memberships/expired-today', [MembershipTierController::class, 'expiredToday'])
             ->name('api.admin.memberships.expired-today');
+        Route::post('/memberships/downgrade-expired', [MembershipTierController::class, 'downgradeExpired'])
+            ->name('api.admin.memberships.downgrade-expired');
 
         Route::post('/users/prune-inactive', [UserLifecycleController::class, 'pruneInactive'])
             ->name('api.admin.users.prune-inactive');
