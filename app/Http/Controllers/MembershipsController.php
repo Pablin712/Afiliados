@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Memberships\IndexMembershipsRequest;
 use App\Models\Membership;
 use App\Models\MembershipType;
+use App\Services\MembershipTierService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +20,10 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class MembershipsController extends Controller
 {
+    public function __construct(private readonly MembershipTierService $membershipTierService)
+    {
+    }
+
     public function index(IndexMembershipsRequest $request): View|JsonResponse|Response|StreamedResponse
     {
         $query = $this->buildQuery($request);
@@ -32,6 +37,7 @@ class MembershipsController extends Controller
 
         $perPage = max(5, min(100, (int) $request->integer('per_page', 10)));
         $records = (clone $query)->paginate($perPage);
+        $rankExplanations = $this->membershipTierService->explainAll();
 
         if ($request->boolean('ajax')) {
             return response()->json([
@@ -40,6 +46,7 @@ class MembershipsController extends Controller
                     'membershipTypes' => $membershipTypes,
                     'statusOptions' => $statusOptions,
                     'canEdit' => $canEdit,
+                    'rankExplanations' => $rankExplanations,
                 ])->render(),
                 'total_records' => $records->total(),
                 'current_page' => $records->currentPage(),
@@ -61,6 +68,7 @@ class MembershipsController extends Controller
             'membershipTypes' => $membershipTypes,
             'filters' => $filters,
             'statusOptions' => $statusOptions,
+            'rankExplanations' => $rankExplanations,
         ]);
     }
 

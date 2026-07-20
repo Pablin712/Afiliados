@@ -7,6 +7,7 @@ return [
         'user' => 'User',
         'membership_type' => 'Membership Type',
         'status' => 'Status',
+        'reason' => 'Reason',
         'started_at' => 'Started At',
         'expires_at' => 'Expires At',
         'created_at' => 'Created At',

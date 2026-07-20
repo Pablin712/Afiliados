@@ -81,15 +81,95 @@
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.admin.financial_dashboard.line_chart_title') }}</h3>
                     <div id="lineChart" class="mt-4 h-[320px]"></div>
                 </div>
-                <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900">
+                <div
+                    class="rounded-xl border border-gray-200 bg-white p-4 dark:border-graphite-800 dark:bg-graphite-900"
+                    x-data="{
+                        open: false,
+                        selectedType: null,
+                        membershipTotals: @js($summary['membership_totals'] ?? []),
+                        selected() {
+                            return this.membershipTotals.find(item => item.name === this.selectedType) ?? null;
+                        },
+                        show(name) {
+                            this.selectedType = name;
+                            this.open = true;
+                        },
+                    }"
+                >
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ __('messages.admin.financial_dashboard.memberships_title') }}</h3>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.financial_dashboard.memberships_hint') }}</p>
                     <div class="mt-3 space-y-2">
                         @foreach (($summary['membership_totals'] ?? []) as $item)
-                            <div class="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-sm dark:bg-graphite-800">
+                            <button
+                                type="button"
+                                @click="show('{{ $item['name'] }}')"
+                                class="w-full flex items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-sm dark:bg-graphite-800 hover:bg-gray-100 dark:hover:bg-graphite-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors text-left"
+                            >
                                 <span class="capitalize">{{ $item['name'] }}</span>
-                                <span class="font-semibold">{{ $item['total'] }}</span>
-                            </div>
+                                <span class="flex items-center gap-1.5 font-semibold">
+                                    {{ $item['total'] }}
+                                    <svg class="w-3.5 h-3.5 text-gray-400 dark:text-graphite-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </button>
                         @endforeach
+                    </div>
+
+                    <div
+                        x-show="open"
+                        x-cloak
+                        style="display: none;"
+                        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                        x-transition:enter="ease-out duration-150"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="ease-in duration-100"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                    >
+                        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="open = false"></div>
+
+                        <div class="relative bg-white dark:bg-graphite-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-graphite-700 w-full max-w-lg max-h-[80vh] flex flex-col">
+                            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-graphite-800">
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 dark:text-graphite-100 capitalize" x-text="selectedType"></h4>
+                                    <p class="text-xs text-gray-500 dark:text-graphite-400">
+                                        <span x-text="selected()?.total ?? 0"></span> {{ __('messages.admin.financial_dashboard.memberships_users_count') }}
+                                    </p>
+                                </div>
+                                <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-graphite-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="overflow-y-auto p-2">
+                                <template x-if="!selected() || selected().users.length === 0">
+                                    <p class="px-3 py-6 text-center text-sm text-gray-500 dark:text-graphite-400">{{ __('messages.admin.financial_dashboard.memberships_no_users') }}</p>
+                                </template>
+                                <ul class="divide-y divide-gray-100 dark:divide-graphite-800">
+                                    <template x-for="u in (selected()?.users ?? [])" :key="u.id">
+                                        <li class="flex items-center justify-between gap-3 px-3 py-2.5">
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-graphite-100 truncate" x-text="u.name"></p>
+                                                <p class="text-xs text-gray-500 dark:text-graphite-400 truncate" x-text="u.email"></p>
+                                            </div>
+                                            <span
+                                                class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase"
+                                                :class="{
+                                                    'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300': u.status === 'active',
+                                                    'bg-gray-100 text-gray-600 dark:bg-graphite-800 dark:text-graphite-300': u.status === 'free',
+                                                    'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300': u.status === 'expired',
+                                                    'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300': u.status === 'pending_payment',
+                                                }"
+                                                x-text="u.status"
+                                            ></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

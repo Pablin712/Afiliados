@@ -339,20 +339,36 @@ class DailyFinancialStatsService
     }
 
     /**
-     * @return list<array{name:string,total:int}>
+     * @return list<array{name:string,total:int,users:list<array{id:int,name:string,email:string,status:string}>}>
      */
     protected function membershipTotals(): array
     {
         $rows = DB::table('memberships')
             ->join('membership_types', 'membership_types.id', '=', 'memberships.membership_type_id')
-            ->select('membership_types.name', DB::raw('COUNT(*) as total'))
-            ->groupBy('membership_types.name')
-            ->orderBy('membership_types.name')
+            ->join('users', 'users.id', '=', 'memberships.user_id')
+            ->select(
+                'membership_types.name as type_name',
+                'memberships.status as status',
+                'users.id as user_id',
+                'users.name as user_name',
+                'users.email as user_email'
+            )
+            ->orderBy('users.name')
             ->get();
 
-        return $rows->map(fn (object $row): array => [
-            'name' => (string) $row->name,
-            'total' => (int) $row->total,
-        ])->values()->all();
+        return $rows->groupBy('type_name')
+            ->map(fn ($group, $name): array => [
+                'name' => (string) $name,
+                'total' => $group->count(),
+                'users' => $group->map(fn (object $row): array => [
+                    'id' => (int) $row->user_id,
+                    'name' => (string) $row->user_name,
+                    'email' => (string) $row->user_email,
+                    'status' => (string) $row->status,
+                ])->values()->all(),
+            ])
+            ->sortBy('name')
+            ->values()
+            ->all();
     }
 }

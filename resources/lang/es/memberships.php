@@ -7,6 +7,7 @@ return [
         'user' => 'Usuario',
         'membership_type' => 'Tipo de Membresia',
         'status' => 'Estado',
+        'reason' => 'Razón',
         'started_at' => 'Inicio',
         'expires_at' => 'Vencimiento',
         'created_at' => 'Creado En',

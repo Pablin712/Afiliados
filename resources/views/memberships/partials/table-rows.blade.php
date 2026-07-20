@@ -8,6 +8,25 @@
                 {{ __('memberships.statuses.'.($record->status ?? 'pending_payment')) }}
             </span>
         </td>
+        <td class="px-4 sm:px-6 py-3 text-sm max-w-xs">
+            @php
+                $rankExplanation = ($rankExplanations ?? [])[$record->user_id ?? 0] ?? null;
+            @endphp
+            @if ($rankExplanation)
+                <div class="flex items-start gap-1.5">
+                    @if ($rankExplanation['mismatch'])
+                        <svg class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    @endif
+                    <span class="text-xs {{ $rankExplanation['mismatch'] ? 'text-amber-700 dark:text-amber-400 font-medium' : 'text-gray-500 dark:text-graphite-400' }}">
+                        {{ $rankExplanation['reason'] }}
+                    </span>
+                </div>
+            @else
+                <span class="text-gray-400 dark:text-graphite-600">—</span>
+            @endif
+        </td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-600 dark:text-graphite-400 whitespace-nowrap">{{ optional($record->started_at)->format('Y-m-d H:i:s') ?? '-' }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-600 dark:text-graphite-400 whitespace-nowrap">{{ optional($record->expires_at)->format('Y-m-d H:i:s') ?? '-' }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-600 dark:text-graphite-400 whitespace-nowrap">{{ optional($record->created_at)->format('Y-m-d H:i:s') }}</td>
@@ -58,7 +77,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="{{ ($canEdit ?? false) ? 8 : 7 }}" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
+        <td colspan="{{ ($canEdit ?? false) ? 9 : 8 }}" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
             {{ __('memberships.messages.empty') }}
         </td>
     </tr>

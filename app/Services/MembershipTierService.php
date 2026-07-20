@@ -255,6 +255,159 @@ class MembershipTierService
         ];
     }
 
+    /**
+     * Evaluate every membership against the current network state, without persisting
+     * anything. Unlike recalculate(), this returns a row for EVERY membership (not only the
+     * ones whose stored type/status would change), so callers can explain "why" a user is at
+     * their current rank and flag mismatches with the business rules.
+     *
+     * @return array<int, array{active_direct_affiliates: int, team_points: int, rank_index: int, current_type: string, current_status: string, target_type: string}>
+     */
+    public function evaluateAll(): array
+    {
+        $types = MembershipType::query()->get();
+        $users = User::query()->with(['membership.membershipType', 'roles'])->get();
+
+        $usersById = $users->keyBy('id');
+        $typeMap = $this->buildTypeMap($types);
+
+        $childrenBySponsor = [];
+        foreach ($users as $user) {
+            $sponsorId = (int) ($user->sponsor_id ?? 0);
+
+            if ($sponsorId > 0 && $sponsorId !== (int) $user->id) {
+                $childrenBySponsor[$sponsorId][] = (int) $user->id;
+            }
+        }
+
+        $rankRules = $this->rankRules();
+        $pointsPerAffiliate = max(1, (int) config('affiliates.points_per_affiliate', 100));
+
+        $descendantCache = [];
+        $rankCache = [];
+        $rankResolving = [];
+
+        $memberships = Membership::query()
+            ->with(['membershipType', 'user.roles'])
+            ->whereIn('status', ['active', 'free', 'expired', 'pending_payment'])
+            ->get();
+
+        $results = [];
+
+        foreach ($memberships as $membership) {
+            $user = $membership->user;
+            if ($user instanceof User && $user->hasRole('admin')) {
+                continue;
+            }
+
+            $directActiveAffiliates = $this->countDirectQualifyingAffiliates((int) $membership->user_id, $childrenBySponsor, $usersById);
+            $teamActiveAffiliates = $this->countQualifyingDescendants(
+                (int) $membership->user_id,
+                $childrenBySponsor,
+                $usersById,
+                $descendantCache,
+                []
+            );
+            $teamPoints = $teamActiveAffiliates * $pointsPerAffiliate;
+            $rankIndex = $this->resolveRankIndexForUser(
+                (int) $membership->user_id,
+                $usersById,
+                $childrenBySponsor,
+                $rankRules,
+                $pointsPerAffiliate,
+                $descendantCache,
+                $rankCache,
+                $rankResolving
+            );
+
+            $targetType = $this->resolveTargetType($membership, $rankIndex, $typeMap);
+
+            $results[(int) $membership->user_id] = [
+                'active_direct_affiliates' => $directActiveAffiliates,
+                'team_points' => $teamPoints,
+                'rank_index' => $rankIndex,
+                'current_type' => strtolower((string) ($membership->membershipType?->name ?? '')),
+                'current_status' => (string) $membership->status,
+                'target_type' => strtolower((string) ($targetType?->name ?? '')),
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * Human-readable (Spanish) explanation of why each user has their current membership
+     * rank/status, flagging cases where the stored type doesn't match what the current
+     * business rules would compute (pending a recalculate-tiers run).
+     *
+     * @return array<int, array{reason: string, mismatch: bool, active_direct_affiliates: int, team_points: int}>
+     */
+    public function explainAll(): array
+    {
+        $rankRules = $this->rankRules();
+
+        $explanations = [];
+
+        foreach ($this->evaluateAll() as $userId => $data) {
+            $explanations[$userId] = $this->buildReason($data, $rankRules);
+        }
+
+        return $explanations;
+    }
+
+    /**
+     * @param array{active_direct_affiliates: int, team_points: int, rank_index: int, current_type: string, current_status: string, target_type: string} $data
+     * @param array<string, array<string, int|null>> $rankRules
+     * @return array{reason: string, mismatch: bool, active_direct_affiliates: int, team_points: int}
+     */
+    private function buildReason(array $data, array $rankRules): array
+    {
+        $currentType = $data['current_type'];
+        $currentStatus = $data['current_status'];
+        $targetType = $data['target_type'];
+        $directs = $data['active_direct_affiliates'];
+        $points = $data['team_points'];
+
+        $mismatch = $currentStatus === 'active' && $targetType !== '' && $currentType !== $targetType;
+
+        $reason = match (true) {
+            $currentStatus === 'pending_payment' => 'Pago pendiente de aprobacion.',
+            $currentStatus === 'expired' => 'Vencida: pendiente de procesar la baja o renovacion.',
+            $currentStatus === 'free' => 'Free: no tiene una membresia de pago activa actualmente.',
+            $currentType === 'customer' || $currentType === '' => "Customer: compro membresia pero tiene {$directs} afiliado(s) directo(s) activo(s) con pago aprobado (necesita al menos 1 para Beginner).",
+            default => $this->buildRankReason($currentType, $directs, $points, $rankRules),
+        };
+
+        if ($mismatch) {
+            $reason = "Segun las reglas actuales deberia ser \"".ucfirst($targetType)."\" (pendiente de recalculo). ".$reason;
+        }
+
+        return [
+            'reason' => $reason,
+            'mismatch' => $mismatch,
+            'active_direct_affiliates' => $directs,
+            'team_points' => $points,
+        ];
+    }
+
+    /**
+     * @param array<string, array<string, int|null>> $rankRules
+     */
+    private function buildRankReason(string $currentType, int $directs, int $points, array $rankRules): string
+    {
+        $rule = $rankRules[$currentType] ?? [];
+        $requiredDirect = (int) ($rule['direct_affiliates'] ?? 0);
+        $requiredPoints = (int) ($rule['team_points'] ?? 0);
+
+        $reason = ucfirst($currentType).": tiene {$directs} afiliado(s) directo(s) activo(s) (minimo {$requiredDirect})";
+
+        if ($requiredPoints > 0) {
+            $reason .= " y {$points} pts de equipo (minimo {$requiredPoints})";
+        }
+
+        return $reason.'.';
+    }
+
     private function resolveTargetType(
         Membership $membership,
         int $rankIndex,

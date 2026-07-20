@@ -38,6 +38,7 @@
                     ['label' => __('memberships.columns.user'), 'type' => 'string', 'sort_by' => 'users.name'],
                     ['label' => __('memberships.columns.membership_type'), 'type' => 'string', 'sort_by' => 'membership_types.name'],
                     ['label' => __('memberships.columns.status'), 'type' => 'string', 'sort_by' => 'status'],
+                    ['label' => __('memberships.columns.reason'), 'type' => 'string', 'sort_by' => null],
                     ['label' => __('memberships.columns.started_at'), 'type' => 'string', 'sort_by' => 'started_at'],
                     ['label' => __('memberships.columns.expires_at'), 'type' => 'string', 'sort_by' => 'expires_at'],
                     ['label' => __('memberships.columns.created_at'), 'type' => 'string', 'sort_by' => 'created_at'],
@@ -96,6 +97,7 @@
                         'membershipTypes' => $membershipTypes,
                         'statusOptions' => $statusOptions,
                         'canEdit' => $canEdit,
+                        'rankExplanations' => $rankExplanations,
                     ])
                 </tbody>
             </x-enhanced-table>
