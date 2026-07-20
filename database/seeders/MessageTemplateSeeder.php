@@ -40,6 +40,12 @@ class MessageTemplateSeeder extends Seeder
                 'description' => 'Se envía cuando memberships:downgrade-expired renueva una membresía sin costo porque el usuario cumplió el beneficio de gratuidad (nuevos referidos customer en el periodo). Variables disponibles: {name}, {email}, {phone}',
                 'body'        => "Hola {name} 🎉\n\nTu membresía se renovó automáticamente sin costo, por cumplir el beneficio de gratuidad (3 nuevos referidos customer en el periodo).\n\nSigue así para mantener este beneficio el próximo mes.",
             ],
+            [
+                'key'         => 'membership_downgraded',
+                'name'        => 'Membresía vencida sin renovación (bajó a free)',
+                'description' => 'Se envía cuando una membresía vence, no cumple el beneficio de renovación gratis, y pasa a plan free. Variables disponibles: {name}, {email}, {phone}',
+                'body'        => "Hola {name}\n\nTu membresía venció y no se cumplió el beneficio de renovación gratis este periodo, así que tu cuenta pasó a plan free.\n\nPara reactivar tus beneficios, realiza tu pago de reactivación.",
+            ],
         ];
 
         foreach ($templates as $data) {

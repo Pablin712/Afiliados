@@ -70,6 +70,26 @@ class RegistrationWhatsappService
         $this->sendPayload($user, $payload);
     }
 
+    public function sendDowngraded(User $user): void
+    {
+        $fallback = 'Hola {name}'
+            ."\n\nTu membresía venció y no se cumplió el beneficio de renovación gratis este periodo, así que tu cuenta pasó a plan free."
+            ."\n\nPara reactivar tus beneficios, realiza tu pago de reactivación.";
+
+        $template = MessageTemplate::where('key', 'membership_downgraded')->first();
+        $message = $this->renderTemplate($template?->body ?? $fallback, $user);
+
+        $payload = $this->buildStandardPayload(
+            $user,
+            tipo: 'membresia_vencida',
+            event: 'membership.downgraded',
+            mensajeEs: $message,
+            mensajeEn: 'Your membership expired and did not meet the free-renewal benefit this period, so your account moved to the free plan. Please make your reactivation payment to restore your benefits.'
+        );
+
+        $this->sendPayload($user, $payload);
+    }
+
     /**
      * @return array<string, mixed>
      */

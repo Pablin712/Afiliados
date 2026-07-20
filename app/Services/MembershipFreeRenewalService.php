@@ -10,20 +10,33 @@ use Carbon\CarbonInterface;
 class MembershipFreeRenewalService
 {
     /**
-     * Whether the membership's current billing period (started_at -> expires_at) already
-     * earned a free renewal: the sponsor referred enough direct affiliates who made their
-     * first-ever approved payment inside that same period. Reactivations don't count.
+     * Whether the membership's current billing period already earned a free renewal: the
+     * sponsor referred enough direct affiliates who made their first-ever approved payment
+     * inside that same period. Reactivations don't count.
+     *
+     * The evaluation window is capped to the last month before expires_at, even if
+     * started_at is older — started_at can go stale relative to the real monthly cadence
+     * (e.g. an admin manually pushing expires_at forward without touching started_at), which
+     * would otherwise let old referrals from a prior period count again toward a later
+     * renewal decision they were never meant to cover.
      */
     public function qualifies(Membership $membership): bool
     {
-        if ($membership->started_at === null || $membership->expires_at === null) {
+        if ($membership->expires_at === null) {
             return false;
+        }
+
+        $periodEnd = $membership->expires_at;
+        $periodStart = $periodEnd->copy()->subMonth();
+
+        if ($membership->started_at !== null && $membership->started_at->gt($periodStart)) {
+            $periodStart = $membership->started_at;
         }
 
         return $this->newCustomerReferralsInPeriod(
             (int) $membership->user_id,
-            $membership->started_at,
-            $membership->expires_at
+            $periodStart,
+            $periodEnd
         ) >= $this->requiredNewCustomers();
     }
 
