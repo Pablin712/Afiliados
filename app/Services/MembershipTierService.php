@@ -14,6 +14,7 @@ class MembershipTierService
     public function __construct(
         private readonly WhatsappGroupService $whatsappGroupService,
         private readonly TelegramService $telegramService,
+        private readonly RankBonusService $rankBonusService,
     ) {}
 
     /**
@@ -128,10 +129,18 @@ class MembershipTierService
 
             if (! $dryRun) {
                 $prevStatus = (string) $membership->status;
+                $prevTypeName = strtolower((string) ($membership->membershipType?->name ?? 'unknown'));
 
                 $membership->membership_type_id = (int) $targetType->id;
                 $membership->status = $targetStatus;
                 $membership->save();
+
+                // The weekly/batch recalculation is the only place a rank promotion driven
+                // purely by network shape (not a live payment approval) can surface — without
+                // this call, such promotions silently never pay their bonus.
+                if ($membership->user instanceof User) {
+                    $this->rankBonusService->grantForCurrentMembership($membership->user, $prevTypeName, $prevStatus);
+                }
 
                 // Collect phones/telegram IDs of users downgraded to free for batch group removal.
                 if ($targetStatus === 'free' && $prevStatus !== 'free') {

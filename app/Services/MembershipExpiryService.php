@@ -5,9 +5,12 @@ namespace App\Services;
 use App\Models\Membership;
 use App\Models\MembershipExpiryRun;
 use App\Models\MembershipType;
+use Illuminate\Support\Facades\Cache;
 
 class MembershipExpiryService
 {
+    private const LOCK_KEY = 'membership-expiry-process-expired';
+
     public function __construct(
         private readonly WhatsappGroupService $whatsappGroupService,
         private readonly TelegramService $telegramService,
@@ -21,9 +24,44 @@ class MembershipExpiryService
      * WhatsApp/Telegram groups), unless they qualify for a free renewal — in which case the
      * membership opens a new one-month period instead of being downgraded, at no charge.
      *
+     * Real (non-dry-run) executions are guarded by a lock so two overlapping triggers (e.g. a
+     * manual run racing the scheduled one) can't double-extend the same membership.
+     *
      * @return array<string, mixed>
      */
     public function processExpired(bool $dryRun = false): array
+    {
+        if (! $dryRun) {
+            $lock = Cache::lock(self::LOCK_KEY, 300);
+
+            if (! $lock->get()) {
+                return [
+                    'processed' => 0,
+                    'downgraded' => 0,
+                    'free_renewals' => 0,
+                    'dry_run' => $dryRun,
+                    'downgraded_user_ids' => [],
+                    'free_renewal_user_ids' => [],
+                    'whatsapp_group_removed' => 0,
+                    'telegram_banned' => 0,
+                    'skipped_locked' => true,
+                ];
+            }
+
+            try {
+                return $this->doProcessExpired($dryRun);
+            } finally {
+                $lock->release();
+            }
+        }
+
+        return $this->doProcessExpired($dryRun);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function doProcessExpired(bool $dryRun): array
     {
         $freeMembershipType = MembershipType::query()
             ->whereRaw('LOWER(name) = ?', ['free'])

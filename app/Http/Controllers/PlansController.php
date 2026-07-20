@@ -9,6 +9,7 @@ use App\Models\Program;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\DatafastService;
+use App\Services\MembershipFreeRenewalService;
 use App\Services\PaymentPendingWebhookService;
 use App\Services\PendingPaymentReviewService;
 use Illuminate\Support\Carbon;
@@ -27,6 +28,7 @@ class PlansController extends Controller
         private readonly PaymentPendingWebhookService $paymentPendingWebhookService,
         private readonly PendingPaymentReviewService $pendingPaymentReviewService,
         private readonly DatafastService $datafastService,
+        private readonly MembershipFreeRenewalService $membershipFreeRenewalService,
     ) {
     }
 
@@ -50,8 +52,8 @@ class PlansController extends Controller
         $canFreeRenewToday = false;
 
         if (! $isAdmin && $membership instanceof Membership) {
-            $monthlyNewDirectCustomers = $this->countMonthlyNewDirectCustomers((int) $membership->user_id, now());
-            $canFreeRenewToday = $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus, $monthlyNewDirectCustomers);
+            $monthlyNewDirectCustomers = $this->membershipFreeRenewalService->currentPeriodReferralCount($membership);
+            $canFreeRenewToday = $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus);
         }
 
         $pendingPayment = null;
@@ -403,17 +405,20 @@ class PlansController extends Controller
             return back()->with('error', __('messages.plans.already_pending'));
         }
 
-        $monthlyNewDirectCustomers = $this->countMonthlyNewDirectCustomers((int) $membership->user_id, now());
-
-        if (! $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus, $monthlyNewDirectCustomers)) {
+        if (! $this->canFreeRenewToday($membership, $membershipTypeName, $membershipStatus)) {
             return back()->with('error', __('messages.plans.free_renew_not_eligible'));
         }
 
+        // Open a new period starting exactly where the previous one ended (matching
+        // MembershipExpiryService's automatic renewal) so RankBonusService's
+        // isInitialActivationPeriod()/maintenance-bonus tracking — which is keyed off
+        // started_at — keeps working correctly across repeated free renewals.
         $baseDate = $membership->expires_at instanceof Carbon
             ? $membership->expires_at->copy()
             : now();
 
-        $membership->expires_at = $baseDate->addMonth();
+        $membership->started_at = $baseDate->copy();
+        $membership->expires_at = $baseDate->copy()->addMonth();
         $membership->status = 'active';
         $membership->save();
 
@@ -431,7 +436,7 @@ class PlansController extends Controller
         return in_array($membershipStatus, ['active', 'expired', 'free'], true);
     }
 
-    private function canFreeRenewToday(Membership $membership, string $membershipTypeName, string $membershipStatus, int $monthlyNewDirectCustomers): bool
+    private function canFreeRenewToday(Membership $membership, string $membershipTypeName, string $membershipStatus): bool
     {
         if (in_array($membershipTypeName, ['free', 'customer', ''], true)) {
             return false;
@@ -445,32 +450,7 @@ class PlansController extends Controller
             return false;
         }
 
-        $required = 3;
-
-        return $monthlyNewDirectCustomers >= $required;
-    }
-
-    private function countMonthlyNewDirectCustomers(int $sponsorId, Carbon $referenceDate): int
-    {
-        $monthStart = $referenceDate->copy()->startOfMonth();
-        $monthEnd = $referenceDate->copy()->endOfMonth();
-
-        return (int) DB::table('payments as p')
-            ->join('users as direct', 'direct.id', '=', 'p.user_id')
-            ->join('programs as pr', 'pr.id', '=', 'p.program_id')
-            ->join('membership_types as mt', 'mt.id', '=', 'pr.membership_type_id')
-            ->where('direct.sponsor_id', $sponsorId)
-            ->where('p.state', 'approved')
-            ->whereBetween('p.reviewed_at', [$monthStart, $monthEnd])
-            ->whereRaw('LOWER(mt.name) = ?', ['customer'])
-            ->whereNotExists(function ($query): void {
-                $query->select(DB::raw(1))
-                    ->from('payments as prev')
-                    ->whereColumn('prev.user_id', 'p.user_id')
-                    ->where('prev.state', 'approved')
-                    ->whereColumn('prev.id', '<', 'p.id');
-            })
-            ->count();
+        return $this->membershipFreeRenewalService->qualifies($membership);
     }
 }
 

@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Str;
 
+// NOTE: this is inert on the production host — that hosting has no real system cron
+// running `php artisan schedule:run`, so nothing ever triggers Laravel's task scheduler.
+// The command still runs fine locally/via CLI; in production the equivalent logic is
+// exposed as POST /admin/memberships/downgrade-expired for n8n to call on a real cron
+// (see docs/N8N_INTERNAL_APIS.md, Flujo G.2). Do not rely on this line alone.
 Schedule::command('memberships:downgrade-expired')->dailyAt('00:30');
 
 Artisan::command('inspire', function () {

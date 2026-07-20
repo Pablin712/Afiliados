@@ -11,21 +11,45 @@ class MembershipFreeRenewalService
 {
     /**
      * Whether the membership's current billing period already earned a free renewal: the
-     * sponsor referred enough direct affiliates who made their first-ever approved payment
-     * inside that same period. Reactivations don't count.
+     * sponsor referred enough direct affiliates who made their first-ever approved "customer"
+     * payment inside that same period. Reactivations don't count.
      *
+     * This is the single source of truth for the free-renewal rule — both the automatic
+     * expiry processing (MembershipExpiryService) and the user-facing self-service button
+     * (PlansController::renewForFree) must go through this method so they can never disagree
+     * on what counts as "3 new customers this period".
+     */
+    public function qualifies(Membership $membership): bool
+    {
+        return $this->currentPeriodReferralCount($membership) >= $this->requiredNewCustomers();
+    }
+
+    /**
+     * How many qualifying new-customer referrals the sponsor has in their current period —
+     * exposed separately from qualifies() so callers can display progress (e.g. "2 of 3").
+     */
+    public function currentPeriodReferralCount(Membership $membership): int
+    {
+        if ($membership->expires_at === null) {
+            return 0;
+        }
+
+        [$periodStart, $periodEnd] = $this->resolvePeriodBounds($membership);
+
+        return $this->newCustomerReferralsInPeriod((int) $membership->user_id, $periodStart, $periodEnd);
+    }
+
+    /**
      * The evaluation window is capped to the last month before expires_at, even if
      * started_at is older — started_at can go stale relative to the real monthly cadence
      * (e.g. an admin manually pushing expires_at forward without touching started_at), which
      * would otherwise let old referrals from a prior period count again toward a later
      * renewal decision they were never meant to cover.
+     *
+     * @return array{0: CarbonInterface, 1: CarbonInterface}
      */
-    public function qualifies(Membership $membership): bool
+    private function resolvePeriodBounds(Membership $membership): array
     {
-        if ($membership->expires_at === null) {
-            return false;
-        }
-
         $periodEnd = $membership->expires_at;
         $periodStart = $periodEnd->copy()->subMonth();
 
@@ -33,11 +57,7 @@ class MembershipFreeRenewalService
             $periodStart = $membership->started_at;
         }
 
-        return $this->newCustomerReferralsInPeriod(
-            (int) $membership->user_id,
-            $periodStart,
-            $periodEnd
-        ) >= $this->requiredNewCustomers();
+        return [$periodStart, $periodEnd];
     }
 
     public function newCustomerReferralsInPeriod(int $sponsorId, CarbonInterface $periodStart, CarbonInterface $periodEnd): int
@@ -55,6 +75,7 @@ class MembershipFreeRenewalService
 
         foreach ($directAffiliateIds as $affiliateId) {
             $firstApprovedPayment = Payment::query()
+                ->with('program.membershipType')
                 ->where('user_id', $affiliateId)
                 ->where('state', 'approved')
                 ->orderBy('reviewed_at')
@@ -62,6 +83,14 @@ class MembershipFreeRenewalService
                 ->first();
 
             if (! $firstApprovedPayment || $firstApprovedPayment->reviewed_at === null) {
+                continue;
+            }
+
+            // Only "customer" tier programs count as the new-customer referral the business
+            // rule is about (defense in depth: today every program is customer-tier, but
+            // nothing in the schema guarantees that stays true).
+            $typeName = strtolower((string) ($firstApprovedPayment->program?->membershipType?->name ?? ''));
+            if ($typeName !== '' && $typeName !== 'customer') {
                 continue;
             }
 
