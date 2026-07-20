@@ -36,9 +36,30 @@
         </td>
         <td class="px-4 sm:px-6 py-3 text-sm">
             @if ($user->membership)
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
-                    {{ $user->membership->membershipType?->name ?? $user->membership->status }}
-                </span>
+                @php
+                    $membershipStatusColors = [
+                        'active' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+                        'free' => 'bg-gray-100 text-gray-600 dark:bg-graphite-800 dark:text-graphite-300',
+                        'expired' => 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
+                        'pending_payment' => 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+                    ];
+                    $membershipStatusColor = $membershipStatusColors[$user->membership->status] ?? $membershipStatusColors['free'];
+                @endphp
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 capitalize">
+                            {{ $user->membership->membershipType?->name ?? '—' }}
+                        </span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase {{ $membershipStatusColor }}">
+                            {{ __('membership_report.statuses.'.$user->membership->status) }}
+                        </span>
+                    </div>
+                    @if ($user->membership->expires_at)
+                        <span class="text-[11px] text-gray-400 dark:text-graphite-500 font-mono whitespace-nowrap">
+                            {{ __('messages.admin.users.membership_expires_at') }}: {{ $user->membership->expires_at->format('Y-m-d') }}
+                        </span>
+                    @endif
+                </div>
             @else
                 <span class="text-gray-400 dark:text-graphite-600">—</span>
             @endif

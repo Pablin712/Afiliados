@@ -379,6 +379,8 @@ return [
     'admin.users.affiliate_code' => 'Código Afiliado',
     'admin.users.sponsor' => 'Sponsor Actual',
     'admin.users.membership' => 'Membresía',
+    'admin.users.membership_expires_at' => 'Vencimiento',
+    'admin.users.membership_status' => 'Estado',
     'admin.users.change_sponsor' => 'Cambiar sponsor',
     'admin.users.change_sponsor_title' => 'Cambiar Sponsor',
     'admin.users.changing_sponsor_for' => 'Cambiando sponsor de',

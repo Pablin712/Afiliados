@@ -379,6 +379,8 @@ return [
     'admin.users.affiliate_code' => 'Affiliate Code',
     'admin.users.sponsor' => 'Current Sponsor',
     'admin.users.membership' => 'Membership',
+    'admin.users.membership_expires_at' => 'Expires at',
+    'admin.users.membership_status' => 'Status',
     'admin.users.change_sponsor' => 'Change sponsor',
     'admin.users.change_sponsor_title' => 'Change Sponsor',
     'admin.users.changing_sponsor_for' => 'Changing sponsor for',

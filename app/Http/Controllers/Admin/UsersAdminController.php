@@ -188,13 +188,13 @@ class UsersAdminController extends Controller
 
         $headers = [
             'ID', 'Nombre', 'Email', 'Teléfono', 'Código Afiliado',
-            'Patrocinador', 'Membresía', 'Registrado',
+            'Patrocinador', 'Membresía', 'Estado Membresía', 'Vencimiento Membresía', 'Registrado',
             'Banco - Titular', 'Banco - Nombre', 'Banco - Tipo', 'Banco - Número', 'Banco - Identificación',
         ];
 
         $sheet->fromArray($headers, null, 'A1');
 
-        $sheet->getStyle('A1:M1')->applyFromArray([
+        $sheet->getStyle('A1:O1')->applyFromArray([
             'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2F4FFF']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
@@ -211,7 +211,9 @@ class UsersAdminController extends Controller
                 $user->phone ?? '',
                 $user->affiliate_code ?? '',
                 $user->sponsor?->name ?? '',
-                $user->membership?->membershipType?->name ?? $user->membership?->status ?? '',
+                $user->membership?->membershipType?->name ?? '',
+                $user->membership?->status ?? '',
+                $user->membership?->expires_at?->format('Y-m-d') ?? '',
                 $user->created_at?->format('Y-m-d') ?? '',
                 $bank?->owner ?? '',
                 $bank?->bank_name ?? '',
@@ -223,7 +225,7 @@ class UsersAdminController extends Controller
             $row++;
         }
 
-        foreach (range('A', 'M') as $col) {
+        foreach (range('A', 'O') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
