@@ -130,8 +130,11 @@
                     >
                         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="open = false"></div>
 
-                        <div class="relative bg-white dark:bg-graphite-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-graphite-700 w-full max-w-lg max-h-[80vh] flex flex-col">
-                            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-graphite-800">
+                        <div
+                            class="relative bg-white dark:bg-graphite-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-graphite-700 flex flex-col"
+                            style="width: 100%; max-width: 32rem; max-height: 80vh;"
+                        >
+                            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-graphite-800" style="flex-shrink: 0;">
                                 <div>
                                     <h4 class="font-semibold text-gray-900 dark:text-graphite-100 capitalize" x-text="selectedType"></h4>
                                     <p class="text-xs text-gray-500 dark:text-graphite-400">
@@ -144,7 +147,7 @@
                                     </svg>
                                 </button>
                             </div>
-                            <div class="overflow-y-auto p-2">
+                            <div class="p-2" style="overflow-y: auto; min-height: 0;">
                                 <template x-if="!selected() || selected().users.length === 0">
                                     <p class="px-3 py-6 text-center text-sm text-gray-500 dark:text-graphite-400">{{ __('messages.admin.financial_dashboard.memberships_no_users') }}</p>
                                 </template>
