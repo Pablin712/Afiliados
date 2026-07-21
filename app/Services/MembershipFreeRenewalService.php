@@ -40,18 +40,26 @@ class MembershipFreeRenewalService
     }
 
     /**
-     * The evaluation window is capped to the last month before expires_at, even if
-     * started_at is older — started_at can go stale relative to the real monthly cadence
-     * (e.g. an admin manually pushing expires_at forward without touching started_at), which
-     * would otherwise let old referrals from a prior period count again toward a later
+     * The evaluation window is capped to the last month before expires_at (2 months for the
+     * still-ongoing first period, since that one legitimately spans 2 months) — even if
+     * started_at is older than that. started_at can go stale relative to the real monthly
+     * cadence (e.g. an admin manually pushing expires_at forward without touching started_at),
+     * which would otherwise let old referrals from a prior period count again toward a later
      * renewal decision they were never meant to cover.
+     *
+     * Whether this is still the first period is read from renewal_count rather than inferred
+     * from the started_at/expires_at gap: a stale started_at from the bug above can produce
+     * the same wide gap as a genuine first period, so date arithmetic alone can't tell them
+     * apart — renewal_count is explicit, incremented every time a period actually closes
+     * (paid or free), so it can't be fooled by a date that was never touched.
      *
      * @return array{0: CarbonInterface, 1: CarbonInterface}
      */
     private function resolvePeriodBounds(Membership $membership): array
     {
         $periodEnd = $membership->expires_at;
-        $periodStart = $periodEnd->copy()->subMonth();
+        $maxWindowMonths = ((int) $membership->renewal_count) === 0 ? 2 : 1;
+        $periodStart = $periodEnd->copy()->subMonths($maxWindowMonths);
 
         if ($membership->started_at !== null && $membership->started_at->gt($periodStart)) {
             $periodStart = $membership->started_at;

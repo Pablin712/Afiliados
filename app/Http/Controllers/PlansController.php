@@ -420,6 +420,7 @@ class PlansController extends Controller
         $membership->started_at = $baseDate->copy();
         $membership->expires_at = $baseDate->copy()->addMonth();
         $membership->status = 'active';
+        $membership->renewal_count = ((int) $membership->renewal_count) + 1;
         $membership->save();
 
         return back()->with('status', __('messages.plans.free_renew_success', [

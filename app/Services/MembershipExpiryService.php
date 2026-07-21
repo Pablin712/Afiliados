@@ -103,6 +103,7 @@ class MembershipExpiryService
                     $newPeriodStart = $membership->expires_at->copy();
                     $membership->started_at = $newPeriodStart;
                     $membership->expires_at = $newPeriodStart->copy()->addMonth();
+                    $membership->renewal_count = ((int) $membership->renewal_count) + 1;
                     $membership->save();
 
                     if ($membership->user !== null) {

@@ -17,6 +17,7 @@ class Membership extends Model
         'started_at',
         'expires_at',
         'last_payment_id',
+        'renewal_count',
     ];
 
     protected function casts(): array

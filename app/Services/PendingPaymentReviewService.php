@@ -87,6 +87,7 @@ class PendingPaymentReviewService
             $isCustomerTargetMembership = strtolower((string) $membershipType->name) === 'customer';
 
             $durationMonths = $isFirstPayment ? 2 : 1;
+            $priorRenewalCount = (int) (Membership::query()->where('user_id', $user->id)->value('renewal_count') ?? 0);
 
             Membership::updateOrCreate(
                 ['user_id' => $user->id],
@@ -96,6 +97,7 @@ class PendingPaymentReviewService
                     'started_at' => now(),
                     'expires_at' => now()->addMonths($durationMonths),
                     'last_payment_id' => $payment->id,
+                    'renewal_count' => $isFirstPayment ? 0 : $priorRenewalCount + 1,
                 ]
             );
 
