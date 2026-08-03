@@ -63,6 +63,35 @@ class ChannelSeeder extends Seeder
             );
         }
 
+        // Grupos VIP por índice sintético (mismo tipo/función que aet_vip_deriv /
+        // aet_vip_weltrade). El nombre interno y el título reflejan el título
+        // real del grupo en Telegram (verificado vía Bot API getChat).
+        $syntheticIndexGroups = [
+            'aet_vip_deriv_boom900'    => ['chat_id' => '-1003742276402', 'title' => 'AET VIP DERIV BOOM900'],
+            'aet_vip_boom600'          => ['chat_id' => '-1004303646865', 'title' => 'AET VIP BOOM600'],
+            'aet_vip_deriv_boom500'    => ['chat_id' => '-1003779440630', 'title' => 'AET VIP DERIV BOOM500'],
+            'aet_vip_deriv_boom300'    => ['chat_id' => '-1003792234931', 'title' => 'AET VIP DERIV BOOM300'],
+            'aet_vip_weltrade_crash1000' => ['chat_id' => '-1004340084613', 'title' => 'AET VIP WELTRADE CRASH1000'],
+            'aet_vip_weltrade_crash900'  => ['chat_id' => '-1003763757799', 'title' => 'AET VIP WELTRADE CRASH900'],
+            'aet_vip_weltrade_crash600'  => ['chat_id' => '-1004430056028', 'title' => 'AET VIP WELTRADE CRASH600'],
+            'aet_vip_weltrade_crash500'  => ['chat_id' => '-1003697131429', 'title' => 'AET VIP WELTRADE CRASH500'],
+            'aet_vip_weltrade_crash300'  => ['chat_id' => '-1004385644254', 'title' => 'AET VIP WELTRADE CRASH300'],
+        ];
+
+        foreach ($syntheticIndexGroups as $key => $group) {
+            Channel::query()->updateOrCreate(
+                ['type' => Channel::TYPE_TELEGRAM, 'name' => $key],
+                [
+                    'purpose'      => Channel::PURPOSE_GENERAL,
+                    'is_active'    => true,
+                    'is_exclusive' => true,
+                    'chat_id'      => $group['chat_id'],
+                    'bot_token'    => $botToken,
+                    'notes'        => "Grupo Telegram \"{$group['title']}\" — señales de índice sintético. Participa en la expulsión semanal de miembros free.",
+                ]
+            );
+        }
+
         Channel::query()->updateOrCreate(
             ['type' => Channel::TYPE_WHATSAPP, 'name' => 'AET-SAS'],
             [
