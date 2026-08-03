@@ -29,6 +29,7 @@ class AffiliateNetworkController extends Controller
         $affiliateLevels = $this->affiliateTreeService->affiliatesByLevel($user, 3);
 
         return view('user.network.index', [
+            'user' => $user,
             'depth' => $depth,
             'graph' => $graph,
             'sponsor' => $user->sponsor && (int) $user->sponsor->id !== (int) $user->id ? $user->sponsor : null,

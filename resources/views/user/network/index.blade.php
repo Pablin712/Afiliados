@@ -25,6 +25,10 @@
 
     <div class="py-8">
         <div class="mx-auto max-w-7xl space-y-4 sm:px-6 lg:px-8">
+            <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-graphite-800 dark:bg-graphite-900 sm:p-6">
+                @include('profile.partials.referral-link-card')
+            </div>
+
             <div class="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
                     <p class="text-sm leading-6 text-gray-600 dark:text-graphite-300">{{ __('messages.user.network.summary') }}</p>
