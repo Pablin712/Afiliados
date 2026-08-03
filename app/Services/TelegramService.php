@@ -94,8 +94,10 @@ class TelegramService
     /**
      * @param  string|null  $botToken  Overrides the globally configured bot token
      *                                 (e.g. when sending through a per-channel bot).
+     * @param  int|null  $messageThreadId  Forum-group topic id. Omit (or null) to
+     *                                     post to the group's General topic.
      */
-    public function sendMessage(int|string $chatId, string $text, ?string $botToken = null): bool
+    public function sendMessage(int|string $chatId, string $text, ?string $botToken = null, ?int $messageThreadId = null): bool
     {
         $apiBase = $botToken !== null && trim($botToken) !== ''
             ? 'https://api.telegram.org/bot'.trim($botToken)
@@ -107,17 +109,24 @@ class TelegramService
             return false;
         }
 
+        $payload = [
+            'chat_id' => (string) $chatId,
+            'text'    => $text,
+        ];
+
+        if ($messageThreadId !== null) {
+            $payload['message_thread_id'] = $messageThreadId;
+        }
+
         try {
-            $response = Http::timeout(10)->post("{$apiBase}/sendMessage", [
-                'chat_id' => (string) $chatId,
-                'text'    => $text,
-            ]);
+            $response = Http::timeout(10)->post("{$apiBase}/sendMessage", $payload);
 
             return $response->successful();
         } catch (\Throwable $e) {
             Log::warning('Telegram sendMessage failed.', [
-                'chat_id' => (string) $chatId,
-                'error'   => $e->getMessage(),
+                'chat_id'            => (string) $chatId,
+                'message_thread_id'  => $messageThreadId,
+                'error'              => $e->getMessage(),
             ]);
 
             return false;

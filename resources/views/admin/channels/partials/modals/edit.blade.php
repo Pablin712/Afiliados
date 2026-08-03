@@ -42,6 +42,14 @@
             </div>
 
             <div x-show="type === 'telegram'" x-cloak>
+                <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">
+                    {{ __('messages.admin.channels.columns.message_thread_id') }}
+                    <span class="text-xs text-gray-400">{{ __('messages.admin.channels.hints.message_thread_id') }}</span>
+                </label>
+                <input id="channel-edit-message-thread-id" type="number" name="message_thread_id" min="1" class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100 font-mono">
+            </div>
+
+            <div x-show="type === 'telegram'" x-cloak>
                 <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.channels.columns.bot_token') }}</label>
                 <input id="channel-edit-bot-token" type="text" name="bot_token" maxlength="255" class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100 font-mono">
             </div>

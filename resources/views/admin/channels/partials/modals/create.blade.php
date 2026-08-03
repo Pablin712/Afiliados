@@ -53,6 +53,17 @@
             </div>
 
             <div x-show="type === 'telegram'" x-cloak>
+                <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">
+                    {{ __('messages.admin.channels.columns.message_thread_id') }}
+                    <span class="text-xs text-gray-400">{{ __('messages.admin.channels.hints.message_thread_id') }}</span>
+                </label>
+                <input type="number" name="message_thread_id" value="{{ old('message_thread_id') }}" min="1" class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100 font-mono">
+                @error('message_thread_id')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div x-show="type === 'telegram'" x-cloak>
                 <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.channels.columns.bot_token') }}</label>
                 <input type="text" name="bot_token" value="{{ old('bot_token') }}" maxlength="255" class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100 font-mono">
                 @error('bot_token')

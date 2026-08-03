@@ -8,6 +8,7 @@
             'is_active' => (bool) $channel->is_active,
             'is_exclusive' => (bool) $channel->is_exclusive,
             'chat_id' => $channel->chat_id,
+            'message_thread_id' => $channel->message_thread_id,
             'bot_token' => $channel->bot_token,
             'instance_name' => $channel->instance_name,
             'server_url' => $channel->server_url,
@@ -28,7 +29,12 @@
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">{{ $channel->name }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">{{ $typeLabels[$channel->type] ?? $channel->type }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">{{ $purposeLabels[$channel->purpose] ?? $channel->purpose }}</td>
-        <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200 font-mono">{{ $channel->chat_id }}</td>
+        <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200 font-mono">
+            {{ $channel->chat_id }}
+            @if ($channel->message_thread_id)
+                <span class="text-xs text-gray-400">({{ __('messages.admin.channels.hints.topic_short') }} {{ $channel->message_thread_id }})</span>
+            @endif
+        </td>
         <td class="px-4 sm:px-6 py-3 text-sm">
             @if ($channel->is_exclusive)
                 <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">{{ __('messages.admin.channels.status.exclusive') }}</span>

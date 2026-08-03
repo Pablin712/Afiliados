@@ -92,6 +92,34 @@ class ChannelSeeder extends Seeder
             );
         }
 
+        // Grupo Telegram "AET SAS Señales" (chat_id -1003914721960, con Temas
+        // habilitados). Cada índice sintético tendrá su propio tema dentro de
+        // este mismo grupo en vez de un grupo separado; a medida que se creen
+        // más temas, agregar una entrada por tema aquí y retirar el grupo
+        // individual correspondiente (aet_vip_deriv_boomXXX, etc.).
+        $forumTopicGroups = [
+            'aet_senales_boom1000' => [
+                'chat_id' => '-1003914721960',
+                'message_thread_id' => 2,
+                'title' => 'AET SAS Señales — tema Boom 1000',
+            ],
+        ];
+
+        foreach ($forumTopicGroups as $key => $topic) {
+            Channel::query()->updateOrCreate(
+                ['type' => Channel::TYPE_TELEGRAM, 'name' => $key],
+                [
+                    'purpose'            => Channel::PURPOSE_GENERAL,
+                    'is_active'          => true,
+                    'is_exclusive'       => true,
+                    'chat_id'            => $topic['chat_id'],
+                    'message_thread_id'  => $topic['message_thread_id'],
+                    'bot_token'          => $botToken,
+                    'notes'              => "Grupo Telegram \"{$topic['title']}\" — señales de índice sintético. Participa en la expulsión semanal de miembros free.",
+                ]
+            );
+        }
+
         Channel::query()->updateOrCreate(
             ['type' => Channel::TYPE_WHATSAPP, 'name' => 'AET-SAS'],
             [

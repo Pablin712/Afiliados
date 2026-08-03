@@ -24,6 +24,7 @@ class Channel extends Model
         'is_active',
         'is_exclusive',
         'chat_id',
+        'message_thread_id',
         'bot_token',
         'instance_name',
         'server_url',
@@ -32,10 +33,11 @@ class Channel extends Model
     ];
 
     protected $casts = [
-        'is_active'    => 'boolean',
-        'is_exclusive' => 'boolean',
-        'bot_token'    => 'encrypted',
-        'api_key'      => 'encrypted',
+        'is_active'          => 'boolean',
+        'is_exclusive'       => 'boolean',
+        'message_thread_id'  => 'integer',
+        'bot_token'          => 'encrypted',
+        'api_key'            => 'encrypted',
     ];
 
     /**

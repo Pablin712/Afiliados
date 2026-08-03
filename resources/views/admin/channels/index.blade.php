@@ -80,6 +80,7 @@
                         document.getElementById('channel-edit-is-active').checked = !!payload.is_active;
                         document.getElementById('channel-edit-is-exclusive').checked = !!payload.is_exclusive;
                         document.getElementById('channel-edit-chat-id').value = payload.chat_id ?? '';
+                        document.getElementById('channel-edit-message-thread-id').value = payload.message_thread_id ?? '';
                         document.getElementById('channel-edit-bot-token').value = payload.bot_token ?? '';
                         document.getElementById('channel-edit-instance-name').value = payload.instance_name ?? '';
                         document.getElementById('channel-edit-server-url').value = payload.server_url ?? '';

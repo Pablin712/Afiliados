@@ -22,6 +22,7 @@ class StoreChannelRequest extends FormRequest
             'is_active' => ['nullable', 'boolean'],
             'is_exclusive' => ['nullable', 'boolean'],
             'chat_id' => ['required', 'string', 'max:100'],
+            'message_thread_id' => ['nullable', 'integer', 'min:1'],
             'bot_token' => ['nullable', 'string', 'max:255'],
             'instance_name' => ['nullable', 'string', 'max:100', 'required_if:type,'.Channel::TYPE_WHATSAPP],
             'server_url' => ['nullable', 'url', 'max:255', 'required_if:type,'.Channel::TYPE_WHATSAPP],

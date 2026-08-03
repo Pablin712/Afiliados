@@ -116,6 +116,7 @@ class ClassScheduleReminderService
                 $channel->chat_id,
                 $message,
                 $channel->bot_token,
+                $channel->message_thread_id,
             ),
             Channel::TYPE_WHATSAPP => $this->whatsappGroupService->sendText(
                 (string) $channel->server_url,
