@@ -28,6 +28,7 @@ class RoleAndPermissionSeeder extends Seeder
             'actions',
             'courses',
             'channels',
+            'landing_content',
         ];
 
         $actions = ['view', 'create', 'edit', 'delete', 'manage', 'report'];

@@ -151,6 +151,12 @@
                             </x-dropdown-link>
                         @endrole
 
+                        @can('view landing_content')
+                            <x-dropdown-link :href="route('admin.landing-content.index')">
+                                {{ __('messages.admin.landing_content.title') }}
+                            </x-dropdown-link>
+                        @endcan
+
                         @can('report profits')
                             <x-dropdown-link :href="route('admin.financial-dashboard.index')">
                                 {{ __('messages.admin.financial_dashboard.title') }}
@@ -304,6 +310,12 @@
                         {{ __('messages.admin.message_templates.title') }}
                     </x-responsive-nav-link>
                 @endrole
+
+                @can('view landing_content')
+                    <x-responsive-nav-link :href="route('admin.landing-content.index')">
+                        {{ __('messages.admin.landing_content.title') }}
+                    </x-responsive-nav-link>
+                @endcan
 
                 @can('report profits')
                     <x-responsive-nav-link :href="route('admin.financial-dashboard.index')">

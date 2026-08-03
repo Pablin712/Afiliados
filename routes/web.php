@@ -4,6 +4,8 @@ use App\Http\Controllers\ActionController;
 use App\Http\Controllers\Admin\BanksController;
 use App\Http\Controllers\Admin\ChannelsController;
 use App\Http\Controllers\Admin\MessageTemplatesController;
+use App\Http\Controllers\Admin\LandingContentController;
+use App\Http\Controllers\Admin\TestimonialsController;
 use App\Http\Controllers\Admin\CourseCatalogController;
 use App\Http\Controllers\Auth\DeviceConflictController;
 use App\Http\Controllers\Admin\UsersAdminController;
@@ -23,11 +25,10 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\User\ScannerDownloadController;
 use App\Http\Controllers\User\AffiliateNetworkController;
 use App\Http\Controllers\User\MyProfitsController;
+use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [WelcomeController::class, 'index']);
 
 Route::get('/politica-privacidad', function () {
     return view('legal.privacy');
@@ -242,6 +243,26 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/message-templates/{messageTemplate}', [MessageTemplatesController::class, 'update'])
         ->middleware(['verified', 'role:admin'])
         ->name('admin.message-templates.update');
+
+    Route::get('/admin/landing-content', [LandingContentController::class, 'index'])
+        ->middleware(['verified', 'permission:view landing_content'])
+        ->name('admin.landing-content.index');
+
+    Route::put('/admin/landing-content/{key}', [LandingContentController::class, 'update'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.landing-content.update');
+
+    Route::post('/admin/testimonials', [TestimonialsController::class, 'store'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.testimonials.store');
+
+    Route::put('/admin/testimonials/{testimonial}', [TestimonialsController::class, 'update'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.testimonials.update');
+
+    Route::delete('/admin/testimonials/{testimonial}', [TestimonialsController::class, 'destroy'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.testimonials.destroy');
 
     Route::post('/admin/banks', [BanksController::class, 'store'])
         ->middleware(['verified', 'permission:create banks'])

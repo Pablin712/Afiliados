@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             BankSeeder::class,
             ProgramSeeder::class,
             ChannelSeeder::class,
+            LandingContentSeeder::class,
+            TestimonialSeeder::class,
             //ComprehensiveTestScenarioSeeder::class,
         ]);
     }
