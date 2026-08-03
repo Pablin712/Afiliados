@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('app.name', 'AET Trader Academy') }}</title>
+        <title>{{ config('app.name', 'AET SAS') }}</title>
         <link rel="icon" type="image/png" href="{{ asset('storage/aet-logo-light.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('storage/aet-logo-light.png') }}">
 
@@ -42,7 +42,7 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                     <a href="#inicio" class="flex items-center gap-3 shrink-0">
                         <x-application-logo class="h-10 w-auto" />
-                        <span class="hidden sm:inline text-sm font-semibold text-gray-800 dark:text-graphite-100">AET Trader Academy</span>
+                        <span class="hidden sm:inline text-sm font-semibold text-gray-800 dark:text-graphite-100">AET SAS</span>
                     </a>
 
                     <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-graphite-300">
@@ -356,7 +356,7 @@
                     </div>
                 </section>
 
-                <section id="contacto" x-data="{ contactTab: 'new' }" class="mt-10 sm:mt-14 mb-6 rounded-[2rem] border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-emerald-50 p-6 sm:p-8 dark:border-brand-900 dark:from-brand-950/30 dark:via-graphite-900 dark:to-emerald-950/20">
+                <section id="contacto" class="mt-10 sm:mt-14 mb-6 rounded-[2rem] border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-emerald-50 p-6 sm:p-8 dark:border-brand-900 dark:from-brand-950/30 dark:via-graphite-900 dark:to-emerald-950/20">
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.1fr)_420px] lg:gap-10 items-start">
                         <div>
                             <span data-lc-key="contact_badge" class="inline-flex rounded-full border border-brand-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-700 shadow-sm dark:border-brand-900 dark:bg-brand-950/30 dark:text-brand-300">
@@ -370,31 +370,8 @@
                                 {{ $content['contact_description'] }}
                             </p>
 
-                            <div class="mt-6 inline-flex rounded-2xl border border-gray-200 bg-white/80 p-1 shadow-sm dark:border-graphite-700 dark:bg-graphite-900/80">
-                                <button
-                                    type="button"
-                                    data-lc-key="contact_tab_new"
-                                    data-lc-tab-button="new"
-                                    x-on:click="contactTab = 'new'"
-                                    :class="contactTab === 'new' ? 'bg-slate-900 text-white shadow-sm dark:bg-brand-500' : 'text-gray-600 hover:text-gray-900 dark:text-graphite-300 dark:hover:text-white'"
-                                    class="rounded-xl px-4 py-2 text-sm font-semibold transition"
-                                >
-                                    {{ $content['contact_tab_new'] }}
-                                </button>
-                                <button
-                                    type="button"
-                                    data-lc-key="contact_tab_trader"
-                                    data-lc-tab-button="trader"
-                                    x-on:click="contactTab = 'trader'"
-                                    :class="contactTab === 'trader' ? 'bg-slate-900 text-white shadow-sm dark:bg-brand-500' : 'text-gray-600 hover:text-gray-900 dark:text-graphite-300 dark:hover:text-white'"
-                                    class="rounded-xl px-4 py-2 text-sm font-semibold transition"
-                                >
-                                    {{ $content['contact_tab_trader'] }}
-                                </button>
-                            </div>
-
                             <div class="mt-6">
-                                <div data-lc-tab="new" x-show="contactTab === 'new'" x-transition.opacity.duration.250ms class="space-y-5">
+                                <div class="space-y-5">
                                     <div class="rounded-[1.6rem] border border-white/60 bg-white/85 p-5 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.75)] backdrop-blur dark:border-graphite-700 dark:bg-graphite-900/85">
                                         <p data-lc-key="contact_new_eyebrow" class="text-xs font-semibold uppercase tracking-[0.22em] text-brand-700 dark:text-brand-300">{{ $content['contact_new_eyebrow'] }}</p>
                                         <h3 data-lc-key="contact_new_title" class="mt-3 text-xl font-semibold text-gray-900 dark:text-graphite-100">{{ $content['contact_new_title'] }}</h3>
@@ -458,68 +435,13 @@
                                         </a>
                                     </div>
                                 </div>
-
-                                <div data-lc-tab="trader" x-show="contactTab === 'trader'" x-transition.opacity.duration.250ms class="space-y-5" style="display: none;">
-                                    <div class="rounded-[1.6rem] border border-slate-200 bg-slate-950 p-5 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.95)] dark:border-brand-900/50">
-                                        <p data-lc-key="contact_trader_eyebrow" class="text-xs font-semibold uppercase tracking-[0.22em] text-brand-200">{{ $content['contact_trader_eyebrow'] }}</p>
-                                        <h3 data-lc-key="contact_trader_title" class="mt-3 text-xl font-semibold text-white">{{ $content['contact_trader_title'] }}</h3>
-                                        <p data-lc-key="contact_trader_description" class="mt-3 text-sm leading-7 text-slate-300">{{ $content['contact_trader_description'] }}</p>
-
-                                        <div class="mt-5 space-y-3">
-                                            <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                                                <p data-lc-key="contact_trader_item_1_title" class="text-sm font-semibold text-white">{{ $content['contact_trader_item_1_title'] }}</p>
-                                                <p data-lc-key="contact_trader_item_1_desc" class="mt-1 text-sm leading-6 text-slate-300">{{ $content['contact_trader_item_1_desc'] }}</p>
-                                            </div>
-                                            <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                                                <p data-lc-key="contact_trader_item_2_title" class="text-sm font-semibold text-white">{{ $content['contact_trader_item_2_title'] }}</p>
-                                                <p data-lc-key="contact_trader_item_2_desc" class="mt-1 text-sm leading-6 text-slate-300">{{ $content['contact_trader_item_2_desc'] }}</p>
-                                            </div>
-                                            <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                                                <p data-lc-key="contact_trader_item_3_title" class="text-sm font-semibold text-white">{{ $content['contact_trader_item_3_title'] }}</p>
-                                                <p data-lc-key="contact_trader_item_3_desc" class="mt-1 text-sm leading-6 text-slate-300">{{ $content['contact_trader_item_3_desc'] }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid gap-3 sm:grid-cols-2">
-                                        <a data-lc-key="contact_trader_whatsapp_title contact_trader_whatsapp_desc" href="https://wa.me/{{ $content['contact_whatsapp_number_raw'] }}?text={{ rawurlencode($content['contact_trader_ready_message']) }}" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 transition hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:hover:border-emerald-400 dark:hover:bg-emerald-500/20 sm:col-span-2">
-                                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true"><path d="M12.04 2.5c-5.23 0-9.47 4.18-9.47 9.35 0 1.66.44 3.28 1.27 4.7L2.5 21.5l5.08-1.31a9.55 9.55 0 0 0 4.46 1.12h.01c5.23 0 9.47-4.18 9.47-9.35 0-2.49-.99-4.83-2.77-6.59A9.52 9.52 0 0 0 12.04 2.5Zm0 17.2h-.01a7.92 7.92 0 0 1-4.03-1.1l-.29-.17-3.02.78.81-2.93-.19-.3a7.8 7.8 0 0 1-1.23-4.12c0-4.31 3.55-7.82 7.95-7.82 2.12 0 4.11.82 5.61 2.31a7.72 7.72 0 0 1 2.34 5.52c0 4.31-3.56 7.82-7.94 7.82Zm4.35-5.89c-.24-.12-1.4-.69-1.62-.77-.22-.08-.38-.12-.54.12-.16.23-.62.77-.76.92-.14.16-.28.18-.52.06-.24-.12-1-.37-1.9-1.19-.7-.62-1.17-1.39-1.31-1.62-.14-.23-.01-.35.1-.47.1-.1.24-.27.36-.4.12-.14.16-.23.24-.39.08-.16.04-.29-.02-.41-.06-.12-.54-1.29-.74-1.76-.2-.47-.4-.39-.54-.39h-.47c-.16 0-.41.06-.62.29-.22.23-.84.81-.84 1.99s.86 2.3.98 2.46c.12.16 1.68 2.66 4.14 3.63.58.23 1.04.37 1.39.47.58.16 1.1.14 1.52.08.46-.07 1.4-.57 1.6-1.12.2-.55.2-1.02.14-1.12-.06-.1-.22-.16-.46-.27Z"/></svg>
-                                            </span>
-                                            <div>
-                                                <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-200">{{ $content['contact_trader_whatsapp_title'] }}</p>
-                                                <p class="text-xs text-emerald-700 dark:text-emerald-300">{{ $content['contact_trader_whatsapp_desc'] }}</p>
-                                            </div>
-                                        </a>
-
-                                        <a data-lc-key="contact_trader_email_title" href="mailto:{{ $content['contact_email'] }}?subject=Trader%20interesado%20en%20trabajar%20con%20AET" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 transition hover:border-brand-400 hover:bg-brand-50 dark:border-graphite-700 dark:bg-graphite-900 dark:hover:border-brand-700 dark:hover:bg-brand-950/20">
-                                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true"><path d="M3 5.75A2.75 2.75 0 0 1 5.75 3h12.5A2.75 2.75 0 0 1 21 5.75v12.5A2.75 2.75 0 0 1 18.25 21H5.75A2.75 2.75 0 0 1 3 18.25V5.75Zm2.1-.89 6.38 5.1a.83.83 0 0 0 1.04 0l6.38-5.1a1.25 1.25 0 0 0-.65-.18H5.75c-.23 0-.45.06-.65.18Zm14.4 2.03-5.96 4.77a2.33 2.33 0 0 1-2.9 0L4.7 6.89v11.36c0 .69.56 1.25 1.25 1.25h12.1c.69 0 1.25-.56 1.25-1.25V6.89Z"/></svg>
-                                            </span>
-                                            <div>
-                                                <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ $content['contact_trader_email_title'] }}</p>
-                                                <p class="text-xs text-gray-600 dark:text-graphite-300">{{ $content['contact_email'] }}</p>
-                                            </div>
-                                        </a>
-
-                                        <a data-lc-key="contact_telegram_url contact_telegram_handle_display" href="{{ $content['contact_telegram_url'] }}" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 transition hover:border-brand-400 hover:bg-brand-50 dark:border-graphite-700 dark:bg-graphite-900 dark:hover:border-brand-700 dark:hover:bg-brand-950/20">
-                                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm4.64 7.06-1.65 7.79c-.12.56-.45.69-.92.43l-2.54-1.87-1.22 1.17c-.13.13-.24.24-.5.24l.18-2.6 4.73-4.27c.21-.18-.04-.29-.32-.11l-5.85 3.68-2.52-.79c-.55-.17-.56-.55.11-.81l9.84-3.79c.46-.17.86.11.66 1.03Z"/></svg>
-                                            </span>
-                                            <div>
-                                                <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100">Telegram</p>
-                                                <p class="text-xs text-gray-600 dark:text-graphite-300">{{ $content['contact_telegram_handle_display'] }}</p>
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
                         <div class="relative overflow-hidden rounded-[1.8rem] border border-gray-200 bg-white p-4 sm:p-5 shadow-sm dark:border-graphite-700 dark:bg-graphite-900">
                             <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-brand-100/70 blur-3xl dark:bg-brand-700/20"></div>
 
-                            <div data-lc-tab="new" x-show="contactTab === 'new'" x-transition.opacity.duration.250ms class="relative">
+                            <div class="relative">
                                 <p data-lc-key="contact_qr_title" class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ $content['contact_qr_title'] }}</p>
                                 <p data-lc-key="contact_qr_description" class="mt-1 text-xs leading-6 text-gray-600 dark:text-graphite-300">{{ $content['contact_qr_description'] }}</p>
 
@@ -530,21 +452,6 @@
                                 <a data-lc-key="contact_qr_button" href="{{ $content['contact_telegram_url'] }}" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center justify-center w-full px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
                                     {{ $content['contact_qr_button'] }}
                                 </a>
-                            </div>
-
-                            <div data-lc-tab="trader" x-show="contactTab === 'trader'" x-transition.opacity.duration.250ms class="relative space-y-4" style="display: none;">
-                                <div class="rounded-[1.4rem] border border-slate-200 bg-slate-950 p-5 dark:border-brand-900/50">
-                                    <p data-lc-key="contact_trader_side_badge" class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-200">{{ $content['contact_trader_side_badge'] }}</p>
-                                    <h3 data-lc-key="contact_trader_side_title" class="mt-3 text-xl font-semibold text-white">{{ $content['contact_trader_side_title'] }}</h3>
-                                    <p data-lc-key="contact_trader_side_description" class="mt-3 text-sm leading-7 text-slate-300">{{ $content['contact_trader_side_description'] }}</p>
-                                </div>
-
-                                <div class="rounded-[1.4rem] border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/10">
-                                    <p data-lc-key="contact_trader_ready_message_label" class="text-sm font-semibold text-emerald-900 dark:text-emerald-200">{{ $content['contact_trader_ready_message_label'] }}</p>
-                                    <p data-lc-key="contact_trader_ready_message" class="mt-2 rounded-xl bg-white/80 px-4 py-3 text-sm text-emerald-800 shadow-sm dark:bg-graphite-950/70 dark:text-emerald-200">
-                                        {{ $content['contact_trader_ready_message'] }}
-                                    </p>
-                                </div>
                             </div>
                         </div>
                     </div>
