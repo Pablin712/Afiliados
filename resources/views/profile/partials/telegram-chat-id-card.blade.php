@@ -25,12 +25,6 @@
         </p>
     </header>
 
-    @if (session('telegram_required'))
-        <div class="mt-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200">
-            {{ session('telegram_required') }}
-        </div>
-    @endif
-
     @if (session('status') === 'telegram-chat-id-removed')
         <div class="mt-4 rounded-md border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-200">
             {{ __('messages.profile.telegram_removed') }}

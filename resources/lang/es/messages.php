@@ -256,7 +256,6 @@ return [
     'profile.other_bank_updated' => 'Banco guardado correctamente.',
     'profile.telegram_title' => 'Telegram',
     'profile.telegram_description' => 'Vincula tu cuenta de Telegram para acceder a los grupos exclusivos de miembros.',
-    'profile.telegram_required' => 'Para continuar debes registrar tu Telegram. Ingresa a tu perfil y sigue las instrucciones.',
     'profile.telegram_code_label' => 'Tu código único',
     'profile.telegram_code_hint' => 'Envía este código al bot de Telegram para vincular tu cuenta:',
     'profile.telegram_registered_label' => 'Telegram vinculado',

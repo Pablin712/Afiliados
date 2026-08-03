@@ -26,7 +26,6 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\AuditLogMiddleware::class,
             \App\Http\Middleware\EnsureUserPhoneIsSet::class,
-            \App\Http\Middleware\EnsureTelegramChatIdIsSet::class,
             \App\Http\Middleware\EnsureSingleActiveSession::class,
         ]);
 

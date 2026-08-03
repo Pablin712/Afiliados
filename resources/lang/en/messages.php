@@ -256,7 +256,6 @@ return [
     'profile.other_bank_updated' => 'Bank saved successfully.',
     'profile.telegram_title' => 'Telegram',
     'profile.telegram_description' => 'Link your Telegram account to access the exclusive member groups.',
-    'profile.telegram_required' => 'To continue you must link your Telegram account. Go to your profile and follow the instructions.',
     'profile.telegram_code_label' => 'Your unique code',
     'profile.telegram_code_hint' => 'Send this code to the Telegram bot to link your account:',
     'profile.telegram_registered_label' => 'Telegram linked',
