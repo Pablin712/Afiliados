@@ -5,8 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>{{ config('app.name', 'AET Trader Academy') }}</title>
-        <link rel="icon" type="image/png" href="{{ asset('storage/siglas2.png') }}">
-        <link rel="apple-touch-icon" href="{{ asset('storage/siglas2.png') }}">
+        <link rel="icon" type="image/png" href="{{ asset('storage/aet-logo-light.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('storage/aet-logo-light.png') }}">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -26,7 +26,7 @@
             <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur dark:bg-graphite-900/95 dark:border-graphite-800">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                     <a href="#inicio" class="flex items-center gap-3 shrink-0">
-                        <x-application-logo class="h-10 w-auto" src="{{ asset('storage/siglas2.png') }}" />
+                        <x-application-logo class="h-10 w-auto" />
                         <span class="hidden sm:inline text-sm font-semibold text-gray-800 dark:text-graphite-100">AET Trader Academy</span>
                     </a>
 
@@ -239,7 +239,7 @@
 
                                 <div class="flex items-center gap-4">
                                     <div class="program-logo-shell program-pulse-soft flex h-20 w-20 items-center justify-center rounded-[1.6rem] border border-brand-300/20 bg-brand-500/12 shadow-[0_12px_30px_-18px_rgba(63,95,255,0.95)]">
-                                        <img src="{{ asset('storage/siglas2.png') }}" alt="AET Trader Academy" class="h-12 w-12 object-contain">
+                                        <img src="{{ asset('storage/aet-logo-dark.png') }}" alt="AET Trader Academy" class="h-12 w-12 object-contain">
                                     </div>
 
                                     <div>

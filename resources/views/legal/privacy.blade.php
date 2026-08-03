@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>{{ __('messages.link.privacy_policy') }} — {{ config('app.name', 'AET Trader Academy') }}</title>
-        <link rel="icon" type="image/png" href="{{ asset('storage/siglas2.png') }}">
+        <link rel="icon" type="image/png" href="{{ asset('storage/aet-logo-light.png') }}">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -24,7 +24,7 @@
         <header class="border-b border-gray-200 bg-white dark:bg-graphite-900 dark:border-graphite-800">
             <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-3">
                 <a href="/" class="flex items-center gap-3">
-                    <x-application-logo class="h-9 w-auto" src="{{ asset('storage/siglas2.png') }}" />
+                    <x-application-logo class="h-9 w-auto" />
                     <span class="text-sm font-semibold text-gray-800 dark:text-graphite-100">AET Trader Academy</span>
                 </a>
             </div>
