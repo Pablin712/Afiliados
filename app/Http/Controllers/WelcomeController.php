@@ -10,6 +10,13 @@ class WelcomeController extends Controller
 {
     public function index(): View
     {
+        $isPreview = request()->boolean('preview');
+        $previewLocale = request()->query('preview_locale');
+
+        if ($isPreview && in_array($previewLocale, ['es', 'en'], true)) {
+            app()->setLocale($previewLocale);
+        }
+
         $locale = app()->getLocale();
 
         $defaults = collect(__('messages'))
@@ -25,6 +32,6 @@ class WelcomeController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('welcome', compact('content', 'testimonials'));
+        return view('welcome', compact('content', 'testimonials', 'isPreview'));
     }
 }

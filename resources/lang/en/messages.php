@@ -650,6 +650,9 @@ return [
     'admin.channels.messages.confirm_delete_modal' => 'Do you want to delete this channel? This action cannot be undone.',
 
     'admin.landing_content.title' => 'Homepage content',
+    'admin.landing_content.preview_hint' => 'Hover over a content field or photo in the list to see exactly where it appears on the homepage.',
+    'admin.landing_content.preview_title' => 'Live preview',
+    'admin.landing_content.preview_reload' => 'Reload',
     'admin.landing_content.groups.hero' => 'Hero',
     'admin.landing_content.groups.programs' => 'Programs',
     'admin.landing_content.groups.about' => 'Who is behind this',

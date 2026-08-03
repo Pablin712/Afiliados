@@ -650,6 +650,9 @@ return [
     'admin.channels.messages.confirm_delete_modal' => '¿Deseas eliminar este canal? Esta acción no se puede deshacer.',
 
     'admin.landing_content.title' => 'Contenido de la página principal',
+    'admin.landing_content.preview_hint' => 'Pasa el cursor sobre un contenido o foto de la lista para ver exactamente dónde aparece en la página principal.',
+    'admin.landing_content.preview_title' => 'Vista previa en vivo',
+    'admin.landing_content.preview_reload' => 'Actualizar',
     'admin.landing_content.groups.hero' => 'Portada',
     'admin.landing_content.groups.programs' => 'Programas',
     'admin.landing_content.groups.about' => 'Quién está detrás',
