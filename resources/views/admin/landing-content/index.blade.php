@@ -150,7 +150,7 @@
                                         @endphp
                                         <tr
                                             class="transition-colors hover:bg-amber-50 dark:hover:bg-amber-900/10"
-                                            onmouseenter="window.lcHighlight('{{ $button->id }}')"
+                                            onmouseenter="window.lcHighlight('hero_button:{{ $button->id }}')"
                                             onmouseleave="window.lcClearHighlight()"
                                         >
                                             <td class="px-4 py-2 text-sm text-gray-700 dark:text-graphite-200">{{ $button->label_es }}</td>
@@ -245,7 +245,7 @@
                                         @endphp
                                         <tr
                                             class="transition-colors hover:bg-amber-50 dark:hover:bg-amber-900/10"
-                                            onmouseenter="window.lcHighlight('{{ $testimonial->id }}')"
+                                            onmouseenter="window.lcHighlight('testimonial:{{ $testimonial->id }}')"
                                             onmouseleave="window.lcClearHighlight()"
                                         >
                                             <td class="px-4 py-2">
@@ -391,11 +391,32 @@
                         document.getElementById('hero-button-edit-label-es').value = payload.label_es ?? '';
                         document.getElementById('hero-button-edit-label-en').value = payload.label_en ?? '';
                         document.getElementById('hero-button-edit-url').value = payload.url ?? '';
-                        document.getElementById('hero-button-edit-style').value = payload.style ?? 'primary';
                         document.getElementById('hero-button-edit-sort-order').value = payload.sort_order ?? 0;
                         document.getElementById('hero-button-edit-is-active').checked = !!payload.is_active;
+                        window.selectHeroButtonStyle(form, payload.style ?? 'primary');
 
                         window.dispatchEvent(new CustomEvent('open-modal', { detail: 'hero-button-edit-modal' }));
+                    };
+
+                    // Visual style swatch picker (create + edit forms share the
+                    // same markup from admin.hero-buttons.partials.style-picker).
+                    window.selectHeroButtonStyle = function (form, styleKey) {
+                        const picker = form.querySelector('[data-style-swatches]');
+                        if (!picker) return;
+
+                        picker.querySelectorAll('[data-style]').forEach(function (btn) {
+                            btn.classList.toggle('border-brand-500', btn.getAttribute('data-style') === styleKey);
+                            btn.classList.toggle('border-transparent', btn.getAttribute('data-style') !== styleKey);
+                        });
+
+                        const input = form.querySelector('[data-style-input]');
+                        if (input) input.value = styleKey;
+                    };
+
+                    window.pickHeroButtonStyle = function (btn) {
+                        const form = btn.closest('form');
+                        if (!form) return;
+                        window.selectHeroButtonStyle(form, btn.getAttribute('data-style'));
                     };
 
                     window.openHeroButtonDeleteModal = function (payload) {

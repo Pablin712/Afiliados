@@ -36,26 +36,17 @@
                 @enderror
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.hero_buttons.columns.style') }}</label>
-                    <select name="style" required class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
-                        @foreach (\App\Models\HeroButton::styleLabels() as $value => $label)
-                            <option value="{{ $value }}" @selected(old('style', 'primary') === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    @error('style')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+            @include('admin.hero-buttons.partials.style-picker', ['selected' => old('style', 'primary')])
+            @error('style')
+                <p class="-mt-2 text-xs text-red-600">{{ $message }}</p>
+            @enderror
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.hero_buttons.columns.sort_order') }}</label>
-                    <input type="number" name="sort_order" value="{{ old('sort_order', 0) }}" min="0" class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
-                    @error('sort_order')
-                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.hero_buttons.columns.sort_order') }}</label>
+                <input type="number" name="sort_order" value="{{ old('sort_order', 0) }}" min="0" class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
+                @error('sort_order')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="flex items-center gap-2">

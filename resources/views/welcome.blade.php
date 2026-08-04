@@ -503,10 +503,20 @@
 
                     function highlight(key) {
                         clearHighlights();
-                        const safeKey = CSS.escape(key);
-                        const el = document.querySelector('[data-lc-key~="' + safeKey + '"]')
-                            || document.querySelector('[data-lc-testimonial="' + safeKey + '"]')
-                            || document.querySelector('[data-lc-hero-button="' + safeKey + '"]');
+
+                        // Namespaced keys (e.g. "testimonial:3", "hero_button:3")
+                        // disambiguate between collections whose ids overlap -
+                        // testimonial #3 and hero button #3 are not the same
+                        // element. Plain field keys (no prefix) still match
+                        // data-lc-key as before.
+                        let el = null;
+                        if (key.startsWith('testimonial:')) {
+                            el = document.querySelector('[data-lc-testimonial="' + CSS.escape(key.slice('testimonial:'.length)) + '"]');
+                        } else if (key.startsWith('hero_button:')) {
+                            el = document.querySelector('[data-lc-hero-button="' + CSS.escape(key.slice('hero_button:'.length)) + '"]');
+                        } else {
+                            el = document.querySelector('[data-lc-key~="' + CSS.escape(key) + '"]');
+                        }
                         if (!el) return;
 
                         const switchedTab = ensureTabVisible(el);

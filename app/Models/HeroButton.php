@@ -34,6 +34,10 @@ class HeroButton extends Model
             'secondary' => 'inline-flex items-center px-5 py-3 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400',
             'dark' => 'inline-flex items-center px-5 py-3 rounded-md bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 dark:bg-brand-500 dark:hover:bg-brand-400',
             'accent' => 'inline-flex items-center px-5 py-3 rounded-md border border-sky-300 bg-sky-50 text-sm font-semibold text-sky-800 hover:border-sky-400 hover:bg-sky-100 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-300 dark:hover:border-sky-400 dark:hover:bg-sky-500/20',
+            'success' => 'inline-flex items-center px-5 py-3 rounded-md bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500',
+            'warning' => 'inline-flex items-center px-5 py-3 rounded-md border border-amber-300 bg-amber-50 text-sm font-semibold text-amber-800 hover:border-amber-400 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:border-amber-400 dark:hover:bg-amber-500/20',
+            'outline_dark' => 'inline-flex items-center px-5 py-3 rounded-md border-2 border-slate-900 text-sm font-semibold text-slate-900 hover:bg-slate-900 hover:text-white dark:border-graphite-100 dark:text-graphite-100 dark:hover:bg-graphite-100 dark:hover:text-graphite-950',
+            'ghost' => 'inline-flex items-center px-5 py-3 rounded-md text-sm font-semibold text-brand-700 hover:bg-brand-50 dark:text-brand-300 dark:hover:bg-brand-950/30',
         ];
     }
 
@@ -47,6 +51,10 @@ class HeroButton extends Model
             'secondary' => 'Gris con borde',
             'dark' => 'Oscuro sólido',
             'accent' => 'Celeste con borde',
+            'success' => 'Verde sólido',
+            'warning' => 'Ámbar con borde',
+            'outline_dark' => 'Contorno oscuro',
+            'ghost' => 'Solo texto',
         ];
     }
 

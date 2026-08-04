@@ -28,20 +28,13 @@
                 <input id="hero-button-edit-url" type="text" name="url" required maxlength="500" class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100 font-mono">
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.hero_buttons.columns.style') }}</label>
-                    <select id="hero-button-edit-style" name="style" required class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
-                        @foreach (\App\Models\HeroButton::styleLabels() as $value => $label)
-                            <option value="{{ $value }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            <div id="hero-button-edit-style-picker">
+                @include('admin.hero-buttons.partials.style-picker')
+            </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.hero_buttons.columns.sort_order') }}</label>
-                    <input id="hero-button-edit-sort-order" type="number" name="sort_order" min="0" class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
-                </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.hero_buttons.columns.sort_order') }}</label>
+                <input id="hero-button-edit-sort-order" type="number" name="sort_order" min="0" class="w-full rounded-md border-gray-300 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100">
             </div>
 
             <div class="flex items-center gap-2">
