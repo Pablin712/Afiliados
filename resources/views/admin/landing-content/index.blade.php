@@ -104,6 +104,102 @@
                         <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-gray-50 dark:bg-graphite-950 border-b border-gray-200 dark:border-graphite-800">
                             <div>
                                 <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-graphite-300">
+                                    {{ __('messages.admin.hero_buttons.heading') }}
+                                </h3>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.hero_buttons.hint') }}</p>
+                            </div>
+
+                            @can('edit landing_content')
+                                <x-primary-button type="button" onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'hero-button-create-modal' }))">
+                                    {{ __('messages.admin.hero_buttons.buttons.create') }}
+                                </x-primary-button>
+                            @endcan
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-graphite-800">
+                                <thead class="bg-gray-50 dark:bg-graphite-950">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.hero_buttons.columns.label_es') }}</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.hero_buttons.columns.label_en') }}</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.hero_buttons.columns.url') }}</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.hero_buttons.columns.style') }}</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.hero_buttons.columns.sort_order') }}</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.hero_buttons.columns.is_active') }}</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.testimonials.columns.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-graphite-800">
+                                    @forelse ($heroButtons as $button)
+                                        @php
+                                            $styleLabels = \App\Models\HeroButton::styleLabels();
+                                            $buttonEditOnclick = 'window.openHeroButtonEditModal(' . json_encode([
+                                                'id' => $button->id,
+                                                'label_es' => $button->label_es,
+                                                'label_en' => $button->label_en,
+                                                'url' => $button->url,
+                                                'style' => $button->style,
+                                                'sort_order' => $button->sort_order,
+                                                'is_active' => (bool) $button->is_active,
+                                            ]) . ')';
+
+                                            $buttonDeleteOnclick = 'window.openHeroButtonDeleteModal(' . json_encode([
+                                                'id' => $button->id,
+                                                'name' => $button->label_es,
+                                            ]) . ')';
+                                        @endphp
+                                        <tr
+                                            class="transition-colors hover:bg-amber-50 dark:hover:bg-amber-900/10"
+                                            onmouseenter="window.lcHighlight('{{ $button->id }}')"
+                                            onmouseleave="window.lcClearHighlight()"
+                                        >
+                                            <td class="px-4 py-2 text-sm text-gray-700 dark:text-graphite-200">{{ $button->label_es }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700 dark:text-graphite-200">{{ $button->label_en }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700 dark:text-graphite-200 font-mono max-w-xs truncate" title="{{ $button->url }}">{{ $button->url }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700 dark:text-graphite-200">{{ $styleLabels[$button->style] ?? $button->style }}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-700 dark:text-graphite-200">{{ $button->sort_order }}</td>
+                                            <td class="px-4 py-2 text-sm">
+                                                @if ($button->is_active)
+                                                    <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">{{ __('messages.admin.testimonials.status.active') }}</span>
+                                                @else
+                                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-graphite-800 dark:text-graphite-300">{{ __('messages.admin.testimonials.status.inactive') }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    @can('edit landing_content')
+                                                        <x-action-icon-button
+                                                            variant="edit"
+                                                            icon="edit"
+                                                            :title="__('messages.admin.hero_buttons.buttons.edit')"
+                                                            :onclick="$buttonEditOnclick"
+                                                        />
+                                                        <x-action-icon-button
+                                                            variant="delete"
+                                                            icon="delete"
+                                                            :title="__('messages.admin.hero_buttons.buttons.delete')"
+                                                            :onclick="$buttonDeleteOnclick"
+                                                        />
+                                                    @endcan
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
+                                                {{ __('messages.admin.hero_buttons.messages.empty') }}
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-graphite-900 rounded-lg shadow border border-gray-200 dark:border-graphite-700 overflow-hidden">
+                        <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3 bg-gray-50 dark:bg-graphite-950 border-b border-gray-200 dark:border-graphite-800">
+                            <div>
+                                <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-graphite-300">
                                     {{ __('messages.admin.landing_content.testimonials_heading') }}
                                 </h3>
                                 <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.landing_content.testimonials_hint') }}</p>
@@ -201,6 +297,9 @@
             </div>
 
             @include('admin.landing-content.partials.modals.edit')
+            @include('admin.hero-buttons.partials.modals.create')
+            @include('admin.hero-buttons.partials.modals.edit')
+            @include('admin.hero-buttons.partials.modals.delete')
             @include('admin.testimonials.partials.modals.create')
             @include('admin.testimonials.partials.modals.edit')
             @include('admin.testimonials.partials.modals.delete')
@@ -214,6 +313,8 @@
                     const contentUpdatePattern = @json(route('admin.landing-content.update', ['key' => '__KEY__']));
                     const testimonialUpdatePattern = @json(route('admin.testimonials.update', ['testimonial' => '__ID__']));
                     const testimonialDeletePattern = @json(route('admin.testimonials.destroy', ['testimonial' => '__ID__']));
+                    const heroButtonUpdatePattern = @json(route('admin.hero-buttons.update', ['heroButton' => '__ID__']));
+                    const heroButtonDeletePattern = @json(route('admin.hero-buttons.destroy', ['heroButton' => '__ID__']));
 
                     window.openLandingContentEditModal = function (payload) {
                         const form = document.getElementById('landing-content-edit-form');
@@ -278,6 +379,34 @@
                         form.action = testimonialDeletePattern.replace('__ID__', String(payload.id));
                         document.getElementById('testimonial-delete-name').textContent = payload.name ? `(${payload.name})` : '';
                         window.dispatchEvent(new CustomEvent('open-modal', { detail: 'testimonial-delete-modal' }));
+                    };
+
+                    window.openHeroButtonEditModal = function (payload) {
+                        const form = document.getElementById('hero-button-edit-form');
+                        if (!form || !payload || !payload.id) {
+                            return;
+                        }
+
+                        form.action = heroButtonUpdatePattern.replace('__ID__', String(payload.id));
+                        document.getElementById('hero-button-edit-label-es').value = payload.label_es ?? '';
+                        document.getElementById('hero-button-edit-label-en').value = payload.label_en ?? '';
+                        document.getElementById('hero-button-edit-url').value = payload.url ?? '';
+                        document.getElementById('hero-button-edit-style').value = payload.style ?? 'primary';
+                        document.getElementById('hero-button-edit-sort-order').value = payload.sort_order ?? 0;
+                        document.getElementById('hero-button-edit-is-active').checked = !!payload.is_active;
+
+                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'hero-button-edit-modal' }));
+                    };
+
+                    window.openHeroButtonDeleteModal = function (payload) {
+                        const form = document.getElementById('hero-button-delete-form');
+                        if (!form || !payload || !payload.id) {
+                            return;
+                        }
+
+                        form.action = heroButtonDeletePattern.replace('__ID__', String(payload.id));
+                        document.getElementById('hero-button-delete-name').textContent = payload.name ? `(${payload.name})` : '';
+                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'hero-button-delete-modal' }));
                     };
 
                     // --- Live preview hover-highlight ---

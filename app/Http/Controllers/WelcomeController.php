@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HeroButton;
 use App\Models\LandingContent;
 use App\Models\Testimonial;
 use Illuminate\View\View;
@@ -32,6 +33,12 @@ class WelcomeController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('welcome', compact('content', 'testimonials', 'isPreview'));
+        $heroButtons = HeroButton::query()
+            ->active()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        return view('welcome', compact('content', 'testimonials', 'heroButtons', 'isPreview'));
     }
 }

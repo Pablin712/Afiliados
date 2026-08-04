@@ -4,6 +4,7 @@ use App\Http\Controllers\ActionController;
 use App\Http\Controllers\Admin\BanksController;
 use App\Http\Controllers\Admin\ChannelsController;
 use App\Http\Controllers\Admin\MessageTemplatesController;
+use App\Http\Controllers\Admin\HeroButtonsController;
 use App\Http\Controllers\Admin\LandingContentController;
 use App\Http\Controllers\Admin\TestimonialsController;
 use App\Http\Controllers\Admin\CourseCatalogController;
@@ -263,6 +264,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/testimonials/{testimonial}', [TestimonialsController::class, 'destroy'])
         ->middleware(['verified', 'permission:edit landing_content'])
         ->name('admin.testimonials.destroy');
+
+    Route::post('/admin/hero-buttons', [HeroButtonsController::class, 'store'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.hero-buttons.store');
+
+    Route::put('/admin/hero-buttons/{heroButton}', [HeroButtonsController::class, 'update'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.hero-buttons.update');
+
+    Route::delete('/admin/hero-buttons/{heroButton}', [HeroButtonsController::class, 'destroy'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.hero-buttons.destroy');
 
     Route::post('/admin/banks', [BanksController::class, 'store'])
         ->middleware(['verified', 'permission:create banks'])

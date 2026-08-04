@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             ChannelSeeder::class,
             LandingContentSeeder::class,
             TestimonialSeeder::class,
+            HeroButtonSeeder::class,
             //ComprehensiveTestScenarioSeeder::class,
         ]);
     }

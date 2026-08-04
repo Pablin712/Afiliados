@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\HeroButton;
 use App\Models\LandingContent;
 use App\Models\Testimonial;
 use Illuminate\Http\RedirectResponse;
@@ -43,7 +44,12 @@ class LandingContentController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('admin.landing-content.index', compact('fields', 'testimonials'));
+        $heroButtons = HeroButton::query()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        return view('admin.landing-content.index', compact('fields', 'testimonials', 'heroButtons'));
     }
 
     public function update(Request $request, string $key): RedirectResponse

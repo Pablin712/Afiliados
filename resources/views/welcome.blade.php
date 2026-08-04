@@ -153,18 +153,16 @@
                             </p>
 
                             <div class="mt-8 flex flex-wrap gap-3">
-                                <a data-lc-key="button_programs" href="#programas" class="inline-flex items-center px-5 py-3 rounded-md bg-brand-600 text-white text-sm font-semibold hover:bg-brand-500">
-                                    {{ $content['button_programs'] }}
-                                </a>
-                                <a data-lc-key="button_advisor" href="#contacto" class="inline-flex items-center px-5 py-3 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
-                                    {{ $content['button_advisor'] }}
-                                </a>
-                                <a data-lc-key="button_deriv_account hero_deriv_url" href="{{ $content['hero_deriv_url'] }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-5 py-3 rounded-md bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 dark:bg-brand-500 dark:hover:bg-brand-400">
-                                    {{ $content['button_deriv_account'] }}
-                                </a>
-                                <a data-lc-key="button_weltrade_account hero_weltrade_url" href="{{ $content['hero_weltrade_url'] }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-5 py-3 rounded-md border border-sky-300 bg-sky-50 text-sm font-semibold text-sky-800 hover:border-sky-400 hover:bg-sky-100 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-300 dark:hover:border-sky-400 dark:hover:bg-sky-500/20">
-                                    {{ $content['button_weltrade_account'] }}
-                                </a>
+                                @foreach ($heroButtons as $button)
+                                    <a
+                                        data-lc-hero-button="{{ $button->id }}"
+                                        href="{{ $button->url }}"
+                                        @if ($button->opensExternally()) target="_blank" rel="noopener noreferrer" @endif
+                                        class="{{ $button->styleClasses() }}"
+                                    >
+                                        {{ $button->localized('label') }}
+                                    </a>
+                                @endforeach
                             </div>
 
                             <p data-lc-key="trading_accounts_hint" class="mt-4 text-sm text-gray-500 dark:text-graphite-400">
@@ -507,7 +505,8 @@
                         clearHighlights();
                         const safeKey = CSS.escape(key);
                         const el = document.querySelector('[data-lc-key~="' + safeKey + '"]')
-                            || document.querySelector('[data-lc-testimonial="' + safeKey + '"]');
+                            || document.querySelector('[data-lc-testimonial="' + safeKey + '"]')
+                            || document.querySelector('[data-lc-hero-button="' + safeKey + '"]');
                         if (!el) return;
 
                         const switchedTab = ensureTabVisible(el);
