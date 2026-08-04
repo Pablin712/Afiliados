@@ -174,10 +174,10 @@
                             <div class="absolute -top-10 -right-8 h-40 w-40 rounded-full bg-brand-100/80 blur-3xl dark:bg-brand-800/30"></div>
                             <div class="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-sky-100/80 blur-3xl dark:bg-sky-800/20"></div>
                             <div class="relative flex flex-col items-center justify-center px-4 py-6 sm:px-6 sm:py-8">
-                                <img data-lc-key="hero_image_light" src="{{ asset('storage/'.$content['hero_image_light']) }}" alt="AET Trader Academy logo" class="mx-auto block w-full max-w-[280px] dark:hidden">
-                                <img data-lc-key="hero_image_dark" src="{{ asset('storage/'.$content['hero_image_dark']) }}" alt="AET Trader Academy logo dark" class="mx-auto hidden w-full max-w-[280px] dark:block">
+                                <img data-lc-key="hero_image_light" src="{{ asset('storage/'.$content['hero_image_light']) }}" alt="AET SAS logo" class="mx-auto block w-full max-w-[280px] dark:hidden">
+                                <img data-lc-key="hero_image_dark" src="{{ asset('storage/'.$content['hero_image_dark']) }}" alt="AET SAS logo dark" class="mx-auto hidden w-full max-w-[280px] dark:block">
                                 <div class="mt-5 text-center max-w-sm">
-                                    <p class="text-sm font-semibold tracking-wide text-gray-900 dark:text-graphite-100">AET Trader Academy</p>
+                                    <p class="text-sm font-semibold tracking-wide text-gray-900 dark:text-graphite-100">AET SAS</p>
                                     <p data-lc-key="hero_logo_caption" class="mt-1 text-sm text-gray-600 dark:text-graphite-300">{{ $content['hero_logo_caption'] }}</p>
                                 </div>
                             </div>
@@ -252,12 +252,12 @@
 
                                 <div class="flex items-center gap-4">
                                     <div class="program-logo-shell program-pulse-soft flex h-20 w-20 items-center justify-center rounded-[1.6rem] border border-brand-300/20 bg-brand-500/12 shadow-[0_12px_30px_-18px_rgba(63,95,255,0.95)]">
-                                        <img src="{{ asset('storage/aet-logo-dark.png') }}" alt="AET Trader Academy" class="h-12 w-12 object-contain">
+                                        <img src="{{ asset('storage/aet-logo-dark.png') }}" alt="AET SAS" class="h-12 w-12 object-contain">
                                     </div>
 
                                     <div>
                                         <p data-lc-key="programs_panel_badge" class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-300">{{ $content['programs_panel_badge'] }}</p>
-                                        <p class="mt-2 text-2xl font-semibold tracking-tight text-white">AET Trader Academy</p>
+                                        <p class="mt-2 text-2xl font-semibold tracking-tight text-white">AET SAS</p>
                                     </div>
                                 </div>
 
@@ -319,7 +319,7 @@
                         <aside class="rounded-2xl border border-gray-200 dark:border-graphite-800 bg-gray-50 dark:bg-graphite-800/60 p-5 lg:sticky lg:top-24">
                             <div class="overflow-hidden rounded-2xl border border-gray-200 dark:border-graphite-700 bg-white dark:bg-graphite-900">
                                 <div class="h-[360px] sm:h-[440px] lg:h-[420px] w-full bg-gray-100 dark:bg-graphite-900">
-                                    <img data-lc-key="behind_photo" src="{{ asset('storage/'.$content['behind_photo']) }}" alt="{{ $content['behind_person_name'] }} - AET Trader Academy" class="h-full w-full object-cover object-top">
+                                    <img data-lc-key="behind_photo" src="{{ asset('storage/'.$content['behind_photo']) }}" alt="{{ $content['behind_person_name'] }} - AET SAS" class="h-full w-full object-cover object-top">
                                 </div>
                             </div>
                             <div class="mt-4">
