@@ -36,6 +36,15 @@
                         {{ __('messages.user.profits.reason_rank_label', ['rank' => ucfirst($reason['rank_name'])]) }}
                     </p>
                 </div>
+            @elseif ($reason['type'] === 'direct_sale')
+                <div class="space-y-1">
+                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        {{ __('messages.user.profits.reason_direct_sale', ['percentage' => $reason['percentage']]) }}
+                    </span>
+                    <p class="text-xs text-gray-500 dark:text-graphite-500">
+                        {{ __('messages.user.profits.reason_points_before', ['points' => $reason['points_before']]) }}
+                    </p>
+                </div>
             @else
                 <div class="space-y-1">
                     <span class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">

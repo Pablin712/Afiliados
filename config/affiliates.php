@@ -6,6 +6,34 @@ return [
     // Network points granted per qualifying affiliate in the tree.
     'points_per_affiliate' => (int) env('AFFILIATE_POINTS_PER_AFFILIATE', 100),
 
+    // "Programa de Socios AET" (active since 2026-08): direct-sale commission
+    // based on points accumulated by the sponsor during the current calendar
+    // year. One point event = one approved payment (new or renewal) made by
+    // a direct affiliate; points are not stored, they are counted live from
+    // `payments` filtered by year. Full rules: docs/14-programa-socios-aet-anual.md.
+    'annual_points_commission' => [
+        'points_per_sale' => (int) env('AFFILIATE_ANNUAL_POINTS_PER_SALE', 100),
+
+        // Ordered ascending. The percentage applied to a sale is the highest
+        // tier whose min_points is <= the sponsor's points accumulated BEFORE
+        // that sale (the sale that crosses into a new tier still uses the
+        // previous percentage; only later sales use the new one).
+        'tiers' => [
+            ['min_points' => 100, 'percentage' => 0.15],
+            ['min_points' => 400, 'percentage' => 0.20],
+            ['min_points' => 800, 'percentage' => 0.25],
+            ['min_points' => 1300, 'percentage' => 0.30],
+            ['min_points' => 2100, 'percentage' => 0.35],
+            ['min_points' => 3100, 'percentage' => 0.40],
+        ],
+    ],
+
+    // --- LEGACY (inactive since 2026-08, kept for reference/reactivation) ---
+    // 7-level network commissions + rank system (beginner..legend) + rank
+    // bonuses. Superseded by `annual_points_commission` above. Not called
+    // from PendingPaymentReviewService/ProfitDistributionService anymore.
+    // Full description of this system: docs/4-Cambio-de-logica.md.
+
     // Fixed commission amounts by network level.
     // Level 1 differentiates first activation (new) vs renewal/reactivation.
     'level_commissions' => [
@@ -21,7 +49,7 @@ return [
         7 => (float) env('AFFILIATE_LEVEL_7_AMOUNT', 1.2),
     ],
 
-    // Monthly rank bonuses from explorer and above.
+    // LEGACY (see note above). Monthly rank bonuses from explorer and above.
     // Promotion amounts are read from membership_types.profit.
     'rank_maintenance_bonuses' => [
         'explorer' => (float) env('AFFILIATE_EXPLORER_MAINTENANCE_BONUS', 20),
@@ -31,7 +59,12 @@ return [
         'legend' => (float) env('AFFILIATE_LEGEND_MAINTENANCE_BONUS', 800),
     ],
 
-    // Rank rules for user network progression (admin excluded from these rules).
+    // LEGACY (see note above). Rank rules for user network progression
+    // (admin excluded from these rules). Still used by MembershipTierService,
+    // which remains reachable via the admin endpoint
+    // POST /admin/memberships/recalculate-tiers (n8n keeps calling it for its
+    // WhatsApp/Telegram group-expulsion side effect on downgrade), but it is
+    // no longer invoked automatically on payment approval.
     'rank_rules' => [
         'beginner' => [
             'direct_affiliates' => 1,

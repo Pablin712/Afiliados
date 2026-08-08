@@ -18,13 +18,17 @@ return new class extends Migration
         // free-renewals that never left a payment trail, but 0 is the safe default for
         // those anyway (treats them as "still first period", which only widens the lookback
         // window rather than narrowing it).
-        DB::statement(<<<'SQL'
-            UPDATE memberships m
-            SET renewal_count = GREATEST(0, (
-                SELECT COUNT(*) FROM payments p
-                WHERE p.user_id = m.user_id AND p.state = 'approved'
-            ) - 1)
-        SQL);
+        // MySQL-only syntax (UPDATE...alias, GREATEST()). On SQLite (local/test suite) there
+        // is no legacy data to backfill, so this is safely skipped there.
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement(<<<'SQL'
+                UPDATE memberships m
+                SET renewal_count = GREATEST(0, (
+                    SELECT COUNT(*) FROM payments p
+                    WHERE p.user_id = m.user_id AND p.state = 'approved'
+                ) - 1)
+            SQL);
+        }
     }
 
     public function down(): void

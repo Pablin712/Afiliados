@@ -72,7 +72,7 @@ class Profit extends Model
     }
 
     /**
-     * @return array{type: string, level?: int, payment_type?: string, source_user_name?: string|null, source_payment_id?: int|null, kind?: string, rank_name?: string}
+     * @return array{type: string, level?: int, payment_type?: string, source_user_name?: string|null, source_payment_id?: int|null, kind?: string, rank_name?: string, percentage?: int, points_before?: int}
      */
     public function parsedReason(): array
     {
@@ -84,6 +84,17 @@ class Profit extends Model
                 'type'      => 'rank_bonus',
                 'kind'      => $parts[1] ?? '',
                 'rank_name' => $parts[2] ?? '',
+            ];
+        }
+
+        if (str_starts_with($detail, 'direct_sale|')) {
+            $parts = explode('|', $detail, 3);
+            return [
+                'type'              => 'direct_sale',
+                'percentage'        => (int) ($parts[1] ?? 0),
+                'points_before'     => (int) ($parts[2] ?? 0),
+                'source_user_name'  => $this->sourceUser?->name,
+                'source_payment_id' => $this->source_payment_id,
             ];
         }
 

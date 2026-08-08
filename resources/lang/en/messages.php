@@ -938,6 +938,8 @@ return [
     'user.profits.reason_rank_maintenance' => 'Monthly Bonus',
     'user.profits.reason_rank_label' => 'Rank: :rank',
     'user.profits.reason_payment' => 'Payment #:id',
+    'user.profits.reason_direct_sale' => 'Direct Sale (:percentage%)',
+    'user.profits.reason_points_before' => 'Annual points before sale: :points',
 
     'user.profits.request_payout_button' => 'Request payout',
     'user.profits.payout_window_hint' => 'Available from day :day through end of month.',

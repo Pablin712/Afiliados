@@ -938,6 +938,8 @@ return [
     'user.profits.reason_rank_maintenance' => 'Bono Mensual',
     'user.profits.reason_rank_label' => 'Rango: :rank',
     'user.profits.reason_payment' => 'Pago #:id',
+    'user.profits.reason_direct_sale' => 'Venta Directa (:percentage%)',
+    'user.profits.reason_points_before' => 'Puntos anuales previos: :points',
 
     'user.profits.request_payout_button' => 'Cobrar ganancias',
     'user.profits.payout_window_hint' => 'Disponible del día :day al cierre del mes.',

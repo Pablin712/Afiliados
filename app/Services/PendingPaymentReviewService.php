@@ -13,9 +13,6 @@ class PendingPaymentReviewService
 {
     public function __construct(
         private readonly ProfitDistributionService $profitDistributionService,
-        private readonly RankBonusService $rankBonusService,
-        private readonly MembershipTierService $membershipTierService,
-        private readonly AffiliateTreeService $affiliateTreeService,
         private readonly RegistrationWhatsappService $registrationWhatsappService,
     ) {
     }
@@ -103,34 +100,6 @@ class PendingPaymentReviewService
 
             if ($isFirstPayment && $isCustomerTargetMembership) {
                 $this->registrationWhatsappService->sendPostPago($user);
-            }
-
-            if ((int) ($user->sponsor_id ?? 0) > 0) {
-                $sponsors = $this->affiliateTreeService->sponsorsByLevel(
-                    $user,
-                    (int) config('affiliates.max_sponsor_levels', 7)
-                );
-
-                foreach ($sponsors as $row) {
-                    $sponsor = $row['user'] ?? null;
-
-                    if ($sponsor instanceof \App\Models\User && ! $sponsor->hasRole('admin')) {
-                        $sponsor->loadMissing('membership.membershipType');
-
-                        $previousTypeName = strtolower((string) ($sponsor->membership?->membershipType?->name ?? ''));
-                        $previousStatus = (string) ($sponsor->membership?->status ?? 'none');
-
-                        $this->membershipTierService->recalculate((int) $sponsor->id);
-
-                        $sponsor = $sponsor->fresh(['membership.membershipType', 'roles']) ?? $sponsor;
-
-                        $this->rankBonusService->grantForCurrentMembership(
-                            $sponsor,
-                            $previousTypeName,
-                            $previousStatus
-                        );
-                    }
-                }
             }
 
             $this->profitDistributionService->distributeForApprovedPayment($payment, $membershipType);
