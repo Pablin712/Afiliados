@@ -292,6 +292,7 @@
 
                     <div class="mt-4 space-y-3">
                         @forelse ($recentProfits as $profit)
+                            @php $reason = $profit->parsedReason(); @endphp
                             <div class="rounded-2xl border border-gray-200 p-4 dark:border-graphite-800">
                                 <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                     <div>
@@ -299,7 +300,15 @@
                                             {{ $profit->sourceUser?->name ?? __('messages.user.dashboard.system_generated') }}
                                         </p>
                                         <p class="text-xs text-gray-500 dark:text-graphite-400">
-                                            {{ __('messages.user.dashboard.profit_origin', ['payment' => $profit->source_payment_id ?? '-', 'level' => $profit->source_level ?? '-']) }}
+                                            @if ($reason['type'] === 'direct_sale')
+                                                {{ __('messages.user.profits.reason_direct_sale', ['percentage' => $reason['percentage']]) }}
+                                            @elseif ($reason['type'] === 'rank_bonus')
+                                                {{ $reason['kind'] === 'promotion'
+                                                    ? __('messages.user.profits.reason_rank_promo')
+                                                    : __('messages.user.profits.reason_rank_maintenance') }}
+                                            @else
+                                                {{ __('messages.user.profits.reason_level', ['level' => $reason['level'] ?? '-']) }}
+                                            @endif
                                         </p>
                                     </div>
                                     <div class="text-right">
@@ -313,7 +322,13 @@
                                     @else
                                         <span class="rounded-full bg-emerald-100 px-2 py-1 font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">{{ __('messages.admin.profits.status_made') }}</span>
                                     @endif
-                                    <span class="text-gray-500 dark:text-graphite-400">{{ $profit->detail }}</span>
+                                    <span class="text-gray-500 dark:text-graphite-400">
+                                        @if ($reason['type'] === 'direct_sale')
+                                            {{ __('messages.user.profits.reason_points_before', ['points' => $reason['points_before']]) }}
+                                        @elseif (!empty($reason['source_payment_id']))
+                                            {{ __('messages.user.profits.reason_payment', ['id' => $reason['source_payment_id']]) }}
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
                         @empty

@@ -788,7 +788,6 @@ return [
     'user.dashboard.quick_actions' => 'Accesos rapidos',
     'user.dashboard.recent_profits_title' => 'Ganancias recientes',
     'user.dashboard.recent_profits_description' => 'Cada fila representa una ganancia generada por pagos aprobados dentro de tu red.',
-    'user.dashboard.profit_origin' => 'Pago origen #:payment • Nivel :level',
     'user.dashboard.system_generated' => 'Sistema',
     'user.dashboard.no_recent_profits' => 'Todavia no tienes ganancias registradas.',
     'user.dashboard.recent_affiliates_title' => 'Afiliados recientes',
