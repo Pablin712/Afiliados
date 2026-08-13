@@ -50,11 +50,14 @@ class ClassScheduleReminderService
 
             if ($success) {
                 $sent++;
+                // Only mark as sent when at least one channel actually delivered it —
+                // otherwise a fully-failed reminder (e.g. a misconfigured channel)
+                // would never be retried on the next poll, and would fail silently
+                // until the send window closes.
+                $schedule->update(['reminder_sent_at' => now()]);
             } else {
                 $failed++;
             }
-
-            $schedule->update(['reminder_sent_at' => now()]);
         }
 
         return [
