@@ -520,6 +520,9 @@ return [
     'plans.free_renew_success' => 'Renovación gratuita aplicada. Nueva fecha de vencimiento: :date.',
     'plans.program_created' => 'Programa creado correctamente.',
     'plans.program_updated' => 'Programa actualizado correctamente.',
+    'plans.delete_program' => 'Eliminar programa',
+    'plans.confirm_delete_program' => '¿Eliminar este programa? Esta acción no se puede deshacer.',
+    'plans.program_deleted' => 'Programa eliminado correctamente.',
 
     // Datafast / pago con tarjeta
     'plans.tab_bank_transfer'           => 'Transferencia bancaria',

@@ -72,4 +72,11 @@ class ProgramController extends Controller
 
         return back()->with('status', __('messages.plans.program_updated'));
     }
+
+    public function destroy(Program $program): RedirectResponse
+    {
+        $program->delete();
+
+        return back()->with('status', __('messages.plans.program_deleted'));
+    }
 }

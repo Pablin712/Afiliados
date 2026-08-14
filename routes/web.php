@@ -149,6 +149,10 @@ Route::middleware('auth')->group(function () {
         ->middleware(['verified', 'role:admin'])
         ->name('plans.programs.update');
 
+    Route::delete('/plans/programs/{program}', [ProgramController::class, 'destroy'])
+        ->middleware(['verified', 'role:admin'])
+        ->name('plans.programs.destroy');
+
     Route::get('/actions', [ActionController::class, 'index'])
         ->middleware(['verified', 'permission:view actions'])
         ->name('actions.index');

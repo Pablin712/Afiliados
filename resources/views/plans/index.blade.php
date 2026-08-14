@@ -146,9 +146,16 @@
                                 </label>
                             </div>
 
-                            <div class="md:col-span-2 pt-2">
+                            <div class="md:col-span-2 pt-2 flex items-center gap-3">
                                 <x-primary-button>{{ __('messages.plans.save_changes') }}</x-primary-button>
                             </div>
+                        </form>
+
+                        <form method="POST" action="{{ route('plans.programs.destroy', $program) }}" class="mt-3"
+                              onsubmit="return confirm('{{ addslashes(__('messages.plans.confirm_delete_program')) }}')">
+                            @csrf
+                            @method('DELETE')
+                            <x-danger-button type="submit">{{ __('messages.plans.delete_program') }}</x-danger-button>
                         </form>
                     </div>
                 @endforeach

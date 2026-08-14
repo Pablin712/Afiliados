@@ -520,6 +520,9 @@ return [
     'plans.free_renew_success' => 'Free renewal applied. New expiration date: :date.',
     'plans.program_created' => 'Program created successfully.',
     'plans.program_updated' => 'Program updated successfully.',
+    'plans.delete_program' => 'Delete program',
+    'plans.confirm_delete_program' => 'Delete this program? This action cannot be undone.',
+    'plans.program_deleted' => 'Program deleted successfully.',
 
     // Datafast / card payment
     'plans.tab_bank_transfer'           => 'Bank transfer',
