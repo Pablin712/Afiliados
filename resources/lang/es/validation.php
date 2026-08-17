@@ -25,5 +25,8 @@ return [
         'sponsor_id' => 'patrocinador',
         'commission_rate' => 'tasa de comisión',
         'membership_type_id' => 'tipo de membresía',
+        'photo' => 'foto',
+        'video' => 'video',
+        'media_type' => 'tipo de contenido',
     ],
 ];

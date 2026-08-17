@@ -235,7 +235,9 @@
                                                 'quote_en' => $testimonial->quote_en,
                                                 'sort_order' => $testimonial->sort_order,
                                                 'is_active' => (bool) $testimonial->is_active,
+                                                'mediaType' => $testimonial->media_type ?? 'image',
                                                 'currentPhotoUrl' => $testimonial->photo_path ? asset('storage/'.$testimonial->photo_path) : null,
+                                                'currentVideoUrl' => $testimonial->video_path ? asset('storage/'.$testimonial->video_path) : null,
                                             ]) . ')';
 
                                             $deleteOnclick = 'window.openTestimonialDeleteModal(' . json_encode([
@@ -249,7 +251,9 @@
                                             onmouseleave="window.lcClearHighlight()"
                                         >
                                             <td class="px-4 py-2">
-                                                @if ($testimonial->photo_path)
+                                                @if ($testimonial->isVideo())
+                                                    <video src="{{ asset('storage/'.$testimonial->video_path) }}" muted class="h-12 w-12 rounded-md object-cover border border-gray-200 dark:border-graphite-700"></video>
+                                                @elseif ($testimonial->photo_path)
                                                     <img src="{{ asset('storage/'.$testimonial->photo_path) }}" alt="{{ $testimonial->name_es }}" class="h-12 w-12 rounded-md object-cover border border-gray-200 dark:border-graphite-700">
                                                 @endif
                                             </td>
@@ -344,6 +348,15 @@
                         window.dispatchEvent(new CustomEvent('open-modal', { detail: 'landing-content-edit-modal' }));
                     };
 
+                    // Shared by both the create and edit testimonial forms: shows
+                    // only the file input relevant to the selected media type.
+                    window.toggleTestimonialMediaFields = function (form, mediaType) {
+                        if (!form) return;
+                        form.querySelectorAll('[data-media-field]').forEach(function (el) {
+                            el.classList.toggle('hidden', el.getAttribute('data-media-field') !== mediaType);
+                        });
+                    };
+
                     window.openTestimonialEditModal = function (payload) {
                         const form = document.getElementById('testimonial-edit-form');
                         if (!form || !payload || !payload.id) {
@@ -358,13 +371,27 @@
                         document.getElementById('testimonial-edit-sort-order').value = payload.sort_order ?? 0;
                         document.getElementById('testimonial-edit-is-active').checked = !!payload.is_active;
                         document.getElementById('testimonial-edit-photo').value = '';
+                        document.getElementById('testimonial-edit-video').value = '';
 
-                        const preview = document.getElementById('testimonial-edit-current-photo');
+                        const mediaType = payload.mediaType === 'video' ? 'video' : 'image';
+                        document.getElementById('testimonial-edit-media-type-image').checked = mediaType === 'image';
+                        document.getElementById('testimonial-edit-media-type-video').checked = mediaType === 'video';
+                        window.toggleTestimonialMediaFields(form, mediaType);
+
+                        const photoPreview = document.getElementById('testimonial-edit-current-photo');
                         if (payload.currentPhotoUrl) {
-                            preview.src = payload.currentPhotoUrl;
-                            preview.classList.remove('hidden');
+                            photoPreview.src = payload.currentPhotoUrl;
+                            photoPreview.classList.remove('hidden');
                         } else {
-                            preview.classList.add('hidden');
+                            photoPreview.classList.add('hidden');
+                        }
+
+                        const videoPreview = document.getElementById('testimonial-edit-current-video');
+                        if (payload.currentVideoUrl) {
+                            videoPreview.src = payload.currentVideoUrl;
+                            videoPreview.classList.remove('hidden');
+                        } else {
+                            videoPreview.classList.add('hidden');
                         }
 
                         window.dispatchEvent(new CustomEvent('open-modal', { detail: 'testimonial-edit-modal' }));

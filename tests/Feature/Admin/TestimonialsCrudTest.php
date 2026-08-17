@@ -26,6 +26,7 @@ class TestimonialsCrudTest extends TestCase
             'name_en' => 'Test Student',
             'quote_es' => 'Testimonio de prueba.',
             'quote_en' => 'Test testimonial.',
+            'media_type' => 'image',
             'photo' => UploadedFile::fake()->image('testimonio.jpg'),
             'sort_order' => 5,
             'is_active' => true,
@@ -38,6 +39,51 @@ class TestimonialsCrudTest extends TestCase
 
         $this->assertSame(5, $testimonial->sort_order);
         Storage::disk('public')->assertExists($testimonial->photo_path);
+    }
+
+    public function test_admin_can_create_testimonial_with_video(): void
+    {
+        Storage::fake('public');
+
+        $admin = $this->createAdminWithPermissions(['edit landing_content']);
+
+        $response = $this->actingAs($admin)->post(route('admin.testimonials.store'), [
+            'name_es' => 'Alumno Video',
+            'name_en' => 'Video Student',
+            'quote_es' => 'Testimonio en video.',
+            'quote_en' => 'Video testimonial.',
+            'media_type' => 'video',
+            'video' => UploadedFile::fake()->create('testimonio.mp4', 2048, 'video/mp4'),
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $response->assertRedirect(route('admin.landing-content.index'));
+        $response->assertSessionHasNoErrors();
+
+        $testimonial = Testimonial::query()->where('name_es', 'Alumno Video')->firstOrFail();
+
+        $this->assertSame('video', $testimonial->media_type);
+        $this->assertNull($testimonial->photo_path);
+        Storage::disk('public')->assertExists($testimonial->video_path);
+    }
+
+    public function test_creating_testimonial_without_matching_media_type_file_fails(): void
+    {
+        Storage::fake('public');
+
+        $admin = $this->createAdminWithPermissions(['edit landing_content']);
+
+        $response = $this->actingAs($admin)->post(route('admin.testimonials.store'), [
+            'name_es' => 'Alumno Sin Media',
+            'name_en' => 'No Media Student',
+            'quote_es' => 'Testimonio sin archivo.',
+            'quote_en' => 'Testimonial without file.',
+            'media_type' => 'video',
+        ]);
+
+        $response->assertSessionHasErrors('video');
+        $this->assertDatabaseMissing('testimonials', ['name_es' => 'Alumno Sin Media']);
     }
 
     public function test_admin_can_update_and_delete_testimonial_with_permission(): void
@@ -54,6 +100,7 @@ class TestimonialsCrudTest extends TestCase
             'quote_es' => 'Cita original.',
             'quote_en' => 'Original quote.',
             'photo_path' => $originalPhoto,
+            'media_type' => 'image',
             'sort_order' => 1,
             'is_active' => true,
         ]);
@@ -63,6 +110,7 @@ class TestimonialsCrudTest extends TestCase
             'name_en' => 'Edited Name',
             'quote_es' => 'Cita editada.',
             'quote_en' => 'Edited quote.',
+            'media_type' => 'image',
             'sort_order' => 2,
             'is_active' => false,
         ]);

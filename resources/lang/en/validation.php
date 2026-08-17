@@ -25,5 +25,8 @@ return [
         'sponsor_id' => 'sponsor',
         'commission_rate' => 'commission rate',
         'membership_type_id' => 'membership type',
+        'photo' => 'photo',
+        'video' => 'video',
+        'media_type' => 'content type',
     ],
 ];

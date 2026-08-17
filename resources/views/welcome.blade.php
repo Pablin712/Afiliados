@@ -343,7 +343,11 @@
                         @foreach ($testimonials as $testimonial)
                             <article data-lc-testimonial="{{ $testimonial->id }}" class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
                                 <div class="aspect-[9/16] bg-gray-100 dark:bg-graphite-800">
-                                    <img src="{{ asset('storage/'.$testimonial->photo_path) }}" alt="{{ $testimonial->localized('name') }}" class="h-full w-full object-contain object-center">
+                                    @if ($testimonial->isVideo())
+                                        <video src="{{ asset('storage/'.$testimonial->video_path) }}" class="h-full w-full object-contain object-center" controls muted playsinline preload="metadata"></video>
+                                    @else
+                                        <img src="{{ asset('storage/'.$testimonial->photo_path) }}" alt="{{ $testimonial->localized('name') }}" class="h-full w-full object-contain object-center">
+                                    @endif
                                 </div>
                                 <div class="p-4">
                                     <h3 class="text-sm font-semibold text-gray-900 dark:text-graphite-100">{{ $testimonial->localized('name') }}</h3>

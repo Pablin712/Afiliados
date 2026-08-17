@@ -43,11 +43,38 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.testimonials.columns.photo') }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.testimonials.forms.media_type_label') }}</label>
+                <div class="flex items-center gap-4">
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-graphite-300">
+                        <input id="testimonial-edit-media-type-image" type="radio" name="media_type" value="image" onchange="window.toggleTestimonialMediaFields(this.form, 'image')" class="border-gray-300 dark:border-graphite-700">
+                        {{ __('messages.admin.testimonials.forms.media_type_image') }}
+                    </label>
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-graphite-300">
+                        <input id="testimonial-edit-media-type-video" type="radio" name="media_type" value="video" onchange="window.toggleTestimonialMediaFields(this.form, 'video')" class="border-gray-300 dark:border-graphite-700">
+                        {{ __('messages.admin.testimonials.forms.media_type_video') }}
+                    </label>
+                </div>
+                @error('media_type')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div data-media-field="image">
+                <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.testimonials.forms.media_type_image') }}</label>
                 <img id="testimonial-edit-current-photo" src="" alt="" class="h-16 w-16 rounded-md object-cover border border-gray-200 dark:border-graphite-700 hidden mb-2">
                 <input id="testimonial-edit-photo" type="file" name="photo" accept="image/*" class="w-full text-sm text-gray-700 dark:text-graphite-200">
                 <p class="mt-1 text-xs text-gray-400">{{ __('messages.admin.testimonials.forms.photo_hint_edit') }}</p>
                 @error('photo')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div data-media-field="video" class="hidden">
+                <label class="block text-sm font-medium text-gray-700 dark:text-graphite-300 mb-1">{{ __('messages.admin.testimonials.forms.media_type_video') }}</label>
+                <video id="testimonial-edit-current-video" src="" controls class="h-24 w-16 rounded-md border border-gray-200 dark:border-graphite-700 hidden mb-2"></video>
+                <input id="testimonial-edit-video" type="file" name="video" accept="video/mp4,video/quicktime,video/webm" class="w-full text-sm text-gray-700 dark:text-graphite-200">
+                <p class="mt-1 text-xs text-gray-400">{{ __('messages.admin.testimonials.forms.video_hint_edit') }}</p>
+                @error('video')
                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                 @enderror
             </div>

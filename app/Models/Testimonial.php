@@ -13,6 +13,8 @@ class Testimonial extends Model
         'quote_es',
         'quote_en',
         'photo_path',
+        'media_type',
+        'video_path',
         'sort_order',
         'is_active',
     ];
@@ -32,5 +34,10 @@ class Testimonial extends Model
         $locale = app()->getLocale();
 
         return $this->{"{$field}_{$locale}"} ?: $this->{"{$field}_es"};
+    }
+
+    public function isVideo(): bool
+    {
+        return $this->media_type === 'video' && $this->video_path;
     }
 }
