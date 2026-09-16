@@ -48,6 +48,7 @@
                     <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-graphite-300">
                         <a href="#inicio" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.home') }}</a>
                         <a href="#programas" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.programs') }}</a>
+                        <a href="{{ route('blog.index') }}" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.blog') }}</a>
                         <a href="#quien-detras" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.about_behind') }}</a>
                         <a href="#testimonios" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.testimonials') }}</a>
                         <a href="#contacto" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.contact') }}</a>
@@ -109,6 +110,7 @@
                     <nav class="px-4 py-3 space-y-2 text-sm font-medium text-gray-700 dark:text-graphite-200">
                         <a href="#inicio" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.home') }}</a>
                         <a href="#programas" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.programs') }}</a>
+                        <a href="{{ route('blog.index') }}" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.blog') }}</a>
                         <a href="#quien-detras" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.about_behind') }}</a>
                         <a href="#testimonios" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.testimonials') }}</a>
                         <a href="#contacto" class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-graphite-800">{{ __('messages.nav.contact') }}</a>
@@ -465,6 +467,7 @@
                     <p data-lc-key="footer_copyright_suffix">&copy; {{ date('Y') }} {{ $content['footer_copyright_suffix'] }}</p>
 
                     <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+                        <a href="{{ route('blog.index') }}" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.nav.blog') }}</a>
                         <a href="{{ route('legal.privacy') }}" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.link.privacy_policy') }}</a>
                         <a href="{{ route('legal.terms') }}" class="hover:text-brand-600 dark:hover:text-brand-400">{{ __('messages.link.terms_and_conditions') }}</a>
                         <a data-lc-key="contact_email" href="mailto:{{ $content['contact_email'] }}" class="hover:text-brand-600 dark:hover:text-brand-400">{{ $content['contact_email'] }}</a>

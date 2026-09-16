@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\BlogPost;
 use App\Models\HeroButton;
 use App\Models\LandingContent;
 use App\Models\Testimonial;
@@ -49,7 +50,14 @@ class LandingContentController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('admin.landing-content.index', compact('fields', 'testimonials', 'heroButtons'));
+        $blogPosts = BlogPost::query()
+            ->with('prices')
+            ->orderBy('sort_order')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('admin.landing-content.index', compact('fields', 'testimonials', 'heroButtons', 'blogPosts'));
     }
 
     public function update(Request $request, string $key): RedirectResponse

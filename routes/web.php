@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\ActionController;
 use App\Http\Controllers\Admin\BanksController;
+use App\Http\Controllers\Admin\BlogPostsController;
 use App\Http\Controllers\Admin\ChannelsController;
 use App\Http\Controllers\Admin\MessageTemplatesController;
 use App\Http\Controllers\Admin\HeroButtonsController;
 use App\Http\Controllers\Admin\LandingContentController;
 use App\Http\Controllers\Admin\TestimonialsController;
 use App\Http\Controllers\Admin\CourseCatalogController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Auth\DeviceConflictController;
 use App\Http\Controllers\Admin\UsersAdminController;
 use App\Http\Controllers\CourseController;
@@ -30,6 +32,9 @@ use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index']);
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/politica-privacidad', function () {
     return view('legal.privacy');
@@ -268,6 +273,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/testimonials/{testimonial}', [TestimonialsController::class, 'destroy'])
         ->middleware(['verified', 'permission:edit landing_content'])
         ->name('admin.testimonials.destroy');
+
+    Route::post('/admin/blog', [BlogPostsController::class, 'store'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.blog.store');
+
+    Route::put('/admin/blog/{blogPost}', [BlogPostsController::class, 'update'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.blog.update');
+
+    Route::delete('/admin/blog/{blogPost}', [BlogPostsController::class, 'destroy'])
+        ->middleware(['verified', 'permission:edit landing_content'])
+        ->name('admin.blog.destroy');
 
     Route::post('/admin/hero-buttons', [HeroButtonsController::class, 'store'])
         ->middleware(['verified', 'permission:edit landing_content'])

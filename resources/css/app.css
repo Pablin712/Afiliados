@@ -34,6 +34,83 @@
 		@apply inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 shadow-sm transition hover:border-amber-400 hover:text-amber-700 dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-200 dark:hover:border-amber-500 dark:hover:text-amber-300;
 	}
 
+	/* Rendered markdown of a blog entry. Hand-rolled instead of pulling in
+	   @tailwindcss/typography, because production builds run against the
+	   node_modules already uploaded to the server. */
+	.blog-body {
+		@apply text-base leading-8 text-gray-700 dark:text-graphite-300;
+	}
+
+	.blog-body > * + * {
+		@apply mt-5;
+	}
+
+	.blog-body h1,
+	.blog-body h2 {
+		@apply mt-10 text-2xl font-bold tracking-tight text-gray-900 dark:text-graphite-100;
+	}
+
+	.blog-body h3 {
+		@apply mt-8 text-xl font-semibold text-gray-900 dark:text-graphite-100;
+	}
+
+	.blog-body h4 {
+		@apply mt-6 text-lg font-semibold text-gray-900 dark:text-graphite-100;
+	}
+
+	.blog-body a {
+		@apply font-medium text-brand-600 underline underline-offset-2 hover:text-brand-500 dark:text-brand-400;
+	}
+
+	.blog-body strong {
+		@apply font-semibold text-gray-900 dark:text-graphite-100;
+	}
+
+	.blog-body ul {
+		@apply list-disc space-y-2 pl-6;
+	}
+
+	.blog-body ol {
+		@apply list-decimal space-y-2 pl-6;
+	}
+
+	.blog-body img {
+		@apply my-6 w-full rounded-2xl border border-gray-200 object-cover dark:border-graphite-800;
+	}
+
+	.blog-body blockquote {
+		@apply border-l-4 border-brand-300 bg-brand-50/60 px-5 py-3 italic text-gray-700 dark:border-brand-700 dark:bg-brand-950/20 dark:text-graphite-200;
+	}
+
+	.blog-body code {
+		@apply rounded bg-gray-100 px-1.5 py-0.5 text-sm text-gray-800 dark:bg-graphite-800 dark:text-graphite-100;
+	}
+
+	.blog-body pre {
+		@apply overflow-x-auto rounded-xl bg-gray-900 p-4 text-sm text-gray-100;
+	}
+
+	.blog-body pre code {
+		@apply bg-transparent p-0 text-gray-100;
+	}
+
+	.blog-body hr {
+		@apply my-8 border-gray-200 dark:border-graphite-800;
+	}
+
+	.blog-body table {
+		@apply w-full border-collapse text-sm;
+	}
+
+	.blog-body th,
+	.blog-body td {
+		@apply border border-gray-200 px-3 py-2 text-left dark:border-graphite-800;
+	}
+
+	.blog-body th {
+		@apply bg-gray-50 font-semibold text-gray-900 dark:bg-graphite-800 dark:text-graphite-100;
+	}
+
 	.programs-showcase {
 		background:
 			radial-gradient(circle at top left, rgba(63, 95, 255, 0.28), transparent 34%),
