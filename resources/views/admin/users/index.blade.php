@@ -110,6 +110,18 @@
                         this.pendingBtn = d.btn;
                         this.visible = true;
                     },
+                    roleTitles: {
+                        make_teacher:   'Asignar rol Teacher',
+                        remove_teacher: 'Quitar rol Teacher',
+                        make_blogger:   @js(__('messages.admin.users.make_blogger')),
+                        remove_blogger: @js(__('messages.admin.users.remove_blogger')),
+                    },
+                    roleDescriptions: {
+                        make_teacher:   'El usuario podrá programar y gestionar sus propias clases.',
+                        remove_teacher: 'El usuario perderá acceso a programar clases.',
+                        make_blogger:   @js(__('messages.admin.users.make_blogger_hint')),
+                        remove_blogger: @js(__('messages.admin.users.remove_blogger_hint')),
+                    },
                     close() {
                         this.visible = false;
                         if (this.pendingBtn) { this.pendingBtn.disabled = false; this.pendingBtn = null; }
@@ -153,13 +165,13 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-600 dark:text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100" x-text="action === 'make_teacher' ? 'Asignar rol Teacher' : 'Quitar rol Teacher'"></p>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-graphite-100" x-text="roleTitles[action] ?? ''"></p>
                                     <p class="text-sm text-gray-500 dark:text-graphite-400 mt-0.5 truncate">
                                         Usuario: <span class="font-medium text-gray-700 dark:text-graphite-300" x-text="userName"></span>
                                     </p>
                                 </div>
                             </div>
-                            <p class="text-sm text-gray-600 dark:text-graphite-400" x-text="action === 'make_teacher' ? 'El usuario podrá programar y gestionar sus propias clases.' : 'El usuario perderá acceso a programar clases.'"></p>
+                            <p class="text-sm text-gray-600 dark:text-graphite-400" x-text="roleDescriptions[action] ?? ''"></p>
                             <div class="flex items-center justify-end gap-2 pt-1">
                                 <button
                                     type="button"
@@ -193,7 +205,7 @@
                     const csrfToken            = document.querySelector('meta[name="csrf-token"]').content;
                     const sponsorSelect        = document.getElementById('sponsor-select');
 
-                    window.toggleTeacherRole = function (userId, action, btn) {
+                    window.toggleUserRole = function (userId, action, btn) {
                         btn.disabled = true;
                         const userName = btn.closest('tr')?.querySelector('td:nth-child(2) span:first-child')?.textContent?.trim() ?? '';
                         window.dispatchEvent(new CustomEvent('open-role-confirm', {

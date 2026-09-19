@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class BlogPost extends Model
 {
     protected $fillable = [
+        'author_id',
         'slug',
         'title_es',
         'title_en',
@@ -29,9 +30,9 @@ class BlogPost extends Model
         'sort_order' => 'integer',
     ];
 
-    public function prices(): HasMany
+    public function author(): BelongsTo
     {
-        return $this->hasMany(BlogPostPrice::class)->orderBy('sort_order')->orderBy('id');
+        return $this->belongsTo(User::class, 'author_id');
     }
 
     public function scopePublished(Builder $query): Builder
@@ -80,16 +81,6 @@ class BlogPost extends Model
             'html_input' => 'escape',
             'allow_unsafe_links' => false,
         ]);
-    }
-
-    /**
-     * Prices grouped by region, keeping the admin's ordering within each one.
-     *
-     * @return \Illuminate\Support\Collection<string, \Illuminate\Support\Collection<int, BlogPostPrice>>
-     */
-    public function pricesByRegion(): \Illuminate\Support\Collection
-    {
-        return $this->prices->groupBy('region');
     }
 
     public static function uniqueSlug(string $title, ?int $ignoreId = null): string

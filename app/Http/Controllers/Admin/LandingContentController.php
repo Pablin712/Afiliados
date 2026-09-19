@@ -51,7 +51,7 @@ class LandingContentController extends Controller
             ->get();
 
         $blogPosts = BlogPost::query()
-            ->with('prices')
+            ->with('author')
             ->orderBy('sort_order')
             ->orderByDesc('published_at')
             ->orderByDesc('id')

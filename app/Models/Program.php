@@ -44,4 +44,46 @@ class Program extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function regionPrices(): HasMany
+    {
+        return $this->hasMany(ProgramRegionPrice::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * A program either charges the same everywhere (its own costs) or defines
+     * one price row per region, in which case the buyer must pick one.
+     */
+    public function chargesByRegion(): bool
+    {
+        return $this->regionPrices()->exists();
+    }
+
+    /**
+     * Amount for a bank transfer. The region row wins when there is one, so
+     * programs without regions keep behaving exactly as before.
+     */
+    public function transferCostFor(?ProgramRegionPrice $region, bool $isRenewal): float
+    {
+        if ($region instanceof ProgramRegionPrice) {
+            return $region->transferCost($isRenewal);
+        }
+
+        return (float) ($isRenewal ? $this->renewal_cost : $this->first_payment_cost);
+    }
+
+    /**
+     * Amount for a card payment, or null when card payment is not offered for
+     * this program (or for this region).
+     */
+    public function cardCostFor(?ProgramRegionPrice $region, bool $isRenewal): ?float
+    {
+        if ($region instanceof ProgramRegionPrice) {
+            return $region->cardCost($isRenewal);
+        }
+
+        $value = $isRenewal ? $this->card_renewal_cost : $this->card_first_payment_cost;
+
+        return $value === null ? null : (float) $value;
+    }
 }

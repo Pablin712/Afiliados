@@ -20,6 +20,7 @@ class Payment extends Model
         'number',
         'photo',
         'amount',
+        'region_label',
         'state',
         'payment_method',
         'gateway_order_id',

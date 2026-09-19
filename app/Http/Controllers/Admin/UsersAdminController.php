@@ -139,22 +139,27 @@ class UsersAdminController extends Controller
     public function updateRole(Request $request, User $user): JsonResponse
     {
         $validated = $request->validate([
-            'action' => ['required', 'in:make_teacher,remove_teacher'],
+            'action' => ['required', 'in:make_teacher,remove_teacher,make_blogger,remove_blogger'],
         ]);
 
         if ($user->hasRole('admin')) {
             return response()->json(['message' => 'No se puede modificar el rol de un administrador.'], 422);
         }
 
-        if ($validated['action'] === 'make_teacher') {
-            $user->assignRole('teacher');
+        // Each action is "<verb>_<role>": teacher schedules classes, blogger
+        // writes blog entries.
+        [$verb, $role] = explode('_', $validated['action'], 2);
+
+        if ($verb === 'make') {
+            $user->assignRole($role);
         } else {
-            $user->removeRole('teacher');
+            $user->removeRole($role);
         }
 
         return response()->json([
-            'success'    => true,
-            'is_teacher' => $user->hasRole('teacher'),
+            'success'     => true,
+            'is_teacher'  => $user->hasRole('teacher'),
+            'is_blogger'  => $user->hasRole('blogger'),
         ]);
     }
 

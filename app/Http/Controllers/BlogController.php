@@ -12,7 +12,7 @@ class BlogController extends Controller
     {
         $posts = BlogPost::query()
             ->published()
-            ->with('prices')
+            ->with('author')
             ->orderBy('sort_order')
             ->orderByDesc('published_at')
             ->orderByDesc('id')
@@ -28,7 +28,7 @@ class BlogController extends Controller
     {
         $post = BlogPost::query()
             ->published()
-            ->with('prices')
+            ->with('author')
             ->where('slug', $slug)
             ->firstOrFail();
 

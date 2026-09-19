@@ -88,6 +88,8 @@
                             </label>
                         </div>
 
+                        @include('plans.partials.region-prices-editor')
+
                         <div class="md:col-span-2 pt-2">
                             <x-primary-button>{{ __('messages.plans.create_program') }}</x-primary-button>
                         </div>
@@ -145,6 +147,8 @@
                                     {{ __('messages.plans.field_is_active') }}
                                 </label>
                             </div>
+
+                            @include('plans.partials.region-prices-editor', ['program' => $program])
 
                             <div class="md:col-span-2 pt-2 flex items-center gap-3">
                                 <x-primary-button>{{ __('messages.plans.save_changes') }}</x-primary-button>
@@ -225,20 +229,41 @@
                 </div>
             @else
                 @foreach ($programs as $program)
-                    <div class="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-950/40 overflow-hidden">
-
-                        {{-- Program header --}}
                         @php
                             $displayDurationMonths  = $hasApprovedPayment ? 1 : (int) $program->duration_months;
-                            $transferAmount         = $hasApprovedPayment ? (float) $program->renewal_cost             : (float) $program->first_payment_cost;
-                            $cardAmount             = $hasApprovedPayment ? (float) ($program->card_renewal_cost ?? 0)  : (float) ($program->card_first_payment_cost ?? 0);
-                            $programHasCardPrice    = $hasApprovedPayment ? $program->card_renewal_cost !== null         : $program->card_first_payment_cost !== null;
+
+                            // A plan either charges the same everywhere or has one price row
+                            // per region; in that case the first region is preselected and
+                            // Alpine swaps the figures when the buyer picks another one.
+                            $regionRows             = $program->regionPrices;
+                            $hasRegionPrices        = $regionRows->isNotEmpty();
+                            $defaultRegion          = $regionRows->first();
+                            $regionOptions          = $regionRows->map(fn ($row) => [
+                                                          'id'       => $row->id,
+                                                          'region'   => $row->region,
+                                                          'transfer' => $row->transferCost($hasApprovedPayment),
+                                                          'card'     => $row->cardCost($hasApprovedPayment),
+                                                      ])->values();
+
+                            $transferAmount         = $program->transferCostFor($defaultRegion, $hasApprovedPayment);
+                            $cardAmount             = (float) ($program->cardCostFor($defaultRegion, $hasApprovedPayment) ?? 0);
+                            $programHasCardPrice    = $hasRegionPrices
+                                                        ? $regionRows->contains(fn ($row) => $row->cardCost($hasApprovedPayment) !== null)
+                                                        : ($hasApprovedPayment ? $program->card_renewal_cost !== null : $program->card_first_payment_cost !== null);
                             $programContextDescription = $hasApprovedPayment
                                 ? __('messages.plans.program_context_customer_renewal')
                                 : __('messages.plans.program_context_first_payment');
                             $savingsAmount = ($programHasCardPrice && $cardAmount > $transferAmount) ? $cardAmount - $transferAmount : 0;
                             $savingsPct    = ($savingsAmount > 0 && $cardAmount > 0) ? (int) round($savingsAmount / $cardAmount * 100) : 0;
                         @endphp
+
+                    <div
+                        class="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-graphite-800 dark:bg-graphite-950/40 overflow-hidden"
+                        x-data="planRegionPricing(@js($regionOptions), @js($transferAmount), @js($programHasCardPrice ? $cardAmount : null))"
+                    >
+
+                        {{-- Program header --}}
+
                         <div class="p-6 border-b border-gray-100 dark:border-graphite-800">
                             <div class="flex flex-wrap items-start justify-between gap-6">
                                 <div class="flex-1 min-w-0">
@@ -262,29 +287,29 @@
                                 <div class="shrink-0 flex flex-col sm:flex-row items-end gap-3">
                                     @if ($programHasCardPrice && (bool) config('affiliates.datafast.enabled'))
                                         {{-- Card price: valor real --}}
-                                        <div class="rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-right dark:border-graphite-600 dark:bg-graphite-800 min-w-[9rem]">
+                                        <div class="rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-right dark:border-graphite-600 dark:bg-graphite-800 min-w-[9rem]" x-show="hasCard" x-cloak>
                                             <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-graphite-400 flex items-center justify-end gap-1">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 shrink-0"><path d="M2.5 4A1.5 1.5 0 0 0 1 5.5V6h18v-.5A1.5 1.5 0 0 0 17.5 4h-15ZM19 8.5H1v6A1.5 1.5 0 0 0 2.5 16h15a1.5 1.5 0 0 0 1.5-1.5v-6ZM3 13.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75Zm4.75-.75a.75.75 0 0 0 0 1.5h3.5a.75.75 0 0 0 0-1.5h-3.5Z"/></svg>
                                                 Valor real
                                             </p>
-                                            <p class="mt-0.5 text-2xl font-bold text-gray-600 dark:text-graphite-200 line-through decoration-gray-400 dark:decoration-graphite-500">${{ number_format($cardAmount, 2) }}</p>
+                                            <p class="mt-0.5 text-2xl font-bold text-gray-600 dark:text-graphite-200 line-through decoration-gray-400 dark:decoration-graphite-500" x-text="money(cardAmount)">${{ number_format($cardAmount, 2) }}</p>
                                             <p class="text-[11px] text-gray-400 dark:text-graphite-500">con tarjeta · {{ __('messages.plans.duration_months', ['count' => $displayDurationMonths]) }}</p>
                                         </div>
                                     @endif
 
                                     {{-- Transfer price: precio preferencial --}}
                                     <div class="rounded-xl border border-brand-300 bg-brand-50 px-4 py-3 text-right dark:border-brand-700 dark:bg-brand-950/50 min-w-[9rem]">
-                                        @if ($savingsAmount > 0)
-                                            <p class="text-[11px] font-semibold text-green-600 dark:text-green-400 flex items-center justify-end gap-1 mb-1">
+                                        @if ($savingsAmount > 0 || $hasRegionPrices)
+                                            <p class="text-[11px] font-semibold text-green-600 dark:text-green-400 flex items-center justify-end gap-1 mb-1" x-show="savings > 0" x-cloak>
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-3 h-3 shrink-0"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z" clip-rule="evenodd"/></svg>
-                                                Ahorras ${{ number_format($savingsAmount, 2) }} ({{ $savingsPct }}% off)
+                                                <span x-text="savingsLabel">Ahorras ${{ number_format($savingsAmount, 2) }} ({{ $savingsPct }}% off)</span>
                                             </p>
                                         @endif
                                         <p class="text-[11px] font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400 flex items-center justify-end gap-1">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 shrink-0"><path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 0 0 3 5.5v2.879a2.5 2.5 0 0 0 .732 1.767l6.5 6.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-6.5-6.5A2.5 2.5 0 0 0 8.38 3H5.5ZM6 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
                                             Precio preferencial
                                         </p>
-                                        <p class="mt-0.5 text-2xl font-bold text-brand-600 dark:text-brand-300">${{ number_format($transferAmount, 2) }}</p>
+                                        <p class="mt-0.5 text-2xl font-bold text-brand-600 dark:text-brand-300" x-text="money(transferAmount)">${{ number_format($transferAmount, 2) }}</p>
                                         <p class="text-[11px] text-brand-500 dark:text-brand-400">transferencia · {{ __('messages.plans.duration_months', ['count' => $displayDurationMonths]) }}</p>
                                     </div>
                                 </div>
@@ -339,6 +364,27 @@
                                         }
                                     }"
                                 >
+                                    {{-- Region selector: drives both payment methods --}}
+                                    @if ($hasRegionPrices)
+                                        <div class="mb-5 rounded-xl border border-brand-200 bg-brand-50/60 p-4 dark:border-brand-900/60 dark:bg-brand-950/20">
+                                            <label for="region_price_{{ $program->id }}" class="block text-sm font-semibold text-brand-800 dark:text-brand-300">
+                                                {{ __('messages.plans.region_select_label') }}
+                                            </label>
+                                            <p class="mt-1 text-xs text-brand-700/80 dark:text-brand-400/80">
+                                                {{ __('messages.plans.region_select_hint') }}
+                                            </p>
+                                            <select
+                                                id="region_price_{{ $program->id }}"
+                                                x-model="selectedId"
+                                                class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-300 focus:ring focus:ring-brand-200 focus:ring-opacity-50 sm:max-w-xs dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100"
+                                            >
+                                                @foreach ($regionOptions as $option)
+                                                    <option value="{{ $option['id'] }}">{{ $option['region'] }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endif
+
                                     {{-- Payment method tabs --}}
                                     @if ($hasBanks && $datafastEnabled)
                                         <div class="mb-5 flex gap-2 border-b border-gray-200 dark:border-graphite-700">
@@ -383,6 +429,9 @@
                                             >
                                                 @csrf
                                                 <input type="hidden" name="program_id" value="{{ $program->id }}">
+                                                @if ($hasRegionPrices)
+                                                    <input type="hidden" name="region_price_id" :value="selectedId">
+                                                @endif
 
                                                 <div class="grid gap-6 lg:grid-cols-2">
 
@@ -459,9 +508,10 @@
                                                             <x-input-label :value="__('messages.plans.amount_label')" />
                                                             <div class="mt-1 flex items-center justify-between rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 dark:border-brand-900/60 dark:bg-brand-900/20">
                                                                 <span class="text-sm text-gray-700 dark:text-graphite-300">{{ __('messages.plans.fixed_amount_note') }}</span>
-                                                                <span class="text-lg font-bold text-brand-700 dark:text-brand-300">${{ number_format($transferAmount, 2) }}</span>
+                                                                <span class="text-lg font-bold text-brand-700 dark:text-brand-300" x-text="money(transferAmount)">${{ number_format($transferAmount, 2) }}</span>
                                                             </div>
-                                                            <input type="hidden" name="amount" value="{{ number_format($transferAmount, 2, '.', '') }}">
+                                                            {{-- Display only: the server recalculates the amount from the plan and region. --}}
+                                                            <input type="hidden" name="amount" :value="transferAmount" value="{{ number_format($transferAmount, 2, '.', '') }}">
                                                         </div>
 
                                                         <div>
@@ -507,7 +557,7 @@
 
                                             <div class="mt-5 flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-graphite-700 dark:bg-graphite-900/40">
                                                 <span class="text-sm text-gray-600 dark:text-graphite-400">{{ __('messages.plans.fixed_amount_note') }}</span>
-                                                <span class="text-lg font-bold text-gray-700 dark:text-graphite-200">${{ number_format($cardAmount, 2) }}</span>
+                                                <span class="text-lg font-bold text-gray-700 dark:text-graphite-200" x-text="money(cardAmount)">${{ number_format($cardAmount, 2) }}</span>
                                             </div>
 
                                             {{-- Accepted brands --}}
@@ -520,13 +570,22 @@
                                                 @endforeach
                                             </div>
 
-                                            <form method="POST" action="{{ route('plans.card-checkout') }}" class="mt-6">
+                                            <form method="POST" action="{{ route('plans.card-checkout') }}" class="mt-6" x-show="hasCard" x-cloak>
                                                 @csrf
                                                 <input type="hidden" name="program_id" value="{{ $program->id }}">
+                                                @if ($hasRegionPrices)
+                                                    <input type="hidden" name="region_price_id" :value="selectedId">
+                                                @endif
                                                 <x-primary-button type="submit">
                                                     {{ __('messages.plans.card_pay_button') }}
                                                 </x-primary-button>
                                             </form>
+
+                                            @if ($hasRegionPrices)
+                                                <p class="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300" x-show="! hasCard" x-cloak>
+                                                    {{ __('messages.plans.region_card_unavailable') }}
+                                                </p>
+                                            @endif
 
                                             <p class="mt-3 text-xs text-gray-400 dark:text-graphite-500">
                                                 {{ __('messages.plans.card_pay_secure_note') }}
@@ -564,4 +623,68 @@
 
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            // Buyer side: swaps the displayed figures when another region is
+            // picked. The server recalculates the charge on its own, so this
+            // only keeps the page honest about what is about to be charged.
+            window.planRegionPricing = function (regions, baseTransfer, baseCard) {
+                return {
+                    regions: regions ?? [],
+                    baseTransfer: Number(baseTransfer ?? 0),
+                    baseCard: baseCard === null || baseCard === undefined ? null : Number(baseCard),
+                    selectedId: (regions && regions.length) ? String(regions[0].id) : '',
+                    get current() {
+                        if (!this.regions.length) return null;
+                        return this.regions.find((r) => String(r.id) === String(this.selectedId)) ?? null;
+                    },
+                    get transferAmount() {
+                        return this.current ? Number(this.current.transfer) : this.baseTransfer;
+                    },
+                    get cardAmount() {
+                        if (this.current) {
+                            return this.current.card === null ? null : Number(this.current.card);
+                        }
+                        return this.baseCard;
+                    },
+                    get hasCard() {
+                        return this.cardAmount !== null && this.cardAmount !== undefined;
+                    },
+                    get savings() {
+                        if (!this.hasCard) return 0;
+                        const diff = this.cardAmount - this.transferAmount;
+                        return diff > 0 ? diff : 0;
+                    },
+                    get savingsLabel() {
+                        if (this.savings <= 0) return '';
+                        const pct = this.cardAmount > 0 ? Math.round(this.savings / this.cardAmount * 100) : 0;
+                        return 'Ahorras ' + this.money(this.savings) + ' (' + pct + '% off)';
+                    },
+                    money(value) {
+                        return '$' + Number(value ?? 0).toFixed(2);
+                    },
+                };
+            };
+
+            // Admin side: repeatable region rows inside the plan forms.
+            window.regionPriceEditor = function (initialRows) {
+                return {
+                    rows: Array.isArray(initialRows) ? initialRows.slice() : [],
+                    addRow() {
+                        this.rows.push({
+                            region: '',
+                            first_payment_cost: '',
+                            card_first_payment_cost: '',
+                            renewal_cost: '',
+                            card_renewal_cost: '',
+                        });
+                    },
+                    removeRow(index) {
+                        this.rows.splice(index, 1);
+                    },
+                };
+            };
+        </script>
+    @endpush
 </x-app-layout>

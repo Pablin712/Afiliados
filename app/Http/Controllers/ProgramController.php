@@ -2,81 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Programs\ProgramRequest;
 use App\Models\MembershipType;
 use App\Models\Program;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProgramController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function store(ProgramRequest $request): RedirectResponse
     {
-        $customerType = MembershipType::query()
-            ->where('name', 'customer')
-            ->firstOrFail();
+        DB::transaction(function () use ($request): void {
+            $program = Program::create($this->payloadFrom($request));
 
-        $validated = $request->validate([
-            'name'                    => ['required', 'string', 'max:150'],
-            'description'             => ['nullable', 'string'],
-            'first_payment_cost'      => ['required', 'numeric', 'min:0'],
-            'card_first_payment_cost' => ['nullable', 'numeric', 'min:0'],
-            'renewal_cost'            => ['required', 'numeric', 'min:0'],
-            'card_renewal_cost'       => ['nullable', 'numeric', 'min:0'],
-            'duration_months'         => ['required', 'integer', 'min:1', 'max:24'],
-            'is_active'               => ['nullable', 'boolean'],
-        ]);
-
-        Program::create([
-            'name'                    => $validated['name'],
-            'description'             => $validated['description'] ?? null,
-            'membership_type_id'      => $customerType->id,
-            'first_payment_cost'      => $validated['first_payment_cost'],
-            'card_first_payment_cost' => $validated['card_first_payment_cost'] ?? null,
-            'renewal_cost'            => $validated['renewal_cost'],
-            'card_renewal_cost'       => $validated['card_renewal_cost'] ?? null,
-            'duration_months'         => $validated['duration_months'],
-            'is_active'               => $request->boolean('is_active'),
-        ]);
+            $this->syncRegionPrices($program, $request->input('region_prices', []));
+        });
 
         return back()->with('status', __('messages.plans.program_created'));
     }
 
-    public function update(Request $request, Program $program): RedirectResponse
+    public function update(ProgramRequest $request, Program $program): RedirectResponse
     {
-        $customerType = MembershipType::query()
-            ->where('name', 'customer')
-            ->firstOrFail();
+        DB::transaction(function () use ($request, $program): void {
+            $program->update($this->payloadFrom($request));
 
-        $validated = $request->validate([
-            'name'                    => ['required', 'string', 'max:150'],
-            'description'             => ['nullable', 'string'],
-            'first_payment_cost'      => ['required', 'numeric', 'min:0'],
-            'card_first_payment_cost' => ['nullable', 'numeric', 'min:0'],
-            'renewal_cost'            => ['required', 'numeric', 'min:0'],
-            'card_renewal_cost'       => ['nullable', 'numeric', 'min:0'],
-            'duration_months'         => ['required', 'integer', 'min:1', 'max:24'],
-            'is_active'               => ['nullable', 'boolean'],
-        ]);
-
-        $program->update([
-            'name'                    => $validated['name'],
-            'description'             => $validated['description'] ?? null,
-            'membership_type_id'      => $customerType->id,
-            'first_payment_cost'      => $validated['first_payment_cost'],
-            'card_first_payment_cost' => $validated['card_first_payment_cost'] ?? null,
-            'renewal_cost'            => $validated['renewal_cost'],
-            'card_renewal_cost'       => $validated['card_renewal_cost'] ?? null,
-            'duration_months'         => $validated['duration_months'],
-            'is_active'               => $request->boolean('is_active'),
-        ]);
+            $this->syncRegionPrices($program, $request->input('region_prices', []));
+        });
 
         return back()->with('status', __('messages.plans.program_updated'));
     }
 
     public function destroy(Program $program): RedirectResponse
     {
+        abort_unless(request()->user()?->hasRole('admin'), 403);
+
+        // Region prices go with it through the cascading foreign key.
         $program->delete();
 
         return back()->with('status', __('messages.plans.program_deleted'));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payloadFrom(ProgramRequest $request): array
+    {
+        $customerType = MembershipType::query()
+            ->where('name', 'customer')
+            ->firstOrFail();
+
+        return [
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'membership_type_id' => $customerType->id,
+            'first_payment_cost' => $request->input('first_payment_cost'),
+            'card_first_payment_cost' => $request->input('card_first_payment_cost'),
+            'renewal_cost' => $request->input('renewal_cost'),
+            'card_renewal_cost' => $request->input('card_renewal_cost'),
+            'duration_months' => $request->input('duration_months'),
+            'is_active' => $request->boolean('is_active'),
+        ];
+    }
+
+    /**
+     * The editor posts the whole region table on every save, so the stored
+     * rows are replaced wholesale.
+     *
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    private function syncRegionPrices(Program $program, array $rows): void
+    {
+        $program->regionPrices()->delete();
+
+        foreach (array_values($rows) as $index => $row) {
+            $program->regionPrices()->create([
+                'region' => $row['region'],
+                'first_payment_cost' => $row['first_payment_cost'],
+                'card_first_payment_cost' => $row['card_first_payment_cost'] ?? null,
+                'renewal_cost' => $row['renewal_cost'],
+                'card_renewal_cost' => $row['card_renewal_cost'] ?? null,
+                'sort_order' => $index,
+            ]);
+        }
     }
 }

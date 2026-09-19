@@ -28,17 +28,14 @@ class BlogPageTest extends TestCase
         $response->assertDontSee('Programada');
     }
 
-    public function test_post_page_renders_markdown_body_and_regional_prices(): void
+    public function test_post_page_renders_the_markdown_body(): void
     {
         $post = $this->createPost([
             'title_es' => 'VPS para trading',
             'slug' => 'vps-para-trading',
-            'body_es' => "## Qué incluye\n\nUn servidor **siempre encendido**.",
-        ]);
+            'body_es' => "## Qué incluye
 
-        $post->prices()->createMany([
-            ['region' => 'EE.UU.', 'item' => 'VPS Básico', 'price' => 25, 'currency' => 'USD', 'sort_order' => 0],
-            ['region' => 'LATAM', 'item' => 'VPS Básico', 'price' => 18.5, 'currency' => 'USD', 'sort_order' => 1],
+Un servidor **siempre encendido**.",
         ]);
 
         $response = $this->get(route('blog.show', $post->slug));
@@ -46,10 +43,6 @@ class BlogPageTest extends TestCase
         $response->assertOk();
         $response->assertSee('<h2>Qué incluye</h2>', false);
         $response->assertSee('<strong>siempre encendido</strong>', false);
-        $response->assertSee('EE.UU.');
-        $response->assertSee('$25.00');
-        $response->assertSee('LATAM');
-        $response->assertSee('$18.50');
     }
 
     public function test_html_typed_into_the_body_is_escaped(): void

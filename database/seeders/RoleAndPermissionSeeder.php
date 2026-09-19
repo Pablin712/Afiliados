@@ -57,6 +57,12 @@ class RoleAndPermissionSeeder extends Seeder
             'guard_name' => 'web',
         ]);
 
+        // Users the admin picks to write blog entries.
+        Role::firstOrCreate([
+            'name' => 'blogger',
+            'guard_name' => 'web',
+        ]);
+
         $adminRole->syncPermissions(Permission::all());
     }
 }

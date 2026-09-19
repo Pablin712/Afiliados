@@ -7,32 +7,54 @@ use App\Http\Requests\Blog\StoreBlogPostRequest;
 use App\Http\Requests\Blog\UpdateBlogPostRequest;
 use App\Models\BlogPost;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class BlogPostsController extends Controller
 {
+    /**
+     * Writing screen for admins and for the users the admin gave the writer
+     * role to. A writer only sees their own entries; an admin sees them all.
+     */
+    public function index(): View
+    {
+        $user = request()->user();
+
+        Gate::authorize('viewAny', BlogPost::class);
+
+        $blogPosts = BlogPost::query()
+            ->with('author')
+            ->unless($user->can('edit landing_content'), fn ($query) => $query->where('author_id', $user->id))
+            ->orderBy('sort_order')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('admin.blog.index', compact('blogPosts'));
+    }
+
     public function store(StoreBlogPostRequest $request): RedirectResponse
     {
+        Gate::authorize('create', BlogPost::class);
+
         $payload = $this->payloadFrom($request);
         $payload['slug'] = BlogPost::uniqueSlug($request->input('slug') ?: $request->input('title_es'));
+        $payload['author_id'] = $request->user()->id;
 
         if ($request->hasFile('cover')) {
             $payload['cover_image_path'] = $request->file('cover')->store('blog', 'public');
         }
 
-        DB::transaction(function () use ($payload, $request): void {
-            $post = BlogPost::query()->create($payload);
-            $this->syncPrices($post, $request->input('prices', []));
-        });
+        BlogPost::query()->create($payload);
 
-        return redirect()
-            ->route('admin.landing-content.index')
-            ->with('status', __('messages.admin.blog.messages.created'));
+        return back()->with('status', __('messages.admin.blog.messages.created'));
     }
 
     public function update(UpdateBlogPostRequest $request, BlogPost $blogPost): RedirectResponse
     {
+        Gate::authorize('update', $blogPost);
+
         $payload = $this->payloadFrom($request);
         $payload['slug'] = BlogPost::uniqueSlug(
             $request->input('slug') ?: $request->input('title_es'),
@@ -44,28 +66,20 @@ class BlogPostsController extends Controller
             $payload['cover_image_path'] = $request->file('cover')->store('blog', 'public');
         }
 
-        DB::transaction(function () use ($blogPost, $payload, $request): void {
-            $blogPost->update($payload);
-            $this->syncPrices($blogPost, $request->input('prices', []));
-        });
+        $blogPost->update($payload);
 
-        return redirect()
-            ->route('admin.landing-content.index')
-            ->with('status', __('messages.admin.blog.messages.updated'));
+        return back()->with('status', __('messages.admin.blog.messages.updated'));
     }
 
     public function destroy(BlogPost $blogPost): RedirectResponse
     {
-        abort_unless(request()->user()?->can('edit landing_content'), 403);
+        Gate::authorize('delete', $blogPost);
 
         $this->deleteFile($blogPost->cover_image_path);
 
-        // Prices go with it through the cascading foreign key.
         $blogPost->delete();
 
-        return redirect()
-            ->route('admin.landing-content.index')
-            ->with('status', __('messages.admin.blog.messages.deleted'));
+        return back()->with('status', __('messages.admin.blog.messages.deleted'));
     }
 
     /**
@@ -84,28 +98,6 @@ class BlogPostsController extends Controller
             'published_at' => $request->input('published_at') ?: now(),
             'sort_order' => (int) ($request->input('sort_order') ?? 0),
         ];
-    }
-
-    /**
-     * The price editor posts the whole table on every save, so the stored rows
-     * are replaced wholesale instead of diffed row by row.
-     *
-     * @param  array<int, array<string, mixed>>  $rows
-     */
-    private function syncPrices(BlogPost $post, array $rows): void
-    {
-        $post->prices()->delete();
-
-        foreach (array_values($rows) as $index => $row) {
-            $post->prices()->create([
-                'region' => $row['region'],
-                'item' => $row['item'] ?? null,
-                'price' => $row['price'],
-                'currency' => $row['currency'],
-                'note' => $row['note'] ?? null,
-                'sort_order' => $index,
-            ]);
-        }
     }
 
     private function deleteFile(?string $path): void

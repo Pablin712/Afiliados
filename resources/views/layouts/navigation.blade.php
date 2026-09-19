@@ -44,6 +44,11 @@
                     <x-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
                         {{ __('messages.nav.schedules') }}
                     </x-nav-link>
+                    @can('viewAny', App\Models\BlogPost::class)
+                        <x-nav-link :href="route('admin.blog.index')" :active="request()->routeIs('admin.blog.*')">
+                            {{ __('messages.nav.blog_manage') }}
+                        </x-nav-link>
+                    @endcan
                     <x-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                         {{ __('messages.nav.plans') }}
                     </x-nav-link>
@@ -217,6 +222,11 @@
             <x-responsive-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
                 {{ __('messages.nav.schedules') }}
             </x-responsive-nav-link>
+            @can('viewAny', App\Models\BlogPost::class)
+                <x-responsive-nav-link :href="route('admin.blog.index')" :active="request()->routeIs('admin.blog.*')">
+                    {{ __('messages.nav.blog_manage') }}
+                </x-responsive-nav-link>
+            @endcan
             <x-responsive-nav-link :href="route('plans.index')" :active="request()->routeIs('plans.*')">
                 {{ __('messages.nav.plans') }}
             </x-responsive-nav-link>

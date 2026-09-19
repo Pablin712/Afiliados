@@ -1,4 +1,4 @@
-@can('edit landing_content')
+@can('viewAny', App\Models\BlogPost::class)
     <x-modal name="blog-post-delete-modal" focusable>
         <form id="blog-post-delete-form" method="POST" action="{{ route('admin.blog.destroy', ['blogPost' => '__ID__']) }}" class="p-6 space-y-4">
             @csrf

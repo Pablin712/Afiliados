@@ -18,6 +18,9 @@
                 @if ($user->hasRole('teacher'))
                     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 uppercase tracking-wide">Teacher</span>
                 @endif
+                @if ($user->hasRole('blogger'))
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 uppercase tracking-wide">{{ __('messages.admin.users.blogger_badge') }}</span>
+                @endif
                 @if ($user->hasRole('admin'))
                     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300 uppercase tracking-wide">Admin</span>
                 @endif
@@ -98,7 +101,7 @@
                             <button
                                 type="button"
                                 title="Quitar rol Teacher"
-                                onclick="window.toggleTeacherRole({{ $user->id }}, 'remove_teacher', this)"
+                                onclick="window.toggleUserRole({{ $user->id }}, 'remove_teacher', this)"
                                 class="inline-flex items-center justify-center w-8 h-8 rounded-md text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/30 transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
@@ -107,10 +110,30 @@
                             <button
                                 type="button"
                                 title="Hacer Teacher"
-                                onclick="window.toggleTeacherRole({{ $user->id }}, 'make_teacher', this)"
+                                onclick="window.toggleUserRole({{ $user->id }}, 'make_teacher', this)"
                                 class="inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:text-purple-400 dark:hover:bg-purple-900/30 transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                            </button>
+                        @endif
+
+                        @if ($user->hasRole('blogger'))
+                            <button
+                                type="button"
+                                title="{{ __('messages.admin.users.remove_blogger') }}"
+                                onclick="window.toggleUserRole({{ $user->id }}, 'remove_blogger', this)"
+                                class="inline-flex items-center justify-center w-8 h-8 rounded-md text-sky-600 hover:bg-sky-50 dark:text-sky-400 dark:hover:bg-sky-900/30 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                            </button>
+                        @else
+                            <button
+                                type="button"
+                                title="{{ __('messages.admin.users.make_blogger') }}"
+                                onclick="window.toggleUserRole({{ $user->id }}, 'make_blogger', this)"
+                                class="inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:text-sky-400 dark:hover:bg-sky-900/30 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             </button>
                         @endif
                     @endif

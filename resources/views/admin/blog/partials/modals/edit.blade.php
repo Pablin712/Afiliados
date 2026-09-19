@@ -1,4 +1,4 @@
-@can('edit landing_content')
+@can('viewAny', App\Models\BlogPost::class)
     <x-modal name="blog-post-edit-modal" focusable>
         {{--
             The action is filled in by load() when the modal opens, from the

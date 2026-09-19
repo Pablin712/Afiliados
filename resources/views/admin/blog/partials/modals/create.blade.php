@@ -1,4 +1,4 @@
-@can('edit landing_content')
+@can('create', App\Models\BlogPost::class)
     <x-modal name="blog-post-create-modal" focusable>
         <form
             method="POST"

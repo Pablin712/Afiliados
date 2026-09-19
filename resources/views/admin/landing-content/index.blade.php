@@ -313,6 +313,7 @@
             </div>
 
             @include('admin.landing-content.partials.modals.edit')
+            @include('admin.blog.partials.scripts')
             @include('admin.blog.partials.modals.create')
             @include('admin.blog.partials.modals.edit')
             @include('admin.blog.partials.modals.delete')
@@ -334,99 +335,6 @@
                     const testimonialDeletePattern = @json(route('admin.testimonials.destroy', ['testimonial' => '__ID__']));
                     const heroButtonUpdatePattern = @json(route('admin.hero-buttons.update', ['heroButton' => '__ID__']));
                     const heroButtonDeletePattern = @json(route('admin.hero-buttons.destroy', ['heroButton' => '__ID__']));
-
-                    const blogDeletePattern = @json(route('admin.blog.destroy', ['blogPost' => '__ID__']));
-
-                    function blogPostsData() {
-                        const node = document.getElementById('blog-posts-data');
-                        if (!node) return {};
-                        try {
-                            return JSON.parse(node.textContent) || {};
-                        } catch (e) {
-                            return {};
-                        }
-                    }
-
-                    function blankBlogPost() {
-                        return {
-                            title_es: '', title_en: '',
-                            excerpt_es: '', excerpt_en: '',
-                            body_es: '', body_en: '',
-                            slug: '', published_at: '',
-                            sort_order: 0, is_published: true,
-                        };
-                    }
-
-                    function blankPriceRow() {
-                        return { region: '', item: '', price: '', currency: 'USD', note: '' };
-                    }
-
-                    // Alpine component behind both blog modals: the create one
-                    // starts blank, the edit one is filled by load() with the
-                    // row's payload when the modal opens.
-                    window.blogPostForm = function (updatePattern) {
-                        return {
-                            updatePattern: updatePattern || null,
-                            post: blankBlogPost(),
-                            prices: [blankPriceRow()],
-                            currentCoverUrl: null,
-                            publicUrl: null,
-                            addPrice() {
-                                this.prices.push(blankPriceRow());
-                            },
-                            removePrice(index) {
-                                this.prices.splice(index, 1);
-                            },
-                            load(payload) {
-                                if (!payload) return;
-
-                                this.post = Object.assign(blankBlogPost(), {
-                                    title_es: payload.title_es ?? '',
-                                    title_en: payload.title_en ?? '',
-                                    excerpt_es: payload.excerpt_es ?? '',
-                                    excerpt_en: payload.excerpt_en ?? '',
-                                    body_es: payload.body_es ?? '',
-                                    body_en: payload.body_en ?? '',
-                                    slug: payload.slug ?? '',
-                                    published_at: payload.published_at ?? '',
-                                    sort_order: payload.sort_order ?? 0,
-                                    is_published: !!payload.is_published,
-                                });
-
-                                this.prices = (payload.prices && payload.prices.length)
-                                    ? payload.prices.map((row) => Object.assign(blankPriceRow(), row))
-                                    : [blankPriceRow()];
-
-                                this.currentCoverUrl = payload.coverUrl ?? null;
-                                this.publicUrl = payload.publicUrl ?? null;
-
-                                if (this.updatePattern) {
-                                    this.$el.action = this.updatePattern.replace('__ID__', String(payload.id));
-                                }
-
-                                const file = this.$el.querySelector('input[type="file"]');
-                                if (file) file.value = '';
-                            },
-                        };
-                    };
-
-                    window.openBlogPostEditModal = function (id) {
-                        const payload = blogPostsData()[String(id)];
-                        if (!payload) return;
-
-                        window.dispatchEvent(new CustomEvent('blog-post-edit', { detail: payload }));
-                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'blog-post-edit-modal' }));
-                    };
-
-                    window.openBlogPostDeleteModal = function (id) {
-                        const payload = blogPostsData()[String(id)];
-                        const form = document.getElementById('blog-post-delete-form');
-                        if (!form || !payload) return;
-
-                        form.action = blogDeletePattern.replace('__ID__', String(payload.id));
-                        document.getElementById('blog-post-delete-name').textContent = payload.title ? `(${payload.title})` : '';
-                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'blog-post-delete-modal' }));
-                    };
 
                     window.openLandingContentEditModal = function (payload) {
                         const form = document.getElementById('landing-content-edit-form');

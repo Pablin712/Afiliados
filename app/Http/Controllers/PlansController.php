@@ -6,6 +6,7 @@ use App\Models\Bank;
 use App\Models\Membership;
 use App\Models\Payment;
 use App\Models\Program;
+use App\Models\ProgramRegionPrice;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\DatafastService;
@@ -70,7 +71,7 @@ class PlansController extends Controller
         }
 
         $programs = Program::query()
-            ->with('membershipType')
+            ->with(['membershipType', 'regionPrices'])
             ->orderBy('first_payment_cost')
             ->when(! $isAdmin, fn ($query) => $query->where('is_active', true))
             ->get();
@@ -124,21 +125,29 @@ class PlansController extends Controller
         }
 
         $validated = $request->validate([
-            'program_id' => ['required', 'integer', Rule::exists('programs', 'id')->where('is_active', true)],
-            'bank_id'    => ['required', 'integer', 'exists:banks,id'],
-            'number'     => ['required', 'string', 'max:120'],
-            'photo'      => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'program_id'      => ['required', 'integer', Rule::exists('programs', 'id')->where('is_active', true)],
+            'bank_id'         => ['required', 'integer', 'exists:banks,id'],
+            'number'          => ['required', 'string', 'max:120'],
+            'photo'           => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'region_price_id' => ['nullable', 'integer'],
         ]);
 
         $program = Program::query()->findOrFail($validated['program_id']);
 
+        $regionPrice = $this->resolveRegionPrice($program, $request->input('region_price_id'));
+
+        if ($regionPrice === false) {
+            return back()->with('error', __('messages.plans.region_required'));
+        }
+
         $isRenewalOrReactivation = Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
 
-        $calculatedAmount = $isRenewalOrReactivation
-            ? (float) $program->renewal_cost
-            : (float) $program->first_payment_cost;
+        // Never trust an amount coming from the form: it is recalculated here
+        // from the program and the region the buyer picked.
+        $calculatedAmount = $program->transferCostFor($regionPrice, $isRenewalOrReactivation);
+        $regionLabel = $regionPrice?->region;
 
-        $payment = DB::transaction(function () use ($validated, $userId, $calculatedAmount): Payment {
+        $payment = DB::transaction(function () use ($validated, $userId, $calculatedAmount, $regionLabel): Payment {
             $photoPath = $validated['photo']->store('payment-receipts', 'public');
 
             $transaction = Transaction::create([
@@ -159,6 +168,7 @@ class PlansController extends Controller
                 'number'         => $validated['number'],
                 'photo'          => $photoPath,
                 'amount'         => $calculatedAmount,
+                'region_label'   => $regionLabel,
                 'state'          => 'pending',
             ]);
         });
@@ -211,16 +221,21 @@ class PlansController extends Controller
             ->update(['state' => 'cancelled']);
 
         $validated = $request->validate([
-            'program_id' => ['required', 'integer', Rule::exists('programs', 'id')->where('is_active', true)],
+            'program_id'      => ['required', 'integer', Rule::exists('programs', 'id')->where('is_active', true)],
+            'region_price_id' => ['nullable', 'integer'],
         ]);
 
         $program = Program::query()->findOrFail($validated['program_id']);
 
+        $regionPrice = $this->resolveRegionPrice($program, $request->input('region_price_id'));
+
+        if ($regionPrice === false) {
+            return back()->with('error', __('messages.plans.region_required'));
+        }
+
         $isRenewalOrReactivation = Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
 
-        $cardAmount = $isRenewalOrReactivation
-            ? $program->card_renewal_cost
-            : $program->card_first_payment_cost;
+        $cardAmount = $program->cardCostFor($regionPrice, $isRenewalOrReactivation);
 
         if ($cardAmount === null) {
             return back()->with('error', __('messages.plans.card_payment_disabled'));
@@ -253,6 +268,7 @@ class PlansController extends Controller
             'number'           => $merchantTransactionId,
             'photo'            => null,
             'amount'           => $amount,
+            'region_label'     => $regionPrice?->region,
             'state'            => 'pending',
             'payment_method'   => 'card',
             'gateway_order_id' => $checkoutId,
@@ -426,6 +442,27 @@ class PlansController extends Controller
         return back()->with('status', __('messages.plans.free_renew_success', [
             'date' => $membership->expires_at?->format('d/m/Y'),
         ]));
+    }
+
+    /**
+     * Resolve the region row the buyer picked for this program.
+     *
+     * Returns the row, null when the program charges the same everywhere, or
+     * false when the program charges by region and the submitted selection is
+     * missing or belongs to another program - a case the caller rejects rather
+     * than silently falling back to the base price.
+     */
+    private function resolveRegionPrice(Program $program, mixed $regionPriceId): ProgramRegionPrice|null|false
+    {
+        if (! $program->chargesByRegion()) {
+            return null;
+        }
+
+        if (blank($regionPriceId)) {
+            return false;
+        }
+
+        return $program->regionPrices()->whereKey((int) $regionPriceId)->first() ?? false;
     }
 
     private function canSubmitPaidRenewal(string $membershipTypeName, string $membershipStatus): bool

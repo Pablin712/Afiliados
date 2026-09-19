@@ -274,16 +274,22 @@ Route::middleware('auth')->group(function () {
         ->middleware(['verified', 'permission:edit landing_content'])
         ->name('admin.testimonials.destroy');
 
+    // Writing the blog is gated by BlogPostPolicy, not by a single permission:
+    // an admin manages every entry, a user with the writer role only their own.
+    Route::get('/admin/blog', [BlogPostsController::class, 'index'])
+        ->middleware('verified')
+        ->name('admin.blog.index');
+
     Route::post('/admin/blog', [BlogPostsController::class, 'store'])
-        ->middleware(['verified', 'permission:edit landing_content'])
+        ->middleware('verified')
         ->name('admin.blog.store');
 
     Route::put('/admin/blog/{blogPost}', [BlogPostsController::class, 'update'])
-        ->middleware(['verified', 'permission:edit landing_content'])
+        ->middleware('verified')
         ->name('admin.blog.update');
 
     Route::delete('/admin/blog/{blogPost}', [BlogPostsController::class, 'destroy'])
-        ->middleware(['verified', 'permission:edit landing_content'])
+        ->middleware('verified')
         ->name('admin.blog.destroy');
 
     Route::post('/admin/hero-buttons', [HeroButtonsController::class, 'store'])

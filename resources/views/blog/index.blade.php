@@ -52,16 +52,6 @@
                                 {{ $post->summary() }}
                             </p>
 
-                            @if ($post->prices->isNotEmpty())
-                                <div class="mt-4 flex flex-wrap gap-2">
-                                    @foreach ($post->prices->unique('region')->take(3) as $price)
-                                        <span class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
-                                            {{ $price->region }} · {{ $price->formattedPrice() }}
-                                        </span>
-                                    @endforeach
-                                </div>
-                            @endif
-
                             <a href="{{ route('blog.show', $post->slug) }}" class="mt-5 inline-flex items-center text-sm font-semibold text-brand-600 hover:text-brand-500 dark:text-brand-400">
                                 {{ __('messages.blog.read_more') }}
                                 <span aria-hidden="true" class="ml-1">&rarr;</span>

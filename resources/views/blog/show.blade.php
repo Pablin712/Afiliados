@@ -7,6 +7,9 @@
         <header class="mt-5">
             <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-graphite-500">
                 {{ optional($post->published_at)->translatedFormat('d M Y') }}
+                @if ($post->author)
+                    · {{ __('messages.blog.by_author', ['name' => $post->author->name]) }}
+                @endif
             </p>
 
             <h1 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-graphite-100">
@@ -30,64 +33,6 @@
         <div class="blog-body mt-8">
             {!! $post->bodyHtml() !!}
         </div>
-
-        @php($pricesByRegion = $post->pricesByRegion())
-
-        @if ($pricesByRegion->isNotEmpty())
-            <section class="mt-12 rounded-3xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm dark:border-graphite-800 dark:bg-graphite-900">
-                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-graphite-100">
-                    {{ __('messages.blog.prices_title') }}
-                </h2>
-                <p class="mt-2 text-sm text-gray-600 dark:text-graphite-300">
-                    {{ __('messages.blog.prices_hint') }}
-                </p>
-
-                <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    @foreach ($pricesByRegion as $region => $prices)
-                        <div class="flex flex-col rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-graphite-700 dark:bg-graphite-950/50">
-                            <p class="inline-flex w-fit items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700 dark:border-brand-900 dark:bg-brand-950/40 dark:text-brand-300">
-                                {{ $region }}
-                            </p>
-
-                            <ul class="mt-4 space-y-3">
-                                @foreach ($prices as $price)
-                                    <li class="flex items-start justify-between gap-4 border-b border-gray-200 pb-3 last:border-0 last:pb-0 dark:border-graphite-800">
-                                        <div class="min-w-0">
-                                            <p class="text-sm font-medium text-gray-900 dark:text-graphite-100">
-                                                {{ $price->item ?: $post->localized('title') }}
-                                            </p>
-                                            @if ($price->note)
-                                                <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ $price->note }}</p>
-                                            @endif
-                                        </div>
-                                        <p class="shrink-0 text-lg font-bold text-emerald-700 dark:text-emerald-400">
-                                            {{ $price->formattedPrice() }}
-                                        </p>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endforeach
-                </div>
-
-                <div class="mt-6 flex flex-wrap gap-3">
-                    @if (! empty($content['contact_whatsapp_number_raw']))
-                        <a
-                            href="https://wa.me/{{ $content['contact_whatsapp_number_raw'] }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex items-center px-5 py-3 rounded-md bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500"
-                        >
-                            {{ __('messages.blog.prices_cta_whatsapp') }}
-                        </a>
-                    @endif
-
-                    <a href="{{ url('/#contacto') }}" class="inline-flex items-center px-5 py-3 rounded-md border border-gray-300 text-sm font-semibold text-gray-700 hover:text-brand-600 hover:border-brand-400 dark:border-graphite-700 dark:text-graphite-200 dark:hover:text-brand-400">
-                        {{ __('messages.blog.prices_cta_contact') }}
-                    </a>
-                </div>
-            </section>
-        @endif
 
         @if ($related->isNotEmpty())
             <section class="mt-12">

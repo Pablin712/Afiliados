@@ -17,13 +17,6 @@
         'coverUrl' => $post->cover_image_path ? asset('storage/'.$post->cover_image_path) : null,
         'publicUrl' => route('blog.show', $post->slug),
         'title' => $post->title_es,
-        'prices' => $post->prices->map(fn ($price) => [
-            'region' => $price->region,
-            'item' => $price->item,
-            'price' => (string) $price->price,
-            'currency' => $price->currency,
-            'note' => $price->note,
-        ])->values(),
     ]]);
 @endphp
 
@@ -37,9 +30,12 @@
                 {{ __('messages.admin.blog.hint') }}
                 <a href="{{ route('blog.index') }}" target="_blank" rel="noopener" class="font-mono text-brand-600 hover:underline dark:text-brand-400">{{ route('blog.index') }}</a>
             </p>
+            @cannot('edit landing_content')
+                <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.blog.mine_only_hint') }}</p>
+            @endcannot
         </div>
 
-        @can('edit landing_content')
+        @can('create', App\Models\BlogPost::class)
             <x-primary-button type="button" onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'blog-post-create-modal' }))">
                 {{ __('messages.admin.blog.buttons.create') }}
             </x-primary-button>
@@ -52,7 +48,7 @@
                 <tr>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.blog.columns.cover') }}</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.blog.columns.title_es') }}</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.blog.columns.prices') }}</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.blog.columns.author') }}</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.blog.columns.published_at') }}</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.blog.columns.sort_order') }}</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-graphite-400 uppercase">{{ __('messages.admin.blog.columns.is_published') }}</th>
@@ -72,15 +68,7 @@
                             <a href="{{ route('blog.show', $post->slug) }}" target="_blank" rel="noopener" class="text-xs font-mono text-gray-400 hover:text-brand-600 dark:text-graphite-500 dark:hover:text-brand-400">/blog/{{ $post->slug }}</a>
                         </td>
                         <td class="px-4 py-2 text-sm text-gray-700 dark:text-graphite-200">
-                            @if ($post->prices->isEmpty())
-                                <span class="text-xs text-gray-400">—</span>
-                            @else
-                                <div class="flex flex-wrap gap-1">
-                                    @foreach ($post->prices->unique('region') as $price)
-                                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">{{ $price->region }}</span>
-                                    @endforeach
-                                </div>
-                            @endif
+                            {{ $post->author?->name ?? '—' }}
                         </td>
                         <td class="px-4 py-2 text-sm text-gray-700 dark:text-graphite-200">{{ optional($post->published_at)->format('d/m/Y') }}</td>
                         <td class="px-4 py-2 text-sm text-gray-700 dark:text-graphite-200">{{ $post->sort_order }}</td>
@@ -93,13 +81,15 @@
                         </td>
                         <td class="px-4 py-2">
                             <div class="flex flex-wrap items-center gap-2">
-                                @can('edit landing_content')
+                                @can('update', $post)
                                     <x-action-icon-button
                                         variant="edit"
                                         icon="edit"
                                         :title="__('messages.admin.blog.buttons.edit')"
                                         :onclick="'window.openBlogPostEditModal('.$post->id.')'"
                                     />
+                                @endcan
+                                @can('delete', $post)
                                     <x-action-icon-button
                                         variant="delete"
                                         icon="delete"
