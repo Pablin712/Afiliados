@@ -9,7 +9,6 @@ use App\Models\Payment;
 use App\Models\Program;
 use App\Models\User;
 use App\Services\DatafastService;
-use App\Support\Countries;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
@@ -274,7 +273,6 @@ class RegionPricingTest extends TestCase
             ->get(route('plans.index'));
 
         $response->assertOk()
-            ->assertSee(__('messages.plans.region_detected', ['country' => Countries::name('US')]))
             ->assertSee('$200.00')
             ->assertDontSee('$120.00')
             ->assertSee('name="region_price_id" value="'.$usa->id.'"', false)
@@ -291,7 +289,6 @@ class RegionPricingTest extends TestCase
         $this->actingAs($user)
             ->get(route('plans.index'))
             ->assertOk()
-            ->assertSee(__('messages.plans.region_unknown'))
             ->assertSee('$147.00');
     }
 

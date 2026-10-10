@@ -14,7 +14,6 @@ use App\Services\MembershipFreeRenewalService;
 use App\Services\PaymentPendingWebhookService;
 use App\Services\PendingPaymentReviewService;
 use App\Services\VisitorCountryService;
-use App\Support\Countries;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -85,7 +84,6 @@ class PlansController extends Controller
         $visitorCountry = ! $isAdmin && $programs->contains(fn (Program $program) => $program->regionPrices->isNotEmpty())
             ? $this->visitorCountryService->detect($request)
             : null;
-        $visitorCountryName = $visitorCountry !== null ? Countries::name($visitorCountry) : null;
 
         // Renewals/reactivations use renewal cost for users with previous approved payments.
         $hasApprovedPayment = ! $isAdmin
@@ -104,8 +102,7 @@ class PlansController extends Controller
             'isTierUser',
             'canFreeRenewToday',
             'monthlyNewDirectCustomers',
-            'visitorCountry',
-            'visitorCountryName'
+            'visitorCountry'
         ));
     }
 
