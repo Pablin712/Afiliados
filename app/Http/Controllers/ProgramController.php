@@ -77,6 +77,7 @@ class ProgramController extends Controller
         foreach (array_values($rows) as $index => $row) {
             $program->regionPrices()->create([
                 'region' => $row['region'],
+                'countries' => $row['countries'],
                 'first_payment_cost' => $row['first_payment_cost'],
                 'card_first_payment_cost' => $row['card_first_payment_cost'] ?? null,
                 'renewal_cost' => $row['renewal_cost'],

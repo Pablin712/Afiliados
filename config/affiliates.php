@@ -184,4 +184,29 @@ return [
         // Dev only: skip Datafast verification and simulate approval. NEVER true in production.
         'dev_bypass'       => (bool) env('DATAFAST_DEV_BYPASS', false),
     ],
+
+    // Region pricing: the buyer never picks a region, the country their
+    // connection comes from does (see App\Services\VisitorCountryService).
+    'geo' => [
+        // Tried in order until one answers with a country code. {ip} is
+        // replaced by the visitor's IP; plain-text ("US") and JSON
+        // ({"country": "US"} or {"country_code": "US"}) answers both work.
+        // The visitor's IP comes from REMOTE_ADDR: if the site is ever put
+        // behind a proxy or CDN (Cloudflare...), configure trusted proxies
+        // first or every visitor will be located where the proxy is.
+        'providers' => array_values(array_filter(array_map('trim', explode(',', (string) env(
+            'GEO_PROVIDERS',
+            'https://api.country.is/{ip},https://get.geojs.io/v1/ip/country/{ip},https://ipinfo.io/{ip}/country'
+        ))))),
+        'timeout_seconds' => (int) env('GEO_TIMEOUT_SECONDS', 2),
+        // An IP rarely changes country; a VPN gives a different IP, so the
+        // price follows the VPN as soon as it is switched on or off.
+        'cache_minutes' => (int) env('GEO_CACHE_MINUTES', 360),
+        // When every provider fails, retry after this long instead of on
+        // every page view.
+        'failure_cache_minutes' => (int) env('GEO_FAILURE_CACHE_MINUTES', 2),
+        // Local only (ignored in production): pretend the visitor is in this
+        // country, since 127.0.0.1 cannot be located. E.g. GEO_DEBUG_COUNTRY=US
+        'debug_country' => env('GEO_DEBUG_COUNTRY'),
+    ],
 ];

@@ -2,25 +2,51 @@
 
 {{--
     Region price table for the admin plan forms. Each row overrides the plan's
-    four costs for buyers of that region; with no rows the plan charges its own
-    costs everywhere, exactly as before this existed.
+    four costs for buyers connecting from the countries it lists; everyone
+    else - or a plan with no rows - pays the plan's own costs.
 --}}
 @php
-    $initialRows = $program
-        ? $program->regionPrices->map(fn ($price) => [
-            'region' => $price->region,
-            'first_payment_cost' => (string) $price->first_payment_cost,
-            'card_first_payment_cost' => $price->card_first_payment_cost !== null ? (string) $price->card_first_payment_cost : '',
-            'renewal_cost' => (string) $price->renewal_cost,
-            'card_renewal_cost' => $price->card_renewal_cost !== null ? (string) $price->card_renewal_cost : '',
-        ])->values()->all()
-        : [];
+    // Several plan forms share the page; this tells which one a failed
+    // submission came from, so only that editor shows its rows and errors.
+    $formKey = $program ? 'program-'.$program->id : 'program-new';
+    $isOldSubmission = old('_region_form') === $formKey;
+
+    $fields = ['region', 'countries', 'first_payment_cost', 'card_first_payment_cost', 'renewal_cost', 'card_renewal_cost'];
+
+    // The submitted rows still include the ones left blank, which the request
+    // drops before validating; dropping them here too keeps each row lined up
+    // with its errors.
+    $sourceRows = $isOldSubmission
+        ? collect(old('region_prices', []))
+            ->filter(fn ($row) => is_array($row) && collect($row)->only($fields)->contains(fn ($value) => filled($value)))
+        : collect($program?->regionPrices ?? [])->map(fn ($price) => $price->only($fields));
+
+    $rowErrors = [];
+
+    if ($isOldSubmission) {
+        foreach ($errors->get('region_prices.*') as $key => $messages) {
+            $index = (int) (explode('.', $key)[1] ?? 0);
+            $rowErrors[$index] = array_merge($rowErrors[$index] ?? [], $messages);
+        }
+    }
+
+    $initialRows = $sourceRows->values()->map(fn ($row, $index) => [
+        'region' => (string) ($row['region'] ?? ''),
+        'countries' => implode(', ', \App\Support\Countries::parse($row['countries'] ?? null)),
+        'first_payment_cost' => (string) ($row['first_payment_cost'] ?? ''),
+        'card_first_payment_cost' => (string) ($row['card_first_payment_cost'] ?? ''),
+        'renewal_cost' => (string) ($row['renewal_cost'] ?? ''),
+        'card_renewal_cost' => (string) ($row['card_renewal_cost'] ?? ''),
+        'errors' => array_values(array_unique($rowErrors[$index] ?? [])),
+    ])->all();
 @endphp
 
 <div
     class="md:col-span-2 rounded-xl border border-gray-200 dark:border-graphite-700"
     x-data="regionPriceEditor(@js($initialRows))"
 >
+    <input type="hidden" name="_region_form" value="{{ $formKey }}">
+
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-graphite-700 dark:bg-graphite-900">
         <div>
             <p class="text-sm font-semibold text-gray-700 dark:text-graphite-200">{{ __('messages.plans.region_prices.title') }}</p>
@@ -36,6 +62,12 @@
     </div>
 
     <div class="space-y-3 p-4">
+        @if ($isOldSubmission)
+            @foreach ($errors->get('region_prices') as $message)
+                <p class="text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+            @endforeach
+        @endif
+
         <template x-if="rows.length === 0">
             <p class="text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.plans.region_prices.empty') }}</p>
         </template>
@@ -85,6 +117,24 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="mt-3">
+                    <label class="block text-xs font-medium text-gray-600 dark:text-graphite-400 mb-1">{{ __('messages.plans.region_prices.countries') }}</label>
+                    <input
+                        type="text"
+                        :name="'region_prices['+index+'][countries]'"
+                        x-model="row.countries"
+                        placeholder="{{ __('messages.plans.region_prices.countries_placeholder') }}"
+                        class="w-full rounded-md border-gray-300 text-sm dark:border-graphite-700 dark:bg-graphite-900 dark:text-graphite-100"
+                    >
+                    <p class="mt-1 text-xs text-gray-500 dark:text-graphite-400">
+                        {{ __('messages.plans.region_prices.countries_help', ['groups' => implode(', ', \App\Support\Countries::groupNames())]) }}
+                    </p>
+                </div>
+
+                <template x-for="message in (row.errors || [])">
+                    <p class="mt-1 text-xs text-red-600 dark:text-red-400" x-text="message"></p>
+                </template>
             </div>
         </template>
     </div>

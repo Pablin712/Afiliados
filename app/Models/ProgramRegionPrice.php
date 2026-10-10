@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Countries;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -10,6 +11,7 @@ class ProgramRegionPrice extends Model
     protected $fillable = [
         'program_id',
         'region',
+        'countries',
         'first_payment_cost',
         'card_first_payment_cost',
         'renewal_cost',
@@ -20,6 +22,7 @@ class ProgramRegionPrice extends Model
     protected function casts(): array
     {
         return [
+            'countries' => 'array',
             'first_payment_cost' => 'decimal:2',
             'card_first_payment_cost' => 'decimal:2',
             'renewal_cost' => 'decimal:2',
@@ -31,6 +34,22 @@ class ProgramRegionPrice extends Model
     public function program(): BelongsTo
     {
         return $this->belongsTo(Program::class);
+    }
+
+    /**
+     * Country codes this region charges to, with groups such as "LATAM"
+     * expanded.
+     *
+     * @return list<string>
+     */
+    public function coveredCountries(): array
+    {
+        return Countries::expand(Countries::parse($this->countries ?? []));
+    }
+
+    public function covers(string $country): bool
+    {
+        return in_array($country, $this->coveredCountries(), true);
     }
 
     public function transferCost(bool $isRenewal): float

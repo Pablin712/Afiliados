@@ -22,7 +22,15 @@
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">{{ $payment->user->email }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm font-mono text-gray-700 dark:text-graphite-300">{{ $payment->number }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">{{ $payment->transaction?->bank?->name ?? '—' }}</td>
-        <td class="px-4 sm:px-6 py-3 text-sm font-medium text-gray-900 dark:text-graphite-100">${{ number_format((float) $payment->amount, 2) }}</td>
+        <td class="px-4 sm:px-6 py-3 text-sm font-medium text-gray-900 dark:text-graphite-100">
+            ${{ number_format((float) $payment->amount, 2) }}
+            {{-- Region and country explain why this buyer was charged this amount. --}}
+            @if ($payment->region_label || $payment->country_code)
+                <span class="block text-xs text-gray-500 dark:text-graphite-400">
+                    {{ collect([$payment->region_label, $payment->country_code ? \App\Support\Countries::name($payment->country_code) : null])->filter()->implode(' · ') }}
+                </span>
+            @endif
+        </td>
         <td class="px-4 sm:px-6 py-3 text-sm">
             @if ($payment->photo)
                 <x-action-icon-button

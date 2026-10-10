@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Programs;
 
+use App\Support\Countries;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -28,6 +30,8 @@ class ProgramRequest extends FormRequest
             'is_active' => ['nullable', 'boolean'],
             'region_prices' => ['nullable', 'array', 'max:40'],
             'region_prices.*.region' => ['required', 'string', 'max:120'],
+            // A region without countries would never apply to anyone.
+            'region_prices.*.countries' => ['required', 'array', 'max:250', $this->knownCountries(...)],
             'region_prices.*.first_payment_cost' => ['required', 'numeric', 'min:0'],
             'region_prices.*.card_first_payment_cost' => ['nullable', 'numeric', 'min:0'],
             'region_prices.*.renewal_cost' => ['required', 'numeric', 'min:0'],
@@ -39,6 +43,7 @@ class ProgramRequest extends FormRequest
     {
         return [
             'region_prices.*.region' => __('messages.plans.region_prices.region'),
+            'region_prices.*.countries' => __('messages.plans.region_prices.countries'),
             'region_prices.*.first_payment_cost' => __('messages.plans.region_prices.first_payment_cost'),
             'region_prices.*.renewal_cost' => __('messages.plans.region_prices.renewal_cost'),
         ];
@@ -68,6 +73,7 @@ class ProgramRequest extends FormRequest
             $row = array_map(fn ($value) => is_string($value) ? trim($value) : $value, $row);
 
             $isEmpty = blank($row['region'] ?? null)
+                && blank($row['countries'] ?? null)
                 && blank($row['first_payment_cost'] ?? null)
                 && blank($row['renewal_cost'] ?? null)
                 && blank($row['card_first_payment_cost'] ?? null)
@@ -82,9 +88,28 @@ class ProgramRequest extends FormRequest
                 $row[$field] = blank($value) ? null : str_replace(',', '.', (string) $value);
             }
 
+            // Typed as "US, CA latam"; stored as ["US", "CA", "LATAM"].
+            $row['countries'] = Countries::parse($row['countries'] ?? null);
+
             $cleaned[mb_strtolower((string) ($row['region'] ?? ''))] = $row;
         }
 
         $this->merge(['region_prices' => array_values($cleaned)]);
+    }
+
+    /** Names every token that is neither a country code nor a group. */
+    private function knownCountries(string $attribute, mixed $value, Closure $fail): void
+    {
+        $unknown = array_filter(
+            (array) $value,
+            fn ($token) => ! is_string($token) || (! Countries::isCode($token) && ! Countries::isGroup($token)),
+        );
+
+        if ($unknown !== []) {
+            $fail(__('messages.plans.region_prices.countries_invalid', [
+                'values' => implode(', ', array_map('strval', $unknown)),
+                'groups' => implode(', ', Countries::groupNames()),
+            ]));
+        }
     }
 }

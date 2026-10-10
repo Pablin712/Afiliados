@@ -52,11 +52,30 @@ class Program extends Model
 
     /**
      * A program either charges the same everywhere (its own costs) or defines
-     * one price row per region, in which case the buyer must pick one.
+     * price rows for some regions, each listing the countries it applies to.
      */
     public function chargesByRegion(): bool
     {
         return $this->regionPrices()->exists();
+    }
+
+    /**
+     * The region row that prices a buyer connecting from this country, or
+     * null when no region lists it (or the country is unknown) and the
+     * program's own costs apply. When two regions list the same country the
+     * one with fewer countries wins, so an "Ecuador" row can carve a country
+     * out of a "LATAM" one.
+     */
+    public function regionPriceForCountry(?string $country): ?ProgramRegionPrice
+    {
+        if ($country === null || $country === '') {
+            return null;
+        }
+
+        return $this->regionPrices
+            ->filter(fn (ProgramRegionPrice $row) => $row->covers($country))
+            ->sortBy(fn (ProgramRegionPrice $row) => count($row->coveredCountries()))
+            ->first();
     }
 
     /**

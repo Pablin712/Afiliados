@@ -13,6 +13,8 @@ use App\Services\DatafastService;
 use App\Services\MembershipFreeRenewalService;
 use App\Services\PaymentPendingWebhookService;
 use App\Services\PendingPaymentReviewService;
+use App\Services\VisitorCountryService;
+use App\Support\Countries;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,10 +32,11 @@ class PlansController extends Controller
         private readonly PendingPaymentReviewService $pendingPaymentReviewService,
         private readonly DatafastService $datafastService,
         private readonly MembershipFreeRenewalService $membershipFreeRenewalService,
+        private readonly VisitorCountryService $visitorCountryService,
     ) {
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $user = Auth::user();
         $userId = $user?->id;
@@ -78,6 +81,12 @@ class PlansController extends Controller
 
         $banks = Bank::query()->orderBy('name')->get();
 
+        // Only worth locating the buyer when some plan prices by region.
+        $visitorCountry = ! $isAdmin && $programs->contains(fn (Program $program) => $program->regionPrices->isNotEmpty())
+            ? $this->visitorCountryService->detect($request)
+            : null;
+        $visitorCountryName = $visitorCountry !== null ? Countries::name($visitorCountry) : null;
+
         // Renewals/reactivations use renewal cost for users with previous approved payments.
         $hasApprovedPayment = ! $isAdmin
             && Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
@@ -94,7 +103,9 @@ class PlansController extends Controller
             'canSubmitPaidRenewal',
             'isTierUser',
             'canFreeRenewToday',
-            'monthlyNewDirectCustomers'
+            'monthlyNewDirectCustomers',
+            'visitorCountry',
+            'visitorCountryName'
         ));
     }
 
@@ -134,20 +145,21 @@ class PlansController extends Controller
 
         $program = Program::query()->findOrFail($validated['program_id']);
 
-        $regionPrice = $this->resolveRegionPrice($program, $request->input('region_price_id'));
+        $country = $this->visitorCountryFor($program, $request);
+        $regionPrice = $this->regionPriceForVisitor($program, $country, $request->input('region_price_id'));
 
         if ($regionPrice === false) {
-            return back()->with('error', __('messages.plans.region_required'));
+            return back()->with('error', __('messages.plans.region_changed'));
         }
 
         $isRenewalOrReactivation = Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
 
         // Never trust an amount coming from the form: it is recalculated here
-        // from the program and the region the buyer picked.
+        // from the program and the region of the buyer's country.
         $calculatedAmount = $program->transferCostFor($regionPrice, $isRenewalOrReactivation);
         $regionLabel = $regionPrice?->region;
 
-        $payment = DB::transaction(function () use ($validated, $userId, $calculatedAmount, $regionLabel): Payment {
+        $payment = DB::transaction(function () use ($validated, $userId, $calculatedAmount, $regionLabel, $country): Payment {
             $photoPath = $validated['photo']->store('payment-receipts', 'public');
 
             $transaction = Transaction::create([
@@ -169,6 +181,7 @@ class PlansController extends Controller
                 'photo'          => $photoPath,
                 'amount'         => $calculatedAmount,
                 'region_label'   => $regionLabel,
+                'country_code'   => $country,
                 'state'          => 'pending',
             ]);
         });
@@ -227,10 +240,11 @@ class PlansController extends Controller
 
         $program = Program::query()->findOrFail($validated['program_id']);
 
-        $regionPrice = $this->resolveRegionPrice($program, $request->input('region_price_id'));
+        $country = $this->visitorCountryFor($program, $request);
+        $regionPrice = $this->regionPriceForVisitor($program, $country, $request->input('region_price_id'));
 
         if ($regionPrice === false) {
-            return back()->with('error', __('messages.plans.region_required'));
+            return back()->with('error', __('messages.plans.region_changed'));
         }
 
         $isRenewalOrReactivation = Payment::query()->where('user_id', $userId)->where('state', 'approved')->exists();
@@ -269,6 +283,7 @@ class PlansController extends Controller
             'photo'            => null,
             'amount'           => $amount,
             'region_label'     => $regionPrice?->region,
+            'country_code'     => $country,
             'state'            => 'pending',
             'payment_method'   => 'card',
             'gateway_order_id' => $checkoutId,
@@ -445,24 +460,33 @@ class PlansController extends Controller
     }
 
     /**
-     * Resolve the region row the buyer picked for this program.
-     *
-     * Returns the row, null when the program charges the same everywhere, or
-     * false when the program charges by region and the submitted selection is
-     * missing or belongs to another program - a case the caller rejects rather
-     * than silently falling back to the base price.
+     * Country the buyer is paying from, looked up only for programs that
+     * price by region - the others charge the same everywhere.
      */
-    private function resolveRegionPrice(Program $program, mixed $regionPriceId): ProgramRegionPrice|null|false
+    private function visitorCountryFor(Program $program, Request $request): ?string
     {
-        if (! $program->chargesByRegion()) {
-            return null;
-        }
+        return $program->regionPrices->isNotEmpty()
+            ? $this->visitorCountryService->detect($request)
+            : null;
+    }
 
-        if (blank($regionPriceId)) {
+    /**
+     * The region row that prices this buyer, which their country decides -
+     * never the form. The form only echoes back the region the page was
+     * priced with: if it no longer matches (a VPN switched on or off between
+     * loading the page and paying) this returns false and the caller sends
+     * the buyer back to see the new price, instead of charging an amount the
+     * page never showed. Null means the program's own costs apply.
+     */
+    private function regionPriceForVisitor(Program $program, ?string $country, mixed $shownRegionId): ProgramRegionPrice|null|false
+    {
+        $regionPrice = $program->regionPriceForCountry($country);
+
+        if ((string) ($regionPrice?->id ?? '') !== trim((string) $shownRegionId)) {
             return false;
         }
 
-        return $program->regionPrices()->whereKey((int) $regionPriceId)->first() ?? false;
+        return $regionPrice;
     }
 
     private function canSubmitPaidRenewal(string $membershipTypeName, string $membershipStatus): bool
