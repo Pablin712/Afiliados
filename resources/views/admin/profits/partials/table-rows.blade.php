@@ -2,7 +2,7 @@
     @php
         $markPaidOnclick = 'openProfitPaidModal(' . json_encode([
             'id' => $profit->id,
-            'user' => $profit->user?->name,
+            'user' => $profit->user?->name ?? __('messages.admin.users.deleted_user'),
             'amount' => (float) $profit->amount,
         ]) . ')';
         $reason = $profit->parsedReason();
@@ -10,7 +10,7 @@
     <tr class="hover:bg-gray-50 dark:hover:bg-graphite-800/60 transition-colors duration-150">
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">#{{ $profit->id }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">
-            <p class="font-medium text-gray-900 dark:text-graphite-100">{{ $profit->user?->name }}</p>
+            <p class="font-medium text-gray-900 dark:text-graphite-100">{{ $profit->user?->name ?? __('messages.admin.users.deleted_user') }}</p>
             <p class="text-xs text-gray-500 dark:text-graphite-400">{{ $profit->user?->email }}</p>
         </td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-200">

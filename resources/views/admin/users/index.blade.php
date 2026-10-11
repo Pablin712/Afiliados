@@ -193,6 +193,34 @@
                 </div>
             </div>
             @endcan
+
+            {{-- Delete User Modal --}}
+            @can('delete users')
+            <x-modal name="delete-user-modal" focusable>
+                <form id="delete-user-form" method="POST" action="{{ route('admin.users.destroy', ['user' => '__UID__']) }}" class="p-6 space-y-4">
+                    @csrf
+                    @method('DELETE')
+
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-graphite-100">
+                        {{ __('messages.admin.users.delete_title') }}
+                        <span id="delete-user-name"></span>
+                    </h3>
+
+                    <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600 dark:text-graphite-300">
+                        <li>{{ __('messages.admin.users.delete_removes') }}</li>
+                        <li>{{ __('messages.admin.users.delete_keeps') }}</li>
+                        <li id="delete-user-affiliates"></li>
+                    </ul>
+
+                    <p class="text-sm font-medium text-red-700 dark:text-red-300">{{ __('messages.admin.users.delete_irreversible') }}</p>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <x-secondary-button x-on:click.prevent="$dispatch('close-modal', 'delete-user-modal')">{{ __('messages.admin.cancel') }}</x-secondary-button>
+                        <x-danger-button>{{ __('messages.admin.users.delete_confirm') }}</x-danger-button>
+                    </div>
+                </form>
+            </x-modal>
+            @endcan
         </div>
     </div>
 
@@ -234,6 +262,19 @@
                             window.location.reload();
                         })
                         .catch(() => window.location.reload());
+                    };
+
+                    window.openDeleteUserModal = function (payload) {
+                        const form = document.getElementById('delete-user-form');
+                        if (!form || !payload || !payload.id) return;
+
+                        form.action = @json(route('admin.users.destroy', ['user' => '__UID__'])).replace('__UID__', String(payload.id));
+                        document.getElementById('delete-user-name').textContent = payload.name ?? '';
+                        document.getElementById('delete-user-affiliates').textContent = payload.sponsor
+                            ? @json(__('messages.admin.users.delete_affiliates_to_sponsor')).replace(':sponsor', payload.sponsor)
+                            : @json(__('messages.admin.users.delete_affiliates_to_root'));
+
+                        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'delete-user-modal' }));
                     };
 
                     window.openChangeSponsorModal = function (payload) {

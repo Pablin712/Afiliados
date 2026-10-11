@@ -378,6 +378,10 @@ Route::middleware('auth')->group(function () {
         ->middleware(['verified', 'permission:edit users'])
         ->name('admin.users.update-role');
 
+    Route::delete('/admin/users/{user}', [UsersAdminController::class, 'destroy'])
+        ->middleware(['verified', 'permission:delete users'])
+        ->name('admin.users.destroy');
+
     Route::post('/membership-types', [MembershipTypeController::class, 'store'])
         ->middleware(['verified', 'permission:create membership_types'])
         ->name('membership-types.store');

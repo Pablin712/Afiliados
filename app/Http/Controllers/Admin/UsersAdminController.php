@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\UserDeletionService;
 use App\Support\UserAgentParser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -183,6 +184,23 @@ class UsersAdminController extends Controller
         $user->update(['sponsor_id' => $newSponsorId]);
 
         return back()->with('status', __('messages.admin.users.sponsor_updated'));
+    }
+
+    public function destroy(Request $request, User $user, UserDeletionService $userDeletionService): RedirectResponse
+    {
+        $reasons = $userDeletionService->blockers($user, $request->user());
+
+        if ($reasons !== []) {
+            return back()->with('error', __('messages.admin.users.delete_blocked', [
+                'name' => $user->name,
+                'reasons' => implode(' ', $reasons),
+            ]));
+        }
+
+        $name = $user->name;
+        $userDeletionService->delete($user, $request->user());
+
+        return back()->with('status', __('messages.admin.users.deleted', ['name' => $name]));
     }
 
     private function exportExcel(\Illuminate\Support\Collection $users): StreamedResponse

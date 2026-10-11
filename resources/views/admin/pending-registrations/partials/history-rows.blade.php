@@ -2,7 +2,7 @@
     @php
         $receiptOnclick = 'window.openReceiptModal(' . json_encode([
             'photo' => $payment->photo ? asset('storage/' . $payment->photo) : null,
-            'name'  => $payment->user->name,
+            'name'  => $payment->user?->name ?? __('messages.admin.users.deleted_user'),
         ]) . ')';
 
         $stateBadge = match ($payment->state) {
@@ -18,8 +18,8 @@
         };
     @endphp
     <tr class="hover:bg-gray-50 dark:hover:bg-graphite-800/60 transition-colors duration-150">
-        <td class="px-4 sm:px-6 py-3 text-sm font-medium text-gray-900 dark:text-graphite-100">{{ $payment->user->name }}</td>
-        <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">{{ $payment->user->email }}</td>
+        <td class="px-4 sm:px-6 py-3 text-sm font-medium text-gray-900 dark:text-graphite-100">{{ $payment->user?->name ?? __('messages.admin.users.deleted_user') }}</td>
+        <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">{{ $payment->user?->email ?? '—' }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm font-mono text-gray-700 dark:text-graphite-300">{{ $payment->number }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm text-gray-700 dark:text-graphite-300">{{ $payment->transaction?->bank?->name ?? '—' }}</td>
         <td class="px-4 sm:px-6 py-3 text-sm font-medium text-gray-900 dark:text-graphite-100">

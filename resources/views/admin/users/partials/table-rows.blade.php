@@ -138,6 +138,22 @@
                         @endif
                     @endif
                 @endcan
+
+                {{-- Only inactive accounts; the server re-checks every rule. --}}
+                @can('delete users')
+                    @if (! $user->hasRole('admin') && $user->membership?->status !== 'active' && ! $user->is(auth()->user()))
+                        <x-action-icon-button
+                            variant="delete"
+                            icon="delete"
+                            :title="__('messages.admin.users.delete_user')"
+                            :onclick="'window.openDeleteUserModal(' . json_encode([
+                                'id'      => $user->id,
+                                'name'    => $user->name,
+                                'sponsor' => $user->sponsor?->name,
+                            ]) . ')'"
+                        />
+                    @endif
+                @endcan
             </div>
         </td>
     </tr>
