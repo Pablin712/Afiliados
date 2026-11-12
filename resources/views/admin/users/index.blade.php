@@ -30,6 +30,7 @@
                     ['label' => __('messages.admin.users.sponsor'),            'type' => 'string',  'sort_by' => 'sponsor'],
                     ['label' => __('messages.admin.users.membership'),         'type' => 'string',  'sort_by' => 'membership'],
                     ['label' => __('messages.admin.registered_at'),            'type' => 'string',  'sort_by' => 'created_at'],
+                    ['label' => __('messages.admin.users.last_seen'),          'type' => 'string',  'sort_by' => 'last_seen_at'],
                     ['label' => __('messages.admin.users.active_session'),     'type' => 'string',  'sort_by' => 'id'],
                     ['label' => __('messages.actions'),                        'type' => 'actions', 'sort_by' => 'id'],
                 ]"

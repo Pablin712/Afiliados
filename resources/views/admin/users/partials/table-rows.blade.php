@@ -71,6 +71,30 @@
             {{ $user->created_at?->format('Y-m-d') }}
         </td>
         <td class="px-4 sm:px-6 py-3 text-sm">
+            {{-- How long the account has gone unused, to decide on deleting it. --}}
+            @php
+                $daysInactive = $user->last_seen_at ? (int) $user->last_seen_at->diffInDays(now()) : null;
+            @endphp
+            <div class="flex flex-col gap-1">
+                @if ($user->last_seen_at)
+                    <span class="text-xs text-gray-700 dark:text-graphite-300 whitespace-nowrap">{{ $user->last_seen_at->diffForHumans() }}</span>
+                    <span class="text-[11px] text-gray-400 dark:text-graphite-500 font-mono whitespace-nowrap">{{ $user->last_seen_at->format('Y-m-d H:i') }}</span>
+                @else
+                    <span class="text-xs text-gray-500 dark:text-graphite-400">{{ __('messages.admin.users.never_seen') }}</span>
+                @endif
+
+                @if ($daysInactive === null || $daysInactive >= 90)
+                    <span class="inline-flex w-fit items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
+                        {{ $daysInactive === null ? __('messages.admin.users.inactive') : __('messages.admin.users.inactive_days', ['days' => $daysInactive]) }}
+                    </span>
+                @elseif ($daysInactive >= 30)
+                    <span class="inline-flex w-fit items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                        {{ __('messages.admin.users.inactive_days', ['days' => $daysInactive]) }}
+                    </span>
+                @endif
+            </div>
+        </td>
+        <td class="px-4 sm:px-6 py-3 text-sm">
             @if ($session)
                 <div class="flex flex-col gap-0.5">
                     <span class="inline-flex items-center gap-1">
@@ -159,7 +183,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="10" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
+        <td colspan="11" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-graphite-400">
             {{ __('messages.admin.users.no_users') }}
         </td>
     </tr>

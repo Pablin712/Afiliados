@@ -299,7 +299,7 @@ class UsersAdminController extends Controller
 
     protected function resolveSortBy(string $requested): string
     {
-        $allowed = ['id', 'name', 'email', 'phone', 'created_at'];
+        $allowed = ['id', 'name', 'email', 'phone', 'created_at', 'last_seen_at'];
 
         return in_array($requested, $allowed, true) ? $requested : 'id';
     }
